@@ -46,6 +46,33 @@ function connect_db() {
   });
 }
 
+async function check_max_memory(is_buffer) {
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  let size = 10 * 1024 * 1024; // Начнём с 10 мегабайт
+
+  while(true) {
+    try {
+      if (is_buffer)
+        new ArrayBuffer(size);
+      else
+        new Array(size);
+      console.log(`Выделено ${size / (1024*1024)} MB`);
+      // небольшая задержка для предотвращения блокировки интерфейса
+      await sleep(1);
+    } catch(e) {
+      // Обрабатываем ошибку выделения памяти
+      break;
+    }
+    // Увеличиваем размер буфера на 10 мегабайт
+    size += 10 * 1024 * 1024;
+  }
+  // Возвращаем последний успешно выделенный объём памяти в мб
+  return Math.round((size - 10 * 1024 * 1024) / (1024*1024));
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -64,9 +91,9 @@ app.whenReady().then(() => {
           return new Promise((resolve, reject) => {
               db.all(sql, (err, rows) => {
                   if (err) {
-                      reject(err);
+                      reject(err)
                   } else {
-                      resolve(rows);
+                      resolve(rows)
                   }
               });
           });
@@ -75,17 +102,21 @@ app.whenReady().then(() => {
       return JSON.stringify(result, null, '\t')
 
     } else if (arg === "insert random row") {
-      const stmt = db.prepare("INSERT INTO users (username, email) VALUES (?, ?)");
+      const stmt = db.prepare("INSERT INTO users (username, email) VALUES (?, ?)")
       for (let i = 0; i < 1; i++) {
-          const randomName = 'User_' + Math.floor(Math.random() * 1000);
-          const randomEmail = Math.floor(Math.random() * 100) + '@mail.com';
-          stmt.run(randomName, randomEmail);
-          console.log(`Inserted: ${randomName}, Value: ${randomEmail}`);
+          const randomName = 'User_' + Math.floor(Math.random() * 1000)
+          const randomEmail = Math.floor(Math.random() * 100) + '@mail.com'
+          stmt.run(randomName, randomEmail)
+          console.log(`Inserted: ${randomName}, Value: ${randomEmail}`)
       }
-      stmt.finalize();
+      stmt.finalize()
       return 'insert done'
     } else if (arg === 'db path') {
-      return {app_root_path, db_path};
+      return {app_root_path, db_path}
+    } else if (arg === 'memtest') {
+      const max_engine_size = await check_max_memory(false)
+      const max_buffer_size = await check_max_memory(true)
+      return JSON.stringify({max_engine_size, max_buffer_size})
     }
     return 'uknowon command'
   })
