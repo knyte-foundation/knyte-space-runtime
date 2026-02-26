@@ -5,21 +5,32 @@ const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
 let db
 
-function createWindow () {
+function createAllWindows() {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
-    width: 960,
-    height: 540,
+  const system_window = new BrowserWindow({
+    width: 300,
+    height: 960,
+    x: 0,
+    y: 0,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js')
     }
   })
-
   // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
-
+  system_window.loadFile('index.html')
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
+
+  const history_window = new BrowserWindow({
+    width: 600,
+    height: 960,
+    x: 300,
+    y: 0,
+    webPreferences: {
+      preload: path.join(__dirname, '019c9bbc-dbf2-7a72-b831-020f58b971b6')
+    }
+  })
+  history_window.loadFile('index_history.html')
 }
 
 function connect_db() {
@@ -77,7 +88,7 @@ async function check_max_memory(is_buffer) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-  createWindow()
+  createAllWindows()
   connect_db()
 
   ipcMain.handle('invoke-handle-message', async (event, arg) => {
@@ -125,7 +136,7 @@ app.whenReady().then(() => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0)
-      createWindow()
+      createAllWindows()
   })
 })
 
