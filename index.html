@@ -4,33 +4,31 @@
     <meta charset="UTF-8">
     <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <title>knyte.space runtime</title>
+    <title>system</title>
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
-    <h1>Hello World!</h1>
-    <p>
-      We are using
-      <ul>
-        <li>
-          Node.js <span id="node-version"></span>
-        </li>
-        <li>
-          Chromium <span id="chrome-version"></span>
-        </li>
-        <li>
-          Electron <span id="electron-version"></span>
-        </li>
-      </ul>
-    </p>
-    <p>
-      <div>
-        root path: "<span id="root-path"></span>"
-      </div>
-      <div>
-        db user data path: "<span id="db-path"></span>"
-      </div>
-    </p>
+    <h1>knyte.space runtime</h1>
+    <ul>
+      <li>
+        Node.js <span id="node-version"></span>
+      </li>
+      <li>
+        Chromium <span id="chrome-version"></span>
+      </li>
+      <li>
+        Electron <span id="electron-version"></span>
+      </li>
+      <li>
+        Executable root path "<span id="root-path"></span>"
+      </li>
+      <li>
+        DB userdata path "<span id="db-path"></span>"
+      </li>
+      <li>
+        Typical RAM limits: 4 GB for render process, 2 GB for ArrayBuffer
+      </li>
+    </ul>
     <p>
       <button id="button-memtest-node">
         memtest node.js
@@ -42,6 +40,7 @@
       <span id="result-memtest-chromium"></span>
     </p>
     <p>
+      Table users
       <div>
         <button id="button-insert-row">
           append row to db
