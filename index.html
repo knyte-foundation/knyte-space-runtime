@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <title>knyte.space runtime</title>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    <p>
+      We are using
+      <ul>
+        <li>
+          Node.js <span id="node-version"></span>
+        </li>
+        <li>
+          Chromium <span id="chrome-version"></span>
+        </li>
+        <li>
+          Electron <span id="electron-version"></span>
+        </li>
+      </ul>
+    </p>
+    <p>
+      <div>
+        root path: "<span id="root-path"></span>"
+      </div>
+      <div>
+        db user data path: "<span id="db-path"></span>"
+      </div>
+    </p>
+    <p>
+      <div>
+        <button id="button-insert-row">
+          append row to db
+        </button>
+        <button id="button-show-db">
+          show db
+        </button>
+      </div>
+      <pre id="db-listing"></pre>
+    </p>
+
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
+  </body>
+</html>

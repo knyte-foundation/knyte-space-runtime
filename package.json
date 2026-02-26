@@ -1,0 +1,18 @@
+{
+  "name": "knyte_space_runtime",
+  "productName": "knyte.space runtime",
+  "description": "My Electron application description",
+  "keywords": [],
+  "main": "./main.js",
+  "version": "0.0.1",
+  "author": "stanislavrodionov",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "sqlite3": "5.1.7"
+  },
+  "devDependencies": {
+    "electron": "40.1.0"
+  }
+}
