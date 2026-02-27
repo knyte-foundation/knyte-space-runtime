@@ -133,7 +133,7 @@ app.whenReady().then(() => {
   createAllWindows()
   connect_db()
 
-  ipcMain.handle('invoke-handle-message', async (event, arg) => {
+  ipcMain.handle('invoke-handle-message', async (event, arg, arg2) => {
     if (!db) {
       console.log('db not ready')
       return
@@ -173,6 +173,8 @@ app.whenReady().then(() => {
     } else if (arg === 'add space') {
       create_space_window()
       return 'space added'
+    } else if (arg === 'db content append') {
+      return 'not implemented yet > ' + arg2
     }
     return 'uknowon command'
   })
