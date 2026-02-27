@@ -29,13 +29,14 @@ function handle_metest_main() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  const replaceText = (selector, text) => {
-    const element = document.getElementById(selector)
-    if (element) element.innerText = text
-  }
-
-  for (const type of ['chrome', 'node', 'electron']) {
-    replaceText(`${type}-version`, process.versions[type])
+  const versions = [
+    'node-version',
+    'chrome-version',
+    'electron-version',
+  ];
+  for (const version of versions) {
+    const type = version.split('-')[0];
+    document.getElementById(version).innerText = process.versions[type];
   }
 
   ipcRenderer
