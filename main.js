@@ -9,7 +9,7 @@ function createAllWindows() {
   // Create the browser window.
   const system_window = new BrowserWindow({
     width: 300,
-    height: 960,
+    height: 1020,
     x: 0,
     y: 0,
     webPreferences: {
@@ -23,14 +23,25 @@ function createAllWindows() {
 
   const history_window = new BrowserWindow({
     width: 600,
-    height: 960,
+    height: 1020,
     x: 300,
     y: 0,
     webPreferences: {
-      preload: path.join(__dirname, '019c9bbc-dbf2-7a72-b831-020f58b971b6')
+      preload: path.join(__dirname, 'preload_history.js')
     }
   })
   history_window.loadFile('index_history.html')
+
+  const graph_window = new BrowserWindow({
+    width: 892,
+    height: 1020,
+    x: 900,
+    y: 0,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload_graph.js')
+    }
+  })
+  graph_window.loadFile('index_graph.html')
 }
 
 function connect_db() {
