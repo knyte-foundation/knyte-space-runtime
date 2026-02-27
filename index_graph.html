@@ -9,8 +9,49 @@
     <title>graph</title>
   </head>
   <body>
-	<p>Место для размещения graph</p>
-
+    <p>
+      Db table users
+      <div>
+        <button id="button-insert-row">
+          append row to users
+        </button>
+        <button id="button-show-db">
+          show users
+        </button>
+      </div>
+      <pre id="db-listing"></pre>
+    </p>
+    <p>
+      Db table contents
+      <div>
+        <textarea id="content-text-to-append"></textarea>
+        <button id="button-content-append">
+          append row to contents
+        </button>
+        <span id="content-append-result"></span>
+      </div>
+      <div>
+        <textarea id="content-text-to-check"></textarea>
+        <button id="button-content-check">
+          check if contents contains text
+        </button>
+        <span id="content-check-result"></span>
+      </div>
+      <div>
+        <input id="input-content-id" type="text" placeholder="content id" size="38">
+        <button id="button-content-get">
+          get contents by id
+        </button>
+        <textarea id="content-get-result" disabled></textarea>
+      </div>
+      <div>
+        <button id="button-show-db-contents">
+          show contents
+        </button>
+      </div>
+      <pre id="db-contents-listing"></pre>
+    </p>
+	
     <!-- You can also require other files to run in this process -->
     <script src="./render_graph.js"></script>
   </body>
