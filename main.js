@@ -6,10 +6,11 @@ const db_path = path.join(app.getPath('userData'), 'db.sqlite')
 let db
 
 function createAllWindows() {
+  // system
   // Create the browser window.
   const system_window = new BrowserWindow({
     width: 300,
-    height: 1020,
+    height: 1000,
     x: 0,
     y: 0,
     webPreferences: {
@@ -21,9 +22,10 @@ function createAllWindows() {
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
 
+  // history
   const history_window = new BrowserWindow({
     width: 600,
-    height: 1020,
+    height: 1000,
     x: 300,
     y: 0,
     webPreferences: {
@@ -32,9 +34,10 @@ function createAllWindows() {
   })
   history_window.loadFile('index_history.html')
 
+  // graph
   const graph_window = new BrowserWindow({
     width: 892,
-    height: 1020,
+    height: 1000,
     x: 900,
     y: 0,
     webPreferences: {
@@ -42,6 +45,18 @@ function createAllWindows() {
     }
   })
   graph_window.loadFile('index_graph.html')
+
+  // space
+  const space_window = new BrowserWindow({
+    width: 1792,
+    height: 1000,
+    x: 0,
+    y: 50,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload_space.js')
+    }
+  })
+  space_window.loadFile('index_space.html')
 }
 
 function connect_db() {
