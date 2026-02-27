@@ -73,7 +73,7 @@ function connect_db() {
     console.log('Connected to the SQLite database.')
   })
 
-  // 2. Execute the CREATE TABLE statement
+  // 2. Execute the CREATE TABLE statement for users
   const createTableSql = `
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -81,10 +81,21 @@ function connect_db() {
       email TEXT UNIQUE NOT NULL
     );
   `
-
   db.run(createTableSql, (err) => {
     if (err) return console.error('Error creating table:', err.message)
-    console.log('Table created successfully.')
+    console.log('Table "users" created successfully.')
+  })
+
+  // 3. Execute the CREATE TABLE statement for contents
+  const createTableSql2 = `
+    CREATE TABLE IF NOT EXISTS contents (
+      id TEXT NOT NULL PRIMARY KEY,
+      content TEXT UNIQUE NOT NULL CHECK(length(content) > 0)
+    );
+  `
+  db.run(createTableSql2, (err) => {
+    if (err) return console.error('Error creating table:', err.message)
+    console.log('Table "contents" created successfully.')
   })
 }
 
