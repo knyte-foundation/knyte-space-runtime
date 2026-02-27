@@ -1,9 +1,10 @@
 let space_number = 0
+const argt = `--window-caption-number=`
 for (let i = 0; i < process.argv.length; ++i) {
-	const a = process.argv[i]
-	if (a.indexOf('--window-caption-number=') < 0)
+	const arg = process.argv[i]
+	if (arg.indexOf(argt) < 0)
 		continue;
-	space_number = parseInt(a.split('--window-caption-number=')[1])
+	space_number = parseInt(arg.split(argt)[1])
 	break;
 }
 console.log('space_number', space_number)
