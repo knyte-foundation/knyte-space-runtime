@@ -174,7 +174,27 @@ app.whenReady().then(() => {
       create_space_window()
       return 'space added'
     } else if (arg === 'db content append') {
-      return 'not implemented yet > ' + arg2
+      function append_content(sql, id, content) {
+          return new Promise((resolve, reject) => {
+              db.run(sql, id, content, (error) => {
+                  if (error) {
+                      reject(error)
+                  } else {
+                      resolve(id)
+                  }
+              })
+          })
+      }
+      // TODO: migrate from crypto.randomUUID() to uuid v7
+      let result;
+      try {
+        result = await append_content(
+          'INSERT INTO contents (id, content) VALUES (?, ?)', crypto.randomUUID(), arg2
+        )
+      } catch (error) {
+        result = error.message
+      }
+      return result
     }
     return 'uknowon command'
   })

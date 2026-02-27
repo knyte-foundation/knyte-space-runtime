@@ -33,13 +33,9 @@ async function check_max_memory(is_buffer) {
   return Math.round((size - 10 * 1024 * 1024) / (1024*1024))
 }
 
-async function handle_memtest_renderer() {
+document.getElementById('button-memtest-chromium').addEventListener('click', async () => {
   const max_engine_size = await check_max_memory(false)
   const max_buffer_size = await check_max_memory(true)
   document.getElementById('result-memtest-chromium').
     textContent = JSON.stringify({max_engine_size, max_buffer_size})
-}
-
-document.getElementById('button-memtest-chromium').addEventListener('click',
-  handle_memtest_renderer
-)
+})
