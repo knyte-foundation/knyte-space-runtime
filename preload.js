@@ -12,7 +12,7 @@ function handle_show_db() {
   ipcRenderer
     .invoke('invoke-handle-message', 'select all')
     .then((reply) => {
-      document.getElementById("db-listing").textContent = reply
+      document.getElementById('db-listing').textContent = reply
     })
 }
 function handle_append_row() {
@@ -24,7 +24,7 @@ function handle_metest_main() {
   ipcRenderer
     .invoke('invoke-handle-message', 'memtest')
     .then((reply) => {
-      document.getElementById("result-memtest-node").textContent = reply
+      document.getElementById('result-memtest-node').textContent = reply
     })
 }
 
@@ -33,18 +33,18 @@ window.addEventListener('DOMContentLoaded', () => {
     'node-version',
     'chrome-version',
     'electron-version',
-  ];
+  ]
   for (const version of versions) {
-    const type = version.split('-')[0];
-    document.getElementById(version).innerText = process.versions[type];
+    const type = version.split('-')[0]
+    document.getElementById(version).innerText = process.versions[type]
   }
 
   ipcRenderer
     .invoke('invoke-handle-message', 'db path')
     .then((reply) => {
       const {app_root_path, db_path} = reply
-      document.getElementById("root-path").textContent = app_root_path
-      document.getElementById("db-path").textContent = db_path
+      document.getElementById('root-path').textContent = app_root_path
+      document.getElementById('db-path').textContent = db_path
     })
 
   document.getElementById('button-show-db').addEventListener('click', 

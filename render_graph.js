@@ -1,1 +1,1 @@
-console.log("render_graph.js ready")
+console.log('render_graph.js ready')

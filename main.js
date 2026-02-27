@@ -69,8 +69,8 @@ function connect_db() {
 
   // 1. Connect to or create a database file
   db = new sqlite3.Database(db_path, (err) => {
-    if (err) return console.error(err.message);
-    console.log('Connected to the SQLite database.');
+    if (err) return console.error(err.message)
+    console.log('Connected to the SQLite database.')
   })
 
   // 2. Execute the CREATE TABLE statement
@@ -83,36 +83,36 @@ function connect_db() {
   `
 
   db.run(createTableSql, (err) => {
-    if (err) return console.error('Error creating table:', err.message);
-    console.log('Table created successfully.');
-  });
+    if (err) return console.error('Error creating table:', err.message)
+    console.log('Table created successfully.')
+  })
 }
 
 async function check_max_memory(is_buffer) {
   function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  let size = 10 * 1024 * 1024; // Начнём с 10 мегабайт
+  let size = 10 * 1024 * 1024 // Начнём с 10 мегабайт
 
   while(true) {
     try {
       if (is_buffer)
-        new ArrayBuffer(size);
+        new ArrayBuffer(size)
       else
-        new Array(size);
-      console.log(`Выделено ${size / (1024*1024)} MB`);
+        new Array(size)
+      console.log(`Выделено ${size / (1024*1024)} MB`)
       // небольшая задержка для предотвращения блокировки интерфейса
-      await sleep(1);
+      await sleep(1)
     } catch(e) {
       // Обрабатываем ошибку выделения памяти
-      break;
+      break
     }
     // Увеличиваем размер буфера на 10 мегабайт
-    size += 10 * 1024 * 1024;
+    size += 10 * 1024 * 1024
   }
   // Возвращаем последний успешно выделенный объём памяти в мб
-  return Math.round((size - 10 * 1024 * 1024) / (1024*1024));
+  return Math.round((size - 10 * 1024 * 1024) / (1024*1024))
 }
 
 // This method will be called when Electron has finished
@@ -137,14 +137,14 @@ app.whenReady().then(() => {
                   } else {
                       resolve(rows)
                   }
-              });
-          });
+              })
+          })
       }
-      const result = await getAllRows("SELECT id, username, email FROM users")
+      const result = await getAllRows('SELECT id, username, email FROM users')
       return JSON.stringify(result, null, '\t')
 
-    } else if (arg === "insert random row") {
-      const stmt = db.prepare("INSERT INTO users (username, email) VALUES (?, ?)")
+    } else if (arg === 'insert random row') {
+      const stmt = db.prepare('INSERT INTO users (username, email) VALUES (?, ?)')
       for (let i = 0; i < 1; i++) {
           const randomName = 'User_' + Math.floor(Math.random() * 1000)
           const randomEmail = Math.floor(Math.random() * 100) + '@mail.com'
@@ -184,7 +184,7 @@ app.on('window-all-closed', function () {
 
 app.on('will-quit', () => {
   // Close the connection
-  db && db.close();
+  db && db.close()
 })
 
 // In this file you can include the rest of your app's specific main process

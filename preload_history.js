@@ -1,1 +1,1 @@
-console.log("preload_history.js ready")
+console.log('preload_history.js ready')

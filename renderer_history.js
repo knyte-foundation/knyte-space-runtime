@@ -1,1 +1,1 @@
-console.log("renderer_history.js ready")
+console.log('renderer_history.js ready')

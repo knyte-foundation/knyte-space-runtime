@@ -1,1 +1,1 @@
-console.log("render_space.js ready")
+console.log('render_space.js ready')

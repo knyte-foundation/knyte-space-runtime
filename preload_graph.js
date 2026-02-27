@@ -1,1 +1,1 @@
-console.log("preload_graph.js ready")
+console.log('preload_graph.js ready')
