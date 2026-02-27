@@ -10,7 +10,8 @@
     "start": "electron ."
   },
   "dependencies": {
-    "sqlite3": "5.1.7"
+    "sqlite3": "5.1.7",
+    "meslo": "1.0.0"
   },
   "devDependencies": {
     "electron": "40.1.0"

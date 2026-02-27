@@ -1,6 +1,12 @@
 body {
-  background-color: gray;
+  background-color: #1C2333;
+  color: #F5F9FC;
+  font-family: meslo;
+  margin: 2em;
 }
 h1 {
-  color: purple;
+  color: #8AD6F2;
+}
+button {
+  font-family: meslo;
 }
