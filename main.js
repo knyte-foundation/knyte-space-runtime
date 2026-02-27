@@ -3,7 +3,21 @@ const { app, BrowserWindow, ipcMain } = require('electron/main')
 const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
-let db
+let db, space_window_number = 0
+
+function create_space_window() {
+  const space_window = new BrowserWindow({
+    width: 1792,
+    height: 1000,
+    x: 0,
+    y: 50,
+    webPreferences: {
+      preload: path.join(app_root_path, 'preload_space.js'),
+      additionalArguments: [`--window-caption-number=${++space_window_number}`]
+    }
+  })
+  space_window.loadFile('index_space.html')
+}
 
 function createAllWindows() {
   // system
@@ -14,7 +28,7 @@ function createAllWindows() {
     x: 0,
     y: 0,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(app_root_path, 'preload.js')
     }
   })
   // and load the index.html of the app.
@@ -29,7 +43,7 @@ function createAllWindows() {
     x: 300,
     y: 0,
     webPreferences: {
-      preload: path.join(__dirname, 'preload_history.js')
+      preload: path.join(app_root_path, 'preload_history.js')
     }
   })
   history_window.loadFile('index_history.html')
@@ -41,22 +55,13 @@ function createAllWindows() {
     x: 900,
     y: 0,
     webPreferences: {
-      preload: path.join(__dirname, 'preload_graph.js')
+      preload: path.join(app_root_path, 'preload_graph.js')
     }
   })
   graph_window.loadFile('index_graph.html')
 
   // space
-  const space_window = new BrowserWindow({
-    width: 1792,
-    height: 1000,
-    x: 0,
-    y: 50,
-    webPreferences: {
-      preload: path.join(__dirname, 'preload_space.js')
-    }
-  })
-  space_window.loadFile('index_space.html')
+  create_space_window()
 }
 
 function connect_db() {
@@ -154,6 +159,9 @@ app.whenReady().then(() => {
       const max_engine_size = await check_max_memory(false)
       const max_buffer_size = await check_max_memory(true)
       return JSON.stringify({max_engine_size, max_buffer_size})
+    } else if (arg === 'add space') {
+      create_space_window()
+      return 'space added'
     }
     return 'uknowon command'
   })

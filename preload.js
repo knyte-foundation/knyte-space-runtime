@@ -56,4 +56,9 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('button-memtest-node').addEventListener('click',
     handle_metest_main
   )
+  document.getElementById('button-add-space').addEventListener('click', () => {
+    ipcRenderer
+      .invoke('invoke-handle-message', 'add space')
+      .then((reply) => alert(reply))
+  })
 })
