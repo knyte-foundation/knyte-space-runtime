@@ -37,5 +37,17 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
+  document.getElementById('button-content-id-find').addEventListener('click', () => {
+    const input = document.getElementById('input-content-id-find').value
+    const result = document.getElementById('content-id-find-result')
+    result.textContent = 'loading...'
+    setTimeout(() => {
+      ipcRenderer
+        .invoke('invoke-handle-message', 'db get content by id', input)
+        .then((reply) => {
+          result.value = reply
+        })
+    }, 100)
+  })
 })
 console.log('preload_graph.js ready')
