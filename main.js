@@ -174,15 +174,15 @@ app.whenReady().then(() => {
       return {result: 'space added'}
     } else if (arg === 'event-db-append-content') {
       function append_content(sql, id, content) {
-          return new Promise((resolve, reject) => {
-              db.run(sql, id, content, (error) => {
-                  if (error) {
-                      reject(error)
-                  } else {
-                      resolve(id)
-                  }
-              })
+        return new Promise((resolve, reject) => {
+          db.run(sql, id, content, (error) => {
+            if (error) {
+              reject(error)
+            } else {
+              resolve(id)
+            }
           })
+        })
       }
       const id = uuidv7()
       const content = arg2
