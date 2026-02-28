@@ -49,5 +49,16 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
+  document.getElementById('button-show-db-contents').addEventListener('click', () => {
+    const result = document.getElementById('db-contents-listing')
+    result.textContent = 'loading...'
+    setTimeout(() => {
+      ipcRenderer
+        .invoke('invoke-handle-message', 'db get all contents')
+        .then((reply) => {
+          result.textContent = reply
+        })
+    }, 100)
+  })
 })
 console.log('preload_graph.js ready')

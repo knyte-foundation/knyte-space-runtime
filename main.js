@@ -141,34 +141,33 @@ app.whenReady().then(() => {
       console.log('db not ready')
       return
     }
-    function select_content_get(sql, value) {
-        return new Promise((resolve, reject) => {
-            db.get(sql, value, (error, row) => {
-                if (error) {
-                    reject(error)
-                } else {
-                    resolve(row)
-                }
-            })
+    function db_get(sql, value) {
+      return new Promise((resolve, reject) => {
+        db.get(sql, value, (error, row) => {
+          if (error) {
+            reject(error)
+          } else {
+            resolve(row)
+          }
         })
+      })
+    }
+    function db_all(sql) {
+      return new Promise((resolve, reject) => {
+        db.all(sql, (err, rows) => {
+          if (err) {
+            reject(err)
+          } else {
+            resolve(rows)
+          }
+        })
+      })
     }
     if (arg === 'select all') {
-      function getAllRows(sql) {
-          return new Promise((resolve, reject) => {
-              db.all(sql, (err, rows) => {
-                  if (err) {
-                      reject(err)
-                  } else {
-                      resolve(rows)
-                  }
-              })
-          })
-      }
-      const result = await getAllRows(
+      const result = await db_all(
         'SELECT id, username, email FROM users'
       )
       return JSON.stringify(result, null, '\t')
-
     } else if (arg === 'insert random row') {
       const stmt = db.prepare(
         'INSERT INTO users (username, email) VALUES (?, ?)'
@@ -217,7 +216,7 @@ app.whenReady().then(() => {
       let result
       const content = arg2
       try {
-        result = await select_content_get(
+        result = await db_get(
           'SELECT id FROM contents WHERE content = ?', content
         )
       } catch (error) {
@@ -227,13 +226,18 @@ app.whenReady().then(() => {
     } else if (arg === 'db get content by id') {
       const id = arg2
       try {
-        result = await select_content_get(
+        result = await db_get(
           'SELECT content FROM contents WHERE id = ?', id
         )
       } catch (error) {
         result = error.message
       }
       return result ? result.content : 'not found'
+    } else if (arg === 'db get all contents') {
+      const result = await db_all(
+        'SELECT * FROM contents'
+      )
+      return JSON.stringify(result, null, '\t')
     }
     return 'uknowon command'
   })
