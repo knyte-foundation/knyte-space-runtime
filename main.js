@@ -163,24 +163,7 @@ app.whenReady().then(() => {
         })
       })
     }
-    if (arg === 'select all') {
-      const result = await db_all(
-        'SELECT id, username, email FROM users'
-      )
-      return JSON.stringify(result, null, '\t')
-    } else if (arg === 'insert random row') {
-      const stmt = db.prepare(
-        'INSERT INTO users (username, email) VALUES (?, ?)'
-      )
-      for (let i = 0; i < 1; i++) {
-          const randomName = 'User_' + Math.floor(Math.random() * 1000)
-          const randomEmail = Math.floor(Math.random() * 100) + '@mail.com'
-          stmt.run(randomName, randomEmail)
-          console.log(`Inserted: ${randomName}, Value: ${randomEmail}`)
-      }
-      stmt.finalize()
-      return 'insert done'
-    } else if (arg === 'db path') {
+    if (arg === 'db path') {
       return {app_root_path, db_path}
     } else if (arg === 'memtest') {
       const max_engine_size = await check_max_memory(false)
