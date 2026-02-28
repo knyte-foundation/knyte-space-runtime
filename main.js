@@ -194,33 +194,31 @@ app.whenReady().then(() => {
         return {error}
       }
     } else if (arg === 'db get id by content') {
-      let result
       const content = arg2
       try {
-        result = await db_get(
+        const result = await db_get(
           'SELECT id FROM contents WHERE content = ?', content
         )
+        return result ? {id: result.id} : {not_found: true}
       } catch (error) {
-        result = error.message
+        return {error}
       }
-      return result ? result.id : 'not found'
     } else if (arg === 'db get content by id') {
       const id = arg2
       try {
-        result = await db_get(
+        const result = await db_get(
           'SELECT content FROM contents WHERE id = ?', id
         )
+        return result ? {content: result.content} : {not_found: true}
       } catch (error) {
-        result = error.message
+        return {error}
       }
-      return result ? result.content : 'not found'
     } else if (arg === 'db get all contents') {
-      const result = await db_all(
+      return await db_all(
         'SELECT * FROM contents'
       )
-      return JSON.stringify(result, null, '\t')
     }
-    return 'uknowon command'
+    return {uknown_command: true}
   })
 
   app.on('activate', function () {

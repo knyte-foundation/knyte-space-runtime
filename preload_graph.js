@@ -21,19 +21,28 @@ window.addEventListener('DOMContentLoaded', () => {
       ipcRenderer
         .invoke('invoke-handle-message', 'db get id by content', input)
         .then((reply) => {
-          result.textContent = reply
+          result.textContent = reply.id || (
+            reply.not_found ? 'not found' : `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+          )
         })
     }, 100)
   })
   document.getElementById('button-content-id-find').addEventListener('click', () => {
     const input = document.getElementById('input-content-id-find').value
     const result = document.getElementById('content-id-find-result')
+    result.style.color = 'black'
     result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
         .invoke('invoke-handle-message', 'db get content by id', input)
         .then((reply) => {
-          result.value = reply
+          if (reply.content) {
+            result.value = reply.content
+          } else {
+            result.style.color = 'red'
+            result.value = reply.not_found ? 'not found'
+              : `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+          }
         })
     }, 100)
   })
@@ -44,7 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
       ipcRenderer
         .invoke('invoke-handle-message', 'db get all contents')
         .then((reply) => {
-          result.textContent = reply
+          result.textContent = JSON.stringify(reply, null, '\t')
         })
     }, 100)
   })
