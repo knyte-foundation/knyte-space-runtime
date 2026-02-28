@@ -68,38 +68,25 @@ function createAllWindows() {
 }
 
 function connect_db() {
-  const sqlite3 = require('sqlite3').verbose()
+  db = require("better-sqlite3")(db_path, {
+    verbose: console.log,
+  });
+  // NORMAL is a balance between speed (OFF) and safety (FULL)
+  db.pragma(`synchronous=NORMAL`);
+  db.pragma(`journal_mode=WAL`);
+  console.log('Connected to the SQLite database.')
 
-  // 1. Connect to or create a database file
-  db = new sqlite3.Database(db_path, (err) => {
-    if (err) return console.error(err.message)
-    console.log('Connected to the SQLite database.')
-  })
-
-  // 2. Execute the CREATE TABLE statement for users
-  const createTableSql = `
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT NOT NULL,
-      email TEXT UNIQUE NOT NULL
-    );
-  `
-  db.run(createTableSql, (err) => {
-    if (err) return console.error('Error creating table:', err.message)
-    console.log('Table "users" created successfully.')
-  })
-
-  // 3. Execute the CREATE TABLE statement for contents
-  const createTableSql2 = `
-    CREATE TABLE IF NOT EXISTS contents (
-      id TEXT NOT NULL PRIMARY KEY,
-      content TEXT UNIQUE NOT NULL CHECK(length(content) > 0)
-    );
-  `
-  db.run(createTableSql2, (err) => {
-    if (err) return console.error('Error creating table:', err.message)
+  try {
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS contents (
+        id TEXT NOT NULL PRIMARY KEY,
+        content TEXT UNIQUE NOT NULL CHECK(length(content) > 0)
+      );
+    `).run()
     console.log('Table "contents" created successfully.')
-  })
+  } catch (error) {
+    console.error('Error creating table', error)
+  }
 }
 
 async function check_max_memory(is_buffer) {
@@ -141,28 +128,6 @@ app.whenReady().then(() => {
       console.log('db not ready')
       return
     }
-    function db_get(sql, value) {
-      return new Promise((resolve, reject) => {
-        db.get(sql, value, (error, row) => {
-          if (error) {
-            reject(error)
-          } else {
-            resolve(row)
-          }
-        })
-      })
-    }
-    function db_all(sql) {
-      return new Promise((resolve, reject) => {
-        db.all(sql, (err, rows) => {
-          if (err) {
-            reject(err)
-          } else {
-            resolve(rows)
-          }
-        })
-      })
-    }
     if (arg === 'event-system-db-path') {
       return {app_root_path, db_path}
     } else if (arg === 'event-system-memtest') {
@@ -174,49 +139,44 @@ app.whenReady().then(() => {
       return {result: 'space added'}
     } else if (arg === 'event-db-append-content') {
       function append_content(sql, id, content) {
-        return new Promise((resolve, reject) => {
-          db.run(sql, id, content, (error) => {
-            if (error) {
-              reject(error)
-            } else {
-              resolve(id)
-            }
-          })
-        })
+        try {
+          db.prepare(sql).run(id, content)
+          return {id}
+        } catch (error) {
+          const {code, message, stack} = error
+          return {error: {code, message, stack}}
+        }
       }
       const id = uuidv7()
       const content = arg2
-      try {
-        return {id: await append_content(
-          'INSERT INTO contents (id, content) VALUES (?, ?)', id, content
-        )}
-      } catch (error) {
-        return {error}
-      }
+      return append_content(
+        'INSERT INTO contents (id, content) VALUES (?, ?)',
+        id, content
+      )
     } else if (arg === 'event-db-find-content-by-text') {
       const content = arg2
       try {
-        const result = await db_get(
-          'SELECT id FROM contents WHERE content = ?', content
-        )
+        const result = db.prepare(
+          'SELECT id FROM contents WHERE content = ?'
+        ).get(content)
         return result ? {id: result.id} : {not_found: true}
       } catch (error) {
-        return {error}
+        const {code, message, stack} = error
+        return {error: {code, message, stack}}
       }
     } else if (arg === 'event-db-find-content-by-id') {
       const id = arg2
       try {
-        const result = await db_get(
-          'SELECT content FROM contents WHERE id = ?', id
-        )
+        const result = db.prepare(
+          'SELECT content FROM contents WHERE id = ?'
+        ).get(id)
         return result ? {content: result.content} : {not_found: true}
       } catch (error) {
-        return {error}
+        const {code, message, stack} = error
+        return {error: {code, message, stack}}
       }
     } else if (arg === 'event-db-show-contents') {
-      return await db_all(
-        'SELECT * FROM contents'
-      )
+      return db.prepare('SELECT * FROM contents').all()
     }
     return {uknown_command: true}
   })
