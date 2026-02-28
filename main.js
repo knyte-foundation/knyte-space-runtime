@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain } = require('electron/main')
+const { v7: uuidv7 } = require('uuid')
 const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
@@ -13,7 +14,9 @@ function create_space_window() {
     y: 50,
     webPreferences: {
       preload: path.join(app_root_path, 'preload_space.js'),
-      additionalArguments: [`--window-caption-number=${++space_window_number}`]
+      additionalArguments: [
+        `--window-caption-number=${++space_window_number}`
+      ]
     }
   })
   space_window.loadFile('index_space.html')
@@ -151,11 +154,15 @@ app.whenReady().then(() => {
               })
           })
       }
-      const result = await getAllRows('SELECT id, username, email FROM users')
+      const result = await getAllRows(
+        'SELECT id, username, email FROM users'
+      )
       return JSON.stringify(result, null, '\t')
 
     } else if (arg === 'insert random row') {
-      const stmt = db.prepare('INSERT INTO users (username, email) VALUES (?, ?)')
+      const stmt = db.prepare(
+        'INSERT INTO users (username, email) VALUES (?, ?)'
+      )
       for (let i = 0; i < 1; i++) {
           const randomName = 'User_' + Math.floor(Math.random() * 1000)
           const randomEmail = Math.floor(Math.random() * 100) + '@mail.com'
@@ -185,11 +192,12 @@ app.whenReady().then(() => {
               })
           })
       }
-      // TODO: migrate from crypto.randomUUID() to uuid v7
-      let result;
+      let result
+      const id = uuidv7()
+      const content = arg2
       try {
         result = await append_content(
-          'INSERT INTO contents (id, content) VALUES (?, ?)', crypto.randomUUID(), arg2
+          'INSERT INTO contents (id, content) VALUES (?, ?)', id, content
         )
       } catch (error) {
         result = error.message

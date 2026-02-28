@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "sqlite3": "5.1.7",
-    "meslo": "1.0.0"
+    "meslo": "1.0.0",
+    "uuid": "13.0.0"
   },
   "devDependencies": {
     "electron": "40.1.0"
