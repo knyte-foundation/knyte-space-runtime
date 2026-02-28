@@ -163,16 +163,16 @@ app.whenReady().then(() => {
         })
       })
     }
-    if (arg === 'db path') {
+    if (arg === 'event-system-db-path') {
       return {app_root_path, db_path}
-    } else if (arg === 'memtest') {
+    } else if (arg === 'event-system-memtest') {
       const max_engine_size = await check_max_memory(false)
       const max_buffer_size = await check_max_memory(true)
       return {max_engine_size, max_buffer_size}
-    } else if (arg === 'add space') {
+    } else if (arg === 'event-windows-add-space') {
       create_space_window()
       return {result: 'space added'}
-    } else if (arg === 'db content append') {
+    } else if (arg === 'event-db-append-content') {
       function append_content(sql, id, content) {
           return new Promise((resolve, reject) => {
               db.run(sql, id, content, (error) => {
@@ -193,7 +193,7 @@ app.whenReady().then(() => {
       } catch (error) {
         return {error}
       }
-    } else if (arg === 'db get id by content') {
+    } else if (arg === 'event-db-find-content-by-text') {
       const content = arg2
       try {
         const result = await db_get(
@@ -203,7 +203,7 @@ app.whenReady().then(() => {
       } catch (error) {
         return {error}
       }
-    } else if (arg === 'db get content by id') {
+    } else if (arg === 'event-db-find-content-by-id') {
       const id = arg2
       try {
         const result = await db_get(
@@ -213,7 +213,7 @@ app.whenReady().then(() => {
       } catch (error) {
         return {error}
       }
-    } else if (arg === 'db get all contents') {
+    } else if (arg === 'event-db-show-contents') {
       return await db_all(
         'SELECT * FROM contents'
       )

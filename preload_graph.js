@@ -1,25 +1,25 @@
 const { ipcRenderer } = require('electron/renderer')
 
 window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('button-content-append').addEventListener('click', () => {
-    const input = document.getElementById('text-content-append').value
-    const result = document.getElementById('content-append-result')
+  document.getElementById('button-append-content').addEventListener('click', () => {
+    const input = document.getElementById('input-append-content').value
+    const result = document.getElementById('result-append-content')
     result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
-        .invoke('invoke-handle-message', 'db content append', input)
+        .invoke('invoke-handle-message', 'event-db-append-content', input)
         .then((reply) => {
           result.textContent = reply.id || `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
         })
     }, 100)
   })
-  document.getElementById('button-content-find').addEventListener('click', () => {
-    const input = document.getElementById('text-content-find').value
-    const result = document.getElementById('content-find-result')
+  document.getElementById('button-find-content-by-text').addEventListener('click', () => {
+    const input = document.getElementById('input-find-content-by-text').value
+    const result = document.getElementById('result-find-content-by-text')
     result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
-        .invoke('invoke-handle-message', 'db get id by content', input)
+        .invoke('invoke-handle-message', 'event-db-find-content-by-text', input)
         .then((reply) => {
           result.textContent = reply.id || (
             reply.not_found ? 'not found' : `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
@@ -27,14 +27,14 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
-  document.getElementById('button-content-id-find').addEventListener('click', () => {
-    const input = document.getElementById('input-content-id-find').value
-    const result = document.getElementById('content-id-find-result')
+  document.getElementById('button-find-content-by-id').addEventListener('click', () => {
+    const input = document.getElementById('input-find-content-by-id').value
+    const result = document.getElementById('result-find-content-by-id')
     result.style.color = 'black'
     result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
-        .invoke('invoke-handle-message', 'db get content by id', input)
+        .invoke('invoke-handle-message', 'event-db-find-content-by-id', input)
         .then((reply) => {
           if (reply.content) {
             result.value = reply.content
@@ -46,12 +46,12 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
-  document.getElementById('button-show-db-contents').addEventListener('click', () => {
-    const result = document.getElementById('db-contents-listing')
+  document.getElementById('button-show-contents').addEventListener('click', () => {
+    const result = document.getElementById('result-show-contents')
     result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
-        .invoke('invoke-handle-message', 'db get all contents')
+        .invoke('invoke-handle-message', 'event-db-show-contents')
         .then((reply) => {
           result.textContent = JSON.stringify(reply, null, '\t')
         })

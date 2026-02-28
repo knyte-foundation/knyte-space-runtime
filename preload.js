@@ -19,7 +19,7 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById(version).innerText = process.versions[type]
   }
   ipcRenderer
-    .invoke('invoke-handle-message', 'db path')
+    .invoke('invoke-handle-message', 'event-system-db-path')
     .then((reply) => {
       const {app_root_path, db_path} = reply
       document.getElementById('root-path').textContent = app_root_path
@@ -27,7 +27,7 @@ window.addEventListener('DOMContentLoaded', () => {
     })
   document.getElementById('button-memtest-node').addEventListener('click', () => {
     ipcRenderer
-      .invoke('invoke-handle-message', 'memtest')
+      .invoke('invoke-handle-message', 'event-system-memtest')
       .then((reply) => {
         document.getElementById('result-memtest-node').textContent =
           JSON.stringify(reply)
@@ -35,7 +35,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('button-add-space').addEventListener('click', () => {
     ipcRenderer
-      .invoke('invoke-handle-message', 'add space')
+      .invoke('invoke-handle-message', 'event-windows-add-space')
       .then((reply) => alert(reply.result))
   })
 })
