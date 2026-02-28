@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', () => {
       ipcRenderer
         .invoke('invoke-handle-message', 'db content append', input)
         .then((reply) => {
-          result.textContent = reply
+          result.textContent = reply.id || `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
         })
     }, 100)
   })

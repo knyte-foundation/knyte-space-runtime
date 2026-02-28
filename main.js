@@ -168,10 +168,10 @@ app.whenReady().then(() => {
     } else if (arg === 'memtest') {
       const max_engine_size = await check_max_memory(false)
       const max_buffer_size = await check_max_memory(true)
-      return JSON.stringify({max_engine_size, max_buffer_size})
+      return {max_engine_size, max_buffer_size}
     } else if (arg === 'add space') {
       create_space_window()
-      return 'space added'
+      return {result: 'space added'}
     } else if (arg === 'db content append') {
       function append_content(sql, id, content) {
           return new Promise((resolve, reject) => {
@@ -184,17 +184,15 @@ app.whenReady().then(() => {
               })
           })
       }
-      let result
       const id = uuidv7()
       const content = arg2
       try {
-        result = await append_content(
+        return {id: await append_content(
           'INSERT INTO contents (id, content) VALUES (?, ?)', id, content
-        )
+        )}
       } catch (error) {
-        result = error.message
+        return {error}
       }
-      return result
     } else if (arg === 'db get id by content') {
       let result
       const content = arg2

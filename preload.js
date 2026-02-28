@@ -29,12 +29,13 @@ window.addEventListener('DOMContentLoaded', () => {
     ipcRenderer
       .invoke('invoke-handle-message', 'memtest')
       .then((reply) => {
-        document.getElementById('result-memtest-node').textContent = reply
+        document.getElementById('result-memtest-node').textContent =
+          JSON.stringify(reply)
       })
   })
   document.getElementById('button-add-space').addEventListener('click', () => {
     ipcRenderer
       .invoke('invoke-handle-message', 'add space')
-      .then((reply) => alert(reply))
+      .then((reply) => alert(reply.result))
   })
 })
