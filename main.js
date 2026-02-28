@@ -203,6 +203,28 @@ app.whenReady().then(() => {
         result = error.message
       }
       return result
+    } else if (arg === 'db get id by content') {
+      function select_content_get(sql, value) {
+          return new Promise((resolve, reject) => {
+              db.get(sql, value, (error, row) => {
+                  if (error) {
+                      reject(error)
+                  } else {
+                      resolve(row)
+                  }
+              })
+          })
+      }
+      let result
+      const content = arg2
+      try {
+        result = await select_content_get(
+          'SELECT id FROM contents WHERE content = ?', content
+        )
+      } catch (error) {
+        result = error.message
+      }
+      return result ? result.id : 'not found'
     }
     return 'uknowon command'
   })
