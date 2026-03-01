@@ -57,5 +57,22 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
+  document.getElementById('button-add-operation').addEventListener('click', () => {
+    const result = document.getElementById('result-add-operation')
+    result.textContent = 'loading...'
+    const desc = {
+      command: document.getElementById('select-operation-command').value,
+      target: document.getElementById('input-operation-target').value,
+      parameter: document.getElementById('input-operation-parameter').value
+    }
+    setTimeout(() => {
+      ipcRenderer
+        .invoke('invoke-handle-message', 'event-db-append-operation', desc)
+        .then((reply) => {
+          result.textContent = reply.id ||
+            `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+        })
+    }, 100)
+  })
 })
 console.log('preload_graph.js ready')

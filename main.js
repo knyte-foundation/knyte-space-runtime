@@ -67,6 +67,8 @@ function createAllWindows() {
   create_space_window()
 }
 
+const uuid_length = uuid_nil.length;
+const first_optree_table_name = `optree_${uuid_nil}_0`
 function connect_db() {
   db = require("better-sqlite3")(db_path, {
     verbose: console.log,
@@ -76,7 +78,6 @@ function connect_db() {
   db.pragma(`journal_mode=WAL`);
   console.log('Connected to the SQLite database.')
 
-  const uuid_length = uuid_nil.length;
   {
     const table_name = 'contents'
     try {
@@ -92,7 +93,7 @@ function connect_db() {
     }
   }
   {
-    const table_name = `optree_${uuid_nil}_0`
+    const table_name = first_optree_table_name
     try {
       db.prepare(`
         CREATE TABLE IF NOT EXISTS '${table_name}' (
@@ -106,7 +107,7 @@ function connect_db() {
     } catch (error) {
       console.error(`Error creating table "${table_name}"`, error)
     }
-  }  
+  }
 }
 
 async function check_max_memory(is_buffer) {
@@ -197,6 +198,18 @@ app.whenReady().then(() => {
       }
     } else if (arg === 'event-db-show-contents') {
       return db.prepare('SELECT * FROM contents').all()
+    } else if (arg === 'event-db-append-operation') {
+      const id = uuidv7()
+      const {command, target, parameter} = arg2
+      try {
+        db.prepare(
+          `INSERT INTO '${first_optree_table_name}' (id, command, target, parameter) VALUES (?, ?, ?, ?)`
+        ).run(id, command, target, parameter)
+        return {id}
+      } catch (error) {
+        const {code, message, stack} = error
+        return {error: {code, message, stack}}
+      }
     }
     return {uknown_command: true}
   })
