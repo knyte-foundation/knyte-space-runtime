@@ -1,6 +1,6 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain } = require('electron/main')
-const { v7: uuidv7 } = require('uuid')
+const { v7: uuidv7, NIL: uuid_nil } = require('uuid')
 const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
@@ -76,17 +76,37 @@ function connect_db() {
   db.pragma(`journal_mode=WAL`);
   console.log('Connected to the SQLite database.')
 
-  try {
-    db.prepare(`
-      CREATE TABLE IF NOT EXISTS contents (
-        id TEXT NOT NULL PRIMARY KEY,
-        content TEXT UNIQUE NOT NULL CHECK(length(content) > 0)
-      );
-    `).run()
-    console.log('Table "contents" created successfully.')
-  } catch (error) {
-    console.error('Error creating table', error)
+  const uuid_length = uuid_nil.length;
+  {
+    const table_name = 'contents'
+    try {
+      db.prepare(`
+        CREATE TABLE IF NOT EXISTS ${table_name} (
+          id TEXT (${uuid_length}) NOT NULL PRIMARY KEY,
+          content TEXT UNIQUE NOT NULL CHECK(length(content) > 0)
+        );
+      `).run()
+      console.log(`Table "${table_name}" created successfully.`)
+    } catch (error) {
+      console.error(`Error creating table "${table_name}"`, error)
+    }
   }
+  {
+    const table_name = `optree_${uuid_nil}_0`
+    try {
+      db.prepare(`
+        CREATE TABLE IF NOT EXISTS '${table_name}' (
+          id TEXT (${uuid_length}) NOT NULL PRIMARY KEY,
+          command TEXT (${uuid_length}) NOT NULL,
+          target TEXT (${uuid_length}) NOT NULL,
+          parameter TEXT (${uuid_length})
+        );
+      `).run()
+      console.log(`Table "${table_name}" created successfully.`)
+    } catch (error) {
+      console.error(`Error creating table "${table_name}"`, error)
+    }
+  }  
 }
 
 async function check_max_memory(is_buffer) {
