@@ -20,7 +20,14 @@ document.addEventListener('keydown', (event) => {
   const { clientX, clientY } = client_xy
   const focused_element = document.elementFromPoint(clientX, clientY)
   if (code === 'KeyI' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
-    focused_element && focused_element.id && alert(focused_element.id)
+    event.preventDefault()
+    if (focused_element && focused_element.id) {
+      const result = document.getElementById('result-operation-id-text')
+      result.value = focused_element.id
+      document.getElementById('result-operation-id-dialog').showModal()      
+      result.focus()
+      result.select()
+    }
   }
 })
 
