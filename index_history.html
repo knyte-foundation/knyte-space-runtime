@@ -17,6 +17,12 @@
       <button id="button-render-history">
         Render history
       </button>
+      <button id="button-1">
+        steer 1
+      </button>
+      <button id="button-2">
+        steer 2
+      </button>
     </p>
     <div>
       <svg id="svg-history"
@@ -37,12 +43,19 @@
           <polygon points="0 0, 5 2, 0 4" fill="#9DA2A6">
           </polygon>
         </marker>
-        <g id="hixels">
-          <circle
-            cx="100" cy="100" r="30"
-            stroke="red" fill="orange"
-          >
-          </circle>
+        <g class="steering">
+          <g class="hixel_bodies">
+            <circle
+              cx="100" cy="100" r="30"
+              stroke="red" fill="orange"
+            >
+            </circle>
+          </g>
+          <g class="hixel_links">
+          </g>
+        </g>
+        <g class="positioning">
+          <g class="ghosts"></g>
         </g>
       </svg>
     </div>
