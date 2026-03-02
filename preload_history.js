@@ -3,8 +3,8 @@ const { ipcRenderer } = require('electron/renderer')
 window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('button-render-history').addEventListener('click', () => {
     const svg = document.getElementById('svg-history');
-    const hixel_bodies = svg.getElementsByClassName('hixel_bodies')[0]
-    const hixel_links = svg.getElementsByClassName('hixel_links')[0]
+    const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
+    const hixel_links = svg.getElementsByClassName('hixel-links')[0]
     ipcRenderer
       .invoke('invoke-handle-message', 'event-db-show-history')
       .then((reply) => {
