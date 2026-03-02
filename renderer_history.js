@@ -109,13 +109,77 @@ const steering_gear = {
 	}
 };
 
-document.getElementById('button-1').addEventListener('click', () => {
-  steering_gear.init(document.getElementById('svg-history'), 0, 0, 1)
-})
-document.getElementById('button-2').addEventListener('click', () => {
-  steering_gear.init(document.getElementById('svg-history'), 50, 50, 2)
-})
+function space_on_wheel(event) {
+	// ctrlKey + wheel means touch pad scale gesture
+	// mouse wheel means deltaY, shift + mouse wheel means deltaX
+	const { currentTarget, deltaX, deltaY, deltaMode, altKey, ctrlKey, metaKey } =
+		event;
+	const speeds = {};
+	speeds[WheelEvent.DOM_DELTA_PIXEL] = 0.8; // main mode
+	speeds[WheelEvent.DOM_DELTA_LINE] = 0.0; // can't reproduce this mode, thus disable it
+	speeds[WheelEvent.DOM_DELTA_PAGE] = 0.0; // can't reproduce this mode, thus disable it
+	const speed = speeds[deltaMode];
+	//const zoom_wheel_normalization = -1.0 / 360.0;
+	const zoom_pinch_normalization = -1.0 / 72.0;
+	const mousemove_position = { x: previous.localX, y: previous.localY };
+	if (!altKey && ctrlKey && !metaKey) {
+		const text_scale = window.outerWidth / window.innerWidth;
+		const pitch_scale = window.visualViewport.scale;
+		const total_scale = text_scale * pitch_scale;
+		steering_gear.zoom(
+			currentTarget,
+			mousemove_position,
+			zoom_pinch_normalization * total_scale * deltaY,
+		);
+	} else if (!altKey && !ctrlKey && !metaKey)
+		steering_gear.pan(currentTarget, {
+			x: -speed * deltaX,
+			y: -speed * deltaY,
+		});
+	event.stopPropagation();
+	event.preventDefault();
+}
+let previous = {};
+function convert_client_to_local(currentTarget, clientX, clientY) {
+	const rect = currentTarget.getBoundingClientRect();
+	return {
+		localX: clientX - rect.left,
+		localY: clientY - rect.top,
+	};
+}
+function space_on_mousemove(event) {
+	const { currentTarget, buttons, clientX, clientY } = event;
+	const { localX, localY } = convert_client_to_local(
+		currentTarget,
+		clientX,
+		clientY,
+	);
+	if (previous.currentTarget === currentTarget) {
+		if (buttons === 4) {
+			// middle mouse button/wheel pressed
+			steering_gear.pan(currentTarget, {
+				x: localX - previous.localX,
+				y: localY - previous.localY,
+			});
+			event.stopPropagation();
+			event.preventDefault();
+		}
+	}
+	previous.currentTarget = currentTarget;
+	previous.localX = localX;
+	previous.localY = localY;
+	previous.clientX = clientX;
+	previous.clientY = clientY;
+}
+function get_svg_parent(element) {
+	if (!element) return null;
+	else if (element.tagName === "svg" && element.dataset.knyte_id) return element;
+	return get_svg_parent(element.parentElement);
+}
 
+const root = document.getElementById('svg-history')
+root.addEventListener("wheel", space_on_wheel, { passive: false });
+root.addEventListener("mousemove", space_on_mousemove, { passive: false });
 const document_mousemove_cache = {};
 document.addEventListener('mousemove', (event) => {
   const { clientX, clientY } = event
@@ -146,6 +210,11 @@ document.addEventListener('keydown', (event) => {
       result.focus()
       result.select()
     }
+  } else if (code ==='KeyO' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
+    steering_gear.init(root, 0, 0, 1)
+  } else if (code === 'Digit1' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
+    const mousemove_position = { x: previous.localX, y: previous.localY };
+    steering_gear.reset_zoom(root, mousemove_position);
   }
 })
 
