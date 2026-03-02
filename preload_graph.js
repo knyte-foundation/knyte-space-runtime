@@ -76,6 +76,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('button-show-knytes').addEventListener('click', () => {
   const result = document.getElementById('result-show-knytes')
+  const last_operation_id = document.getElementById('019cb041-4ebf-718f-8a02-42b608d04fcd').value
   result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
@@ -100,6 +101,8 @@ window.addEventListener('DOMContentLoaded', () => {
               // set knyte content
               knytes[target] && (knytes[target].content = parameter)
             }
+            if (id === last_operation_id)
+              break
           }
           result.textContent = JSON.stringify(knytes, null, '\t')
         })
