@@ -19,11 +19,27 @@
         version="1.1" xmlns="http://www.w3.org/2000/svg"
         xmlns:xlink="http://www.w3.org/1999/xlink"
       >
-        <circle
-          cx="100" cy="100" r="30"
-          stroke="red" fill="orange"
+        <marker id="marker_trace_start"
+          markerWidth="2" markerHeight="4" refX="1" refY="2"
+          orient="auto"
         >
-        </circle>
+          <polygon points="1 0, 1 4" stroke="#9DA2A6">
+          </polygon>
+        </marker>
+        <marker id="marker_trace_end"
+          markerWidth="5" markerHeight="4" refX="0.5" refY="2"
+          orient="auto"
+        >
+          <polygon points="0 0, 5 2, 0 4" fill="#9DA2A6">
+          </polygon>
+        </marker>
+        <g id="hixels">
+          <circle
+            cx="100" cy="100" r="30"
+            stroke="red" fill="orange"
+          >
+          </circle>
+        </g>
       </svg>
     </div>
 
