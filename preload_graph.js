@@ -74,5 +74,37 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
+  document.getElementById('button-show-knytes').addEventListener('click', () => {
+  const result = document.getElementById('result-show-knytes')
+  result.textContent = 'loading...'
+    setTimeout(() => {
+      ipcRenderer
+        .invoke('invoke-handle-message', 'event-db-show-history')
+        .then((reply) => {
+          const knytes = {};
+          for (let i = 0; i < reply.length; ++i) {
+            const {id, command, target, parameter} = reply[i]
+            if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
+              // create knyte
+              !knytes[target] && (knytes[target] = {})
+            } else if (command === '0188dd27-0d1f-7d9f-8d58-b928173ace6f') {
+              // remove knyte
+              knytes[target] && (delete knytes[target])
+            } else if (command === '0188dd27-0f25-7763-8a72-fcdb42a3432f') {
+              // set knyte initial
+              knytes[target] && (knytes[target].initial = parameter)
+            } else if (command === '0188dd27-1114-777d-879a-d1b8bd08f08d') {
+              // set knyte terminal
+              knytes[target] && (knytes[target].terminal = parameter)
+            } else if (command === '0188dd27-12f5-732d-b53d-6e9519f5ac29') {
+              // set knyte content
+              knytes[target] && (knytes[target].content = parameter)
+            }
+          }
+          result.textContent = JSON.stringify(knytes, null, '\t')
+        })
+    }, 100)
+  })
 })
+
 console.log('preload_graph.js ready')
