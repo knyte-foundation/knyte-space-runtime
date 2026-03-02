@@ -203,7 +203,9 @@ app.whenReady().then(() => {
       const {command, target, parameter} = arg2
       try {
         db.prepare(
-          `INSERT INTO '${first_optree_table_name}' (id, command, target, parameter) VALUES (?, ?, ?, ?)`
+          `INSERT INTO '${
+            first_optree_table_name
+          }' (id, command, target, parameter) VALUES (?, ?, ?, ?)`
         ).run(id, command, target, parameter)
         return {id}
       } catch (error) {
