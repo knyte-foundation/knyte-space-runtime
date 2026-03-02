@@ -76,7 +76,7 @@ window.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('button-show-knytes').addEventListener('click', () => {
   const result = document.getElementById('result-show-knytes')
-  const last_operation_id = document.getElementById('019cb041-4ebf-718f-8a02-42b608d04fcd').value
+  const last_operation_id = document.getElementById('input-last-operation-id').value
   result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
