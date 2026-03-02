@@ -10,3 +10,8 @@ h1 {
 button {
   font-family: meslo;
 }
+#svg-history {
+  background-color: #1C2333; 
+  width: 100%;
+  height: calc(100vh - (32px + 32px) - (24px + 16px) - 6px);
+}
