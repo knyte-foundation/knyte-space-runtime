@@ -212,6 +212,10 @@ app.whenReady().then(() => {
         const {code, message, stack} = error
         return {error: {code, message, stack}}
       }
+    } else if (arg === 'event-db-show-history') {
+      return db.prepare(
+        `SELECT * FROM '${first_optree_table_name}'`
+      ).all()
     }
     return {uknown_command: true}
   })
