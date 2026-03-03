@@ -74,8 +74,14 @@ window.addEventListener('DOMContentLoaded', () => {
     handle_click_show_history
   )
   document.getElementById('button-add-history-branch').addEventListener('click', () => {
+    const svg = document.getElementById('svg-history');
+    const root_operation_id = svg.dataset.operation_in_focus
+    const root_branch_id = null
     ipcRenderer
-      .invoke('invoke-handle-message', 'event-db-add-history-branch')
+      .invoke(
+        'invoke-handle-message', 'event-db-add-history-branch',
+        root_branch_id, root_operation_id
+      )
       .then((reply) => {
         if (!reply.id) {
           alert(`ERROR: ${reply.error ? reply.error.message : 'unknown'}`)

@@ -185,7 +185,7 @@ app.whenReady().then(() => {
   createAllWindows()
   connect_db()
 
-  ipcMain.handle('invoke-handle-message', async (event, arg, arg2) => {
+  ipcMain.handle('invoke-handle-message', async (event, arg, arg2, arg3) => {
     if (!db) {
       console.log('db not ready')
       return
@@ -272,7 +272,12 @@ app.whenReady().then(() => {
         `SELECT * FROM '${first_optree_table_name}'`
       ).all()
     } else if (arg === 'event-db-add-history-branch') {
-      const result = create_history_branch(first_optree_table_id, uuid_nil, uuid_nil)
+      const root_branch_id = arg2 || uuid_nil
+      const root_operation_id = arg3 || uuid_nil
+      const new_branch_id = (/* root_branch_id !== uuid_nil && */root_operation_id !== uuid_nil)
+        ? uuidv7()
+        : uuid_nil
+      const result = create_history_branch(new_branch_id, root_branch_id, root_operation_id)
       if (result.id)
         return {id: result.id}
       else return {error: {
