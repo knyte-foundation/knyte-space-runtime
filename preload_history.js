@@ -2,7 +2,7 @@ const { ipcRenderer } = require('electron/renderer')
 const uuid_nil = '00000000-0000-0000-0000-000000000000'
 // TODO: figure out how to use proper module instead
 // for now I can't include uuid to preload process, have no idea why
-	// const { NIL: uuid_nil } = require('uuid')
+  // const { NIL: uuid_nil } = require('uuid')
 let present_operation_id;
 
 window.addEventListener('DOMContentLoaded', () => {
