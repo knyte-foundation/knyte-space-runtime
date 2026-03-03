@@ -8,6 +8,15 @@ window.addEventListener('DOMContentLoaded', () => {
     ipcRenderer
       .invoke('invoke-handle-message', 'event-db-show-history')
       .then((reply) => {
+        function set_operation_in_focus(node) {
+          const prior_id = svg.dataset.operation_in_focus
+          if (prior_id) {
+            const prior_node = document.getElementById(prior_id)
+            prior_node.removeAttribute('fill')
+          }
+          node.setAttribute('fill', '#FFB266')
+          svg.dataset.operation_in_focus = node.id
+        }
         hixel_bodies.innerHTML = ''
         hixel_links.innerHTML = ''
         let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
@@ -17,12 +26,14 @@ window.addEventListener('DOMContentLoaded', () => {
             'http://www.w3.org/2000/svg', 'circle'
           );
           node.id = operation.id
+          node.classList.add('hixel-selectable')
           node.setAttribute('cx', cx)
           node.setAttribute('cy', cy)
           node.setAttribute('r', r)
           node.setAttribute('stroke-width', stroke_width)
           node.setAttribute('stroke', '#9DA2A6')
           node.setAttribute('fill', '#1C2333')
+          node.addEventListener('click', (event) => set_operation_in_focus(event.target))
           hixel_bodies.append(node)
           if (i > 0) {
             const link = document.createElementNS(
@@ -41,8 +52,7 @@ window.addEventListener('DOMContentLoaded', () => {
           cy_prior = cy
           cy += 80
         }
-        node.setAttribute('fill', '#FFB266')
-        svg.dataset.operation_in_focus = node.id
+        set_operation_in_focus(node)
       })
   })
 })
