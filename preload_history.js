@@ -12,7 +12,7 @@ window.addEventListener('DOMContentLoaded', () => {
           const prior_id = svg.dataset.operation_in_focus
           if (prior_id) {
             const prior_node = document.getElementById(prior_id)
-            prior_node.removeAttribute('fill')
+            prior_node.setAttribute('fill', '#1C2333')
           }
           node.setAttribute('fill', '#FFB266')
           svg.dataset.operation_in_focus = node.id
