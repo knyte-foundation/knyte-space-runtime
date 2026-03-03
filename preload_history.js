@@ -10,10 +10,10 @@ window.addEventListener('DOMContentLoaded', () => {
       .then((reply) => {
         hixel_bodies.innerHTML = ''
         hixel_links.innerHTML = ''
-        let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior
+        let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
         for (let i = 0; i < reply.length; ++i) {
           const operation = reply[i]
-          const node = document.createElementNS(
+          node = document.createElementNS(
             'http://www.w3.org/2000/svg', 'circle'
           );
           node.id = operation.id
@@ -41,6 +41,8 @@ window.addEventListener('DOMContentLoaded', () => {
           cy_prior = cy
           cy += 80
         }
+        node.setAttribute('fill', '#FFB266')
+        svg.dataset.operation_in_focus = node.id
       })
   })
 })
