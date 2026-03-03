@@ -4,7 +4,7 @@ const { v7: uuidv7, NIL: uuid_nil } = require('uuid')
 const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
-let db, space_window_number = 0
+let db, space_window_number = 0, registered_ipc_renders = {}
 
 function create_space_window() {
   const space_window = new BrowserWindow({
@@ -218,6 +218,19 @@ app.whenReady().then(() => {
       ).all()
     }
     return {uknown_command: true}
+  })
+
+  ipcMain.on('asynchronous-message', (event, arg, arg2) => {
+    if (arg === 'event-register-ipc-render') {
+      const render_name = arg2
+      registered_ipc_renders[render_name] = event.sender
+    } else if (arg === 'event-set-operation-in-focus') {
+      const operation_in_focus = arg2
+      const ipc_graph = registered_ipc_renders['graph']
+      ipc_graph && ipc_graph.send(
+        'asynchronous-reply', 'event-set-operation-in-focus', operation_in_focus
+      )
+    }
   })
 
   app.on('activate', function () {

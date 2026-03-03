@@ -75,9 +75,9 @@ window.addEventListener('DOMContentLoaded', () => {
     }, 100)
   })
   document.getElementById('button-show-knytes').addEventListener('click', () => {
-  const result = document.getElementById('result-show-knytes')
-  const last_operation_id = document.getElementById('input-last-operation-id').value
-  result.textContent = 'loading...'
+    const result = document.getElementById('result-show-knytes')
+    const last_operation_id = document.getElementById('input-last-operation-id').value
+    result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
         .invoke('invoke-handle-message', 'event-db-show-history')
@@ -108,6 +108,13 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
+  ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
+    if (arg === 'event-set-operation-in-focus') {
+      const new_operation_in_focus = arg2
+      alert(`new operation in focus: ${new_operation_in_focus}`)
+    }
+  })
+  ipcRenderer.send('asynchronous-message', 'event-register-ipc-render', 'graph')
 })
 
 console.log('preload_graph.js ready')

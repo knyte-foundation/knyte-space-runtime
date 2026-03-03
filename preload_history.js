@@ -16,6 +16,9 @@ window.addEventListener('DOMContentLoaded', () => {
           }
           node.setAttribute('fill', '#FFB266')
           svg.dataset.operation_in_focus = node.id
+          ipcRenderer.send(
+            'asynchronous-message', 'event-set-operation-in-focus', node.id
+          )
         }
         hixel_bodies.innerHTML = ''
         hixel_links.innerHTML = ''
@@ -33,7 +36,9 @@ window.addEventListener('DOMContentLoaded', () => {
           node.setAttribute('stroke-width', stroke_width)
           node.setAttribute('stroke', '#9DA2A6')
           node.setAttribute('fill', '#1C2333')
-          node.addEventListener('click', (event) => set_operation_in_focus(event.target))
+          node.addEventListener('click', (event) => {
+            set_operation_in_focus(event.target)
+          })
           hixel_bodies.append(node)
           if (i > 0) {
             const link = document.createElementNS(
