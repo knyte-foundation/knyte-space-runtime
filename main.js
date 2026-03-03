@@ -131,7 +131,7 @@ function create_history_branch(
   const history_branch_name = get_optree_name(history_branch_id)
   try {
     db.prepare(`
-      CREATE TABLE IF NOT EXISTS '${history_branch_name}' (
+      CREATE TABLE '${history_branch_name}' (
         id TEXT (${uuid_length}) NOT NULL PRIMARY KEY,
         command TEXT (${uuid_length}) NOT NULL,
         target TEXT (${uuid_length}) NOT NULL,
