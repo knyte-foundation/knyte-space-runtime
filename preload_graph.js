@@ -74,7 +74,7 @@ window.addEventListener('DOMContentLoaded', () => {
         })
     }, 100)
   })
-  document.getElementById('button-show-knytes').addEventListener('click', () => {
+  function handle_click_show_knytes() {
     const result = document.getElementById('result-show-knytes')
     const last_operation_id = document.getElementById('input-last-operation-id').value
     result.textContent = 'loading...'
@@ -107,11 +107,15 @@ window.addEventListener('DOMContentLoaded', () => {
           result.textContent = JSON.stringify(knytes, null, '\t')
         })
     }, 100)
-  })
+  }
+  document.getElementById('button-show-knytes').addEventListener('click',
+    handle_click_show_knytes
+  )
   ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
     if (arg === 'event-set-operation-in-focus') {
-      const new_operation_in_focus = arg2
-      alert(`new operation in focus: ${new_operation_in_focus}`)
+      const new_last_operation_id = arg2
+      document.getElementById('input-last-operation-id').value = new_last_operation_id
+      handle_click_show_knytes()
     }
   })
   ipcRenderer.send('asynchronous-message', 'event-register-ipc-render', 'graph')
