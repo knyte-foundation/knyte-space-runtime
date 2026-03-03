@@ -74,7 +74,15 @@ window.addEventListener('DOMContentLoaded', () => {
     handle_click_show_history
   )
   document.getElementById('button-add-history-branch').addEventListener('click', () => {
-    alert('not implemented yet')
+    ipcRenderer
+      .invoke('invoke-handle-message', 'event-db-add-history-branch')
+      .then((reply) => {
+        if (!reply.id) {
+          alert(`ERROR: ${reply.error ? reply.error.message : 'unknown'}`)
+          return
+        }
+        alert(`History branch ${reply.id} added`)
+      })
   })
   ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
     if (arg === 'event-add-operation') {

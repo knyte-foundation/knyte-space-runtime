@@ -68,7 +68,11 @@ function createAllWindows() {
 }
 
 const uuid_length = uuid_nil.length;
-const first_optree_table_name = `optree_${uuid_nil}`
+const first_optree_table_id = uuid_nil
+function get_optree_name(id) {
+  return `optree_${id}`
+}
+const first_optree_table_name = get_optree_name(first_optree_table_id)
 function connect_db() {
   db = require("better-sqlite3")(db_path, {
     verbose: console.log,
@@ -92,24 +96,6 @@ function connect_db() {
       console.error(`Error creating table "${table_name}"`, error)
     }
   }
-  /*
-  {
-    const table_name = first_optree_table_name
-    try {
-      db.prepare(`
-        CREATE TABLE IF NOT EXISTS '${table_name}' (
-          id TEXT (${uuid_length}) NOT NULL PRIMARY KEY,
-          command TEXT (${uuid_length}) NOT NULL,
-          target TEXT (${uuid_length}) NOT NULL,
-          parameter TEXT (${uuid_length})
-        );
-      `).run()
-      console.log(`Table "${table_name}" created successfully.`)
-    } catch (error) {
-      console.error(`Error creating table "${table_name}"`, error)
-    }
-  }
-  */
 }
 function is_table_exist(name) {
   try {
@@ -122,6 +108,46 @@ function is_table_exist(name) {
     }
   } catch (error) {
     return {exists: false, error}
+  }
+}
+function add_operation(history_branch_id, desc) {
+  const table_name = get_optree_name(history_branch_id)
+  const {id, command, target, parameter} = desc
+  try {
+    db.prepare(
+      `INSERT INTO '${
+        table_name
+      }' (id, command, target, parameter) VALUES (?, ?, ?, ?)`
+    ).run(id, command, target, parameter)
+    return {id}
+  } catch (error) {
+    const {code, message, stack} = error
+    return {error: {code, message, stack}}
+  }
+}
+function create_history_branch(
+  history_branch_id, root_branch_id, root_operation_id
+) {
+  const history_branch_name = get_optree_name(history_branch_id)
+  try {
+    db.prepare(`
+      CREATE TABLE IF NOT EXISTS '${history_branch_name}' (
+        id TEXT (${uuid_length}) NOT NULL PRIMARY KEY,
+        command TEXT (${uuid_length}) NOT NULL,
+        target TEXT (${uuid_length}) NOT NULL,
+        parameter TEXT (${uuid_length})
+      );
+    `).run()
+    const id = uuidv7()
+    add_operation(history_branch_id, {
+      id, command: 'create branch',
+      target: root_branch_id, parameter: root_operation_id
+    })
+    console.log(`Table "${history_branch_name}" created successfully.`)
+    return {id: history_branch_name}
+  } catch (error) {
+    console.error(`Error creating table "${history_branch_name}"`, error)
+    return {error}
   }
 }
 
@@ -222,7 +248,6 @@ app.whenReady().then(() => {
           } not found`,
           stack: 'not available',
         }}
-      const id = uuidv7()
       const {command, target, parameter, operation_in_focus} = arg2
       if (operation_in_focus)
         return {error: {
@@ -232,17 +257,8 @@ app.whenReady().then(() => {
           }`,
           stack: 'not available',
         }}
-      try {
-        db.prepare(
-          `INSERT INTO '${
-            first_optree_table_name
-          }' (id, command, target, parameter) VALUES (?, ?, ?, ?)`
-        ).run(id, command, target, parameter)
-        return {id}
-      } catch (error) {
-        const {code, message, stack} = error
-        return {error: {code, message, stack}}
-      }
+      const id = uuidv7()
+      return add_operation(first_optree_table_id, {id, command, target, parameter})
     } else if (arg === 'event-db-show-history') {
       if (!is_table_exist(first_optree_table_name).exists)
         return {error: {
@@ -255,6 +271,15 @@ app.whenReady().then(() => {
       return db.prepare(
         `SELECT * FROM '${first_optree_table_name}'`
       ).all()
+    } else if (arg === 'event-db-add-history-branch') {
+      const result = create_history_branch(first_optree_table_id, uuid_nil, uuid_nil)
+      if (result.id)
+        return {id: result.id}
+      else return {error: {
+        code: result.error?.code, 
+        message: result.error?.message, 
+        stack: result.error?.stack
+      }}
     }
     return {uknown_command: true}
   })
