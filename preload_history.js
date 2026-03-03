@@ -1,4 +1,8 @@
 const { ipcRenderer } = require('electron/renderer')
+const uuid_nil = '00000000-0000-0000-0000-000000000000'
+// TODO: figure out how to use proper module instead
+// for now I can't include uuid to preload process, have no idea why
+	// const { NIL: uuid_nil } = require('uuid')
 let present_operation_id;
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -33,7 +37,7 @@ window.addEventListener('DOMContentLoaded', () => {
           return
         }
         console.log('branches', reply.branches)
-        const branch = reply.branches['00000000-0000-0000-0000-000000000000'] // TODO: fix this stub
+        const branch = reply.branches[uuid_nil]
         let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
         for (let i = 0; i < branch.length; ++i) {
           const operation = branch[i]
@@ -97,7 +101,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (arg === 'event-add-operation') {
       handle_click_show_history()
     }
-  })  
+  })
   ipcRenderer.send(
     'asynchronous-message', 'event-register-ipc-render', 'history'
   )
