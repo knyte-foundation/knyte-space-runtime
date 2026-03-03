@@ -15,13 +15,13 @@ window.addEventListener('DOMContentLoaded', () => {
             const prior_node = document.getElementById(prior_id)
             prior_node.setAttribute('fill', '#1C2333')
           }
-          const selection_color = node.id === present_operation_id
-            ? '#FFB266'
-            : '#F2AAEC'
+          const is_present = node.id === present_operation_id
+          const selection_color = is_present ? '#FFB266' : '#F2AAEC'
           node.setAttribute('fill', selection_color)
           svg.dataset.operation_in_focus = node.id
           ipcRenderer.send(
-            'asynchronous-message', 'event-set-operation-in-focus', node.id
+            'asynchronous-message', 'event-set-operation-in-focus',
+            node.id, is_present
           )
         }
         hixel_bodies.innerHTML = ''

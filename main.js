@@ -220,15 +220,19 @@ app.whenReady().then(() => {
     return {uknown_command: true}
   })
 
-  ipcMain.on('asynchronous-message', (event, arg, arg2) => {
+  ipcMain.on('asynchronous-message', (event, arg, arg2, arg3) => {
     if (arg === 'event-register-ipc-render') {
       const render_name = arg2
       registered_ipc_renders[render_name] = event.sender
     } else if (arg === 'event-set-operation-in-focus') {
       const operation_in_focus = arg2
+      const is_focus_on_present = arg3
+      // TODO: save operation_in_focus to startup table
+      // TODO: determine is_focus_on_present based on main and actual db
       const ipc_graph = registered_ipc_renders['graph']
       ipc_graph && ipc_graph.send(
-        'asynchronous-reply', 'event-set-operation-in-focus', operation_in_focus
+        'asynchronous-reply', 'event-set-operation-in-focus',
+        is_focus_on_present ? '' : operation_in_focus
       )
     } else if (arg === 'event-add-operation') {
       const ipc_history = registered_ipc_renders['history']
