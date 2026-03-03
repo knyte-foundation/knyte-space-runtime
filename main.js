@@ -198,7 +198,7 @@ app.whenReady().then(() => {
       }
     } else if (arg === 'event-db-show-contents') {
       return db.prepare('SELECT * FROM contents').all()
-    } else if (arg === 'event-db-append-operation') {
+    } else if (arg === 'event-db-add-operation') {
       const id = uuidv7()
       const {command, target, parameter} = arg2
       try {

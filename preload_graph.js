@@ -67,7 +67,7 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     setTimeout(() => {
       ipcRenderer
-        .invoke('invoke-handle-message', 'event-db-append-operation', desc)
+        .invoke('invoke-handle-message', 'event-db-add-operation', desc)
         .then((reply) => {
           if (reply.id) {
             result.textContent = reply.id
