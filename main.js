@@ -68,7 +68,7 @@ function createAllWindows() {
 }
 
 const uuid_length = uuid_nil.length;
-const first_optree_table_name = `optree_${uuid_nil}_0`
+const first_optree_table_name = `optree_${uuid_nil}`
 function connect_db() {
   db = require("better-sqlite3")(db_path, {
     verbose: console.log,
@@ -92,6 +92,7 @@ function connect_db() {
       console.error(`Error creating table "${table_name}"`, error)
     }
   }
+  /*
   {
     const table_name = first_optree_table_name
     try {
@@ -107,6 +108,20 @@ function connect_db() {
     } catch (error) {
       console.error(`Error creating table "${table_name}"`, error)
     }
+  }
+  */
+}
+function is_table_exist(name) {
+  try {
+    const result = db.prepare(`
+      SELECT name FROM sqlite_master WHERE type='table' AND name='${name}';
+    `).all()
+    return {exists: result && result.length > 0
+      ? result[0].name === name
+      : false
+    }
+  } catch (error) {
+    return {exists: false, error}
   }
 }
 
@@ -199,6 +214,14 @@ app.whenReady().then(() => {
     } else if (arg === 'event-db-show-contents') {
       return db.prepare('SELECT * FROM contents').all()
     } else if (arg === 'event-db-add-operation') {
+      if (!is_table_exist(first_optree_table_name).exists)
+        return {error: {
+          code: `history branch ${first_optree_table_name} not found`,
+          message: `can't add new operation to history because branch ${
+            first_optree_table_name
+          } not found`,
+          stack: 'not available',
+        }}
       const id = uuidv7()
       const {command, target, parameter, operation_in_focus} = arg2
       if (operation_in_focus)
@@ -221,6 +244,14 @@ app.whenReady().then(() => {
         return {error: {code, message, stack}}
       }
     } else if (arg === 'event-db-show-history') {
+      if (!is_table_exist(first_optree_table_name).exists)
+        return {error: {
+          code: `history branch ${first_optree_table_name} not found`,
+          message: `can't get history because branch ${
+            first_optree_table_name
+          } not found`,
+          stack: 'not available',
+        }}
       return db.prepare(
         `SELECT * FROM '${first_optree_table_name}'`
       ).all()

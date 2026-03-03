@@ -90,6 +90,10 @@ window.addEventListener('DOMContentLoaded', () => {
       ipcRenderer
         .invoke('invoke-handle-message', 'event-db-show-history')
         .then((reply) => {
+          if (reply.error) {
+            result.textContent = `ERROR: ${reply.error.message}`
+            return
+          }
           const knytes = {};
           for (let i = 0; i < reply.length; ++i) {
             const {id, command, target, parameter} = reply[i]

@@ -26,6 +26,11 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         hixel_bodies.innerHTML = ''
         hixel_links.innerHTML = ''
+        if (reply.error) {
+          present_operation_id = ''
+          alert(`ERROR: ${reply.error.message}`)
+          return
+        }
         let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
         for (let i = 0; i < reply.length; ++i) {
           const operation = reply[i]
@@ -68,12 +73,17 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('button-render-history').addEventListener('click',
     handle_click_show_history
   )
+  document.getElementById('button-add-history-branch').addEventListener('click', () => {
+    alert('not implemented yet')
+  })
   ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
     if (arg === 'event-add-operation') {
       handle_click_show_history()
     }
   })  
-  ipcRenderer.send('asynchronous-message', 'event-register-ipc-render', 'history')
+  ipcRenderer.send(
+    'asynchronous-message', 'event-register-ipc-render', 'history'
+  )
 })
 
 console.log('preload_history.js ready')
