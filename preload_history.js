@@ -7,7 +7,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
     const hixel_links = svg.getElementsByClassName('hixel-links')[0]
     ipcRenderer
-      .invoke('invoke-handle-message', 'event-db-show-history')
+      //.invoke('invoke-handle-message', 'event-db-show-history')
+      .invoke('invoke-handle-message', 'event-db-get-history-branches')
       .then((reply) => {
         function set_operation_in_focus(node) {
           const prior_id = svg.dataset.operation_in_focus
@@ -31,9 +32,11 @@ window.addEventListener('DOMContentLoaded', () => {
           alert(`ERROR: ${reply.error.message}`)
           return
         }
+        console.log('branches', reply.branches)
+        const branch = reply.branches['00000000-0000-0000-0000-000000000000'] // TODO: fix this stub
         let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
-        for (let i = 0; i < reply.length; ++i) {
-          const operation = reply[i]
+        for (let i = 0; i < branch.length; ++i) {
+          const operation = branch[i]
           node = document.createElementNS(
             'http://www.w3.org/2000/svg', 'circle'
           );

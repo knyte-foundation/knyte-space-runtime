@@ -107,7 +107,8 @@ function is_table_exist(name) {
       : false
     }
   } catch (error) {
-    return {exists: false, error}
+    const {code, message, stack} = error
+    return {exists: false, error: {code, message, stack}}
   }
 }
 function add_operation(history_branch_id, desc) {
@@ -147,7 +148,8 @@ function create_history_branch(
     return {id: history_branch_name}
   } catch (error) {
     console.error(`Error creating table "${history_branch_name}"`, error)
-    return {error}
+    const {code, message, stack} = error
+    return {error: {code, message, stack}}
   }
 }
 
@@ -271,6 +273,33 @@ app.whenReady().then(() => {
       return db.prepare(
         `SELECT * FROM '${first_optree_table_name}'`
       ).all()
+    } else if (arg === 'event-db-get-history-branches') {
+      let branch_names
+      try {
+        branch_names = db.prepare(`
+          SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'optree_%';
+        `).all()
+        if (branch_names.length === 0)
+          return {error: {
+            code: `history branch ${first_optree_table_name} not found`,
+            message: `can't get history because branch ${
+              first_optree_table_name
+            } not found`,
+            stack: 'not available',
+          }}
+      } catch (error) {
+        const {code, message, stack} = error
+        return {error: {code, message, stack}}
+      }
+      const branches = {}
+      for (let i = 0; i < branch_names.length; ++i) {
+        const {name} = branch_names[i]
+        const id = name.split('optree_')[1]
+        branches[id] = db.prepare(
+          `SELECT * FROM '${name}'`
+        ).all()
+      }
+      return {branches}
     } else if (arg === 'event-db-add-history-branch') {
       const root_branch_id = arg2 || uuid_nil
       const root_operation_id = arg3 || uuid_nil
@@ -281,8 +310,8 @@ app.whenReady().then(() => {
       if (result.id)
         return {id: result.id}
       else return {error: {
-        code: result.error?.code, 
-        message: result.error?.message, 
+        code: result.error?.code,
+        message: result.error?.message,
         stack: result.error?.stack
       }}
     }
