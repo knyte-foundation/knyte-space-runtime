@@ -200,7 +200,15 @@ app.whenReady().then(() => {
       return db.prepare('SELECT * FROM contents').all()
     } else if (arg === 'event-db-add-operation') {
       const id = uuidv7()
-      const {command, target, parameter} = arg2
+      const {command, target, parameter, operation_in_focus} = arg2
+      if (operation_in_focus)
+        return {error: {
+          code: 'db is in read-only mode',
+          message: `can't add new operation to history because operation in focus = ${
+            operation_in_focus
+          }`,
+          stack: 'not available',
+        }}
       try {
         db.prepare(
           `INSERT INTO '${
@@ -227,7 +235,6 @@ app.whenReady().then(() => {
     } else if (arg === 'event-set-operation-in-focus') {
       const operation_in_focus = arg2
       const is_focus_on_present = arg3
-      // TODO: save operation_in_focus to startup table
       // TODO: determine is_focus_on_present based on main and actual db
       const ipc_graph = registered_ipc_renders['graph']
       ipc_graph && ipc_graph.send(

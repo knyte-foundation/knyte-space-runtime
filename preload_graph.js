@@ -59,11 +59,13 @@ window.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('button-add-operation').addEventListener('click', () => {
     const result = document.getElementById('result-add-operation')
+    const last_operation_id = document.getElementById('input-last-operation-id').value
     result.textContent = 'loading...'
     const desc = {
       command: document.getElementById('select-operation-command').value,
       target: document.getElementById('input-operation-target').value,
-      parameter: document.getElementById('input-operation-parameter').value
+      parameter: document.getElementById('input-operation-parameter').value,
+      operation_in_focus: last_operation_id || null,
     }
     setTimeout(() => {
       ipcRenderer
