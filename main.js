@@ -230,6 +230,11 @@ app.whenReady().then(() => {
       ipc_graph && ipc_graph.send(
         'asynchronous-reply', 'event-set-operation-in-focus', operation_in_focus
       )
+    } else if (arg === 'event-add-operation') {
+      const ipc_history = registered_ipc_renders['history']
+      ipc_history && ipc_history.send(
+        'asynchronous-reply', 'event-add-operation'
+      )
     }
   })
 

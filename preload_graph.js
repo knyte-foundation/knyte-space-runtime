@@ -69,8 +69,14 @@ window.addEventListener('DOMContentLoaded', () => {
       ipcRenderer
         .invoke('invoke-handle-message', 'event-db-append-operation', desc)
         .then((reply) => {
-          result.textContent = reply.id ||
-            `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+          if (reply.id) {
+            result.textContent = reply.id
+            ipcRenderer.send(
+              'asynchronous-message', 'event-add-operation'
+            )
+          } else {
+            result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+          }
         })
     }, 100)
   })

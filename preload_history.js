@@ -1,7 +1,7 @@
 const { ipcRenderer } = require('electron/renderer')
 
 window.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('button-render-history').addEventListener('click', () => {
+  function handle_click_show_history() {
     const svg = document.getElementById('svg-history');
     const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
     const hixel_links = svg.getElementsByClassName('hixel-links')[0]
@@ -59,7 +59,16 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         set_operation_in_focus(node)
       })
-  })
+  }
+  document.getElementById('button-render-history').addEventListener('click',
+    handle_click_show_history
+  )
+  ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
+    if (arg === 'event-add-operation') {
+      handle_click_show_history()
+    }
+  })  
+  ipcRenderer.send('asynchronous-message', 'event-register-ipc-render', 'history')
 })
 
 console.log('preload_history.js ready')
