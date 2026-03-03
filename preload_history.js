@@ -36,11 +36,14 @@ window.addEventListener('DOMContentLoaded', () => {
           alert(`ERROR: ${reply.error.message}`)
           return
         }
-        console.log('branches', reply.branches)
-        let cx = 32
-        for (let branch_id in reply.branches) {
-          const branch = reply.branches[branch_id]
-          let cy = 32, r = 16, stroke_width = 4, cy_prior, node
+        if (!(uuid_nil in reply.branches)) {
+          present_operation_id = ''
+          alert(`ERROR: first history branch ${uuid_nil} not found`)
+          return
+        }
+        {
+          const branch = reply.branches[uuid_nil]
+          let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
           for (let i = 0; i < branch.length; ++i) {
             const operation = branch[i]
             node = document.createElementNS(
@@ -75,9 +78,90 @@ window.addEventListener('DOMContentLoaded', () => {
             cy_prior = cy
             cy += 80
           }
-          if (branch_id === uuid_nil) {
-            present_operation_id = node.id
-            set_operation_in_focus(node)
+          present_operation_id = node.id
+          set_operation_in_focus(node)
+        }
+        const sorted_branches = [];
+        for (let branch_id in reply.branches) {
+          if (branch_id === uuid_nil)
+            continue
+          const branch = reply.branches[branch_id]
+          const first_operation = branch[0]
+          const root_operation = first_operation.parameter
+          sorted_branches.push({root_operation, branch})
+        }
+        sorted_branches.sort((a, b) => b.root_operation.localeCompare(a.root_operation))
+        console.log('sorted_branches', sorted_branches)
+        let cx = 32 + 80
+        for (let i = 0; i < sorted_branches.length; ++i) {
+          const {branch, root_operation} = sorted_branches[i]
+          const root_hixel = document.getElementById(root_operation)
+          const node_stroke_color = root_hixel ? '#9DA2A6' : 'red'
+          const root_x = root_hixel ? parseFloat(root_hixel.getAttribute('cx')) : 0
+          const root_y = root_hixel ? parseFloat(root_hixel.getAttribute('cy')) : 0
+          let cy = root_hixel ? root_y + 80 : 32,
+            r = 16, stroke_width = 4, cy_prior, node
+          for (let i = 0; i < branch.length; ++i) {
+            const operation = branch[i]
+            node = document.createElementNS(
+              'http://www.w3.org/2000/svg', 'circle'
+            );
+            node.id = operation.id
+            node.classList.add('hixel-selectable')
+            node.setAttribute('cx', cx)
+            node.setAttribute('cy', cy)
+            node.setAttribute('r', r)
+            node.setAttribute('stroke-width', stroke_width)
+            node.setAttribute('stroke', node_stroke_color)
+            node.setAttribute('fill', '#1C2333')
+            node.addEventListener('click', (event) => {
+              set_operation_in_focus(event.target)
+            })
+            hixel_bodies.append(node)
+            if (i > 0) {
+              const link = document.createElementNS(
+                'http://www.w3.org/2000/svg', 'line'
+              );
+              link.setAttribute('x1', cx)
+              link.setAttribute('y1', cy_prior + r + stroke_width + 1)
+              link.setAttribute('x2', cx)
+              link.setAttribute('y2', cy - r - 5*stroke_width)
+              link.setAttribute('stroke-width', stroke_width)
+              link.setAttribute('stroke', '#9DA2A6')
+              link.setAttribute('marker-start', 'url(#marker_trace_start)')
+              link.setAttribute('marker-end', 'url(#marker_trace_end)')
+              hixel_links.append(link)
+            }
+            cy_prior = cy
+            cy += 80
+          }
+          if (root_hixel) {
+            {
+              const link = document.createElementNS(
+                'http://www.w3.org/2000/svg', 'line'
+              );
+              link.setAttribute('x1', root_x + r + stroke_width + 1)
+              link.setAttribute('y1', root_y)
+              link.setAttribute('x2', cx)
+              link.setAttribute('y2', root_y)
+              link.setAttribute('stroke-width', stroke_width)
+              link.setAttribute('stroke', '#9DA2A6')
+              link.setAttribute('marker-start', 'url(#marker_trace_start)')
+              hixel_links.append(link)
+            }
+            {
+              const link = document.createElementNS(
+                'http://www.w3.org/2000/svg', 'line'
+              );
+              link.setAttribute('x1', cx)
+              link.setAttribute('y1', root_y)
+              link.setAttribute('x2', cx)
+              link.setAttribute('y2', root_y + 80 - r - 5*stroke_width)
+              link.setAttribute('stroke-width', stroke_width)
+              link.setAttribute('stroke', '#9DA2A6')
+              link.setAttribute('marker-end', 'url(#marker_trace_end)')
+              hixel_links.append(link)
+            }
           }
           cx += 80
         }
