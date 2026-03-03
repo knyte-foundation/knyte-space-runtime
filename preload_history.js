@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron/renderer')
+let present_operation_id;
 
 window.addEventListener('DOMContentLoaded', () => {
   function handle_click_show_history() {
@@ -14,7 +15,10 @@ window.addEventListener('DOMContentLoaded', () => {
             const prior_node = document.getElementById(prior_id)
             prior_node.setAttribute('fill', '#1C2333')
           }
-          node.setAttribute('fill', '#FFB266')
+          const selection_color = node.id === present_operation_id
+            ? '#FFB266'
+            : '#F2AAEC'
+          node.setAttribute('fill', selection_color)
           svg.dataset.operation_in_focus = node.id
           ipcRenderer.send(
             'asynchronous-message', 'event-set-operation-in-focus', node.id
@@ -57,6 +61,7 @@ window.addEventListener('DOMContentLoaded', () => {
           cy_prior = cy
           cy += 80
         }
+        present_operation_id = node.id
         set_operation_in_focus(node)
       })
   }
