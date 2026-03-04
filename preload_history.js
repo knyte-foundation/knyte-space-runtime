@@ -3,7 +3,7 @@ const uuid_nil = '00000000-0000-0000-0000-000000000000'
 // TODO: figure out how to use proper module instead
 // for now I can't include uuid to preload process, have no idea why
   // const { NIL: uuid_nil } = require('uuid')
-let present_operation_id;
+let present_operation_ids = {};
 
 window.addEventListener('DOMContentLoaded', () => {
   function handle_click_show_history() {
@@ -20,7 +20,7 @@ window.addEventListener('DOMContentLoaded', () => {
             const prior_node = document.getElementById(prior_id)
             prior_node.setAttribute('fill', '#1C2333')
           }
-          const is_present = node.id === present_operation_id
+          const is_present = node.id in present_operation_ids
           const selection_color = is_present ? '#FFB266' : '#F2AAEC'
           node.setAttribute('fill', selection_color)
           svg.dataset.operation_in_focus = node.id
@@ -31,13 +31,14 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         hixel_bodies.innerHTML = ''
         hixel_links.innerHTML = ''
+        let default_operation_in_focus
         if (reply.error) {
-          present_operation_id = ''
+          present_operation_ids = {}
           alert(`ERROR: ${reply.error.message}`)
           return
         }
         if (!(uuid_nil in reply.branches)) {
-          present_operation_id = ''
+          present_operation_ids = {}
           alert(`ERROR: first history branch ${uuid_nil} not found`)
           return
         }
@@ -78,8 +79,8 @@ window.addEventListener('DOMContentLoaded', () => {
             cy_prior = cy
             cy += 80
           }
-          present_operation_id = node.id
-          set_operation_in_focus(node)
+          present_operation_ids[node.id] = true
+          default_operation_in_focus = node
         }
         const sorted_branches = [];
         for (let branch_id in reply.branches) {
@@ -135,6 +136,7 @@ window.addEventListener('DOMContentLoaded', () => {
             cy_prior = cy
             cy += 80
           }
+          present_operation_ids[node.id] = true
           if (root_hixel) {
             {
               const link = document.createElementNS(
@@ -165,6 +167,7 @@ window.addEventListener('DOMContentLoaded', () => {
           }
           cx += 80
         }
+        default_operation_in_focus && set_operation_in_focus(default_operation_in_focus)
       })
   }
   document.getElementById('button-render-history').addEventListener('click',
