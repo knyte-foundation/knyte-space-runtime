@@ -202,7 +202,8 @@ window.addEventListener('DOMContentLoaded', () => {
     handle_click_show_history
   )
   document.getElementById('button-add-history-branch').addEventListener('click', () => {
-    const svg = document.getElementById('svg-history');
+    const svg = document.getElementById('svg-history')
+    const result = document.getElementById('result-add-history-branch')
     const root_operation_id = svg.dataset.operation_in_focus
     const root_branch_id = svg.dataset.history_branch_in_focus
     ipcRenderer
@@ -215,9 +216,9 @@ window.addEventListener('DOMContentLoaded', () => {
           ipcRenderer.send(
             'asynchronous-message', 'event-add-history-branch'
           )
-          alert(`History branch ${reply.id} added`)
+          result.textContent = `History branch ${reply.id} added`
         } else {
-          alert(`ERROR: ${reply.error ? reply.error.message : 'unknown'}`)
+          result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
         }
       })
   })
