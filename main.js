@@ -242,14 +242,6 @@ app.whenReady().then(() => {
     } else if (arg === 'event-db-show-contents') {
       return db.prepare('SELECT * FROM contents').all()
     } else if (arg === 'event-db-add-operation') {
-      if (!is_table_exist(first_optree_table_name).exists)
-        return {error: {
-          code: `history branch ${first_optree_table_name} not found`,
-          message: `can't add new operation to history because branch ${
-            first_optree_table_name
-          } not found`,
-          stack: 'not available',
-        }}
       const {
         command, target, parameter,
         history_branch_in_focus, operation_in_focus
