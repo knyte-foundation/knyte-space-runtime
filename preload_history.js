@@ -11,7 +11,6 @@ window.addEventListener('DOMContentLoaded', () => {
     const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
     const hixel_links = svg.getElementsByClassName('hixel-links')[0]
     ipcRenderer
-      //.invoke('invoke-handle-message', 'event-db-show-history')
       .invoke('invoke-handle-message', 'event-db-get-history-branches')
       .then((reply) => {
         function set_operation_in_focus(node) {
