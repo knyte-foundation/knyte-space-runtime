@@ -59,12 +59,15 @@ window.addEventListener('DOMContentLoaded', () => {
   })
   document.getElementById('button-add-operation').addEventListener('click', () => {
     const result = document.getElementById('result-add-operation')
+    
+    const focused_branch_id = document.getElementById('input-focused-branch-id').value
     const last_operation_id = document.getElementById('input-last-operation-id').value
     result.textContent = 'loading...'
     const desc = {
       command: document.getElementById('select-operation-command').value,
       target: document.getElementById('input-operation-target').value,
       parameter: document.getElementById('input-operation-parameter').value,
+      history_branch_in_focus: focused_branch_id || null,
       operation_in_focus: last_operation_id || null,
     }
     setTimeout(() => {

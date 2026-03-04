@@ -250,7 +250,10 @@ app.whenReady().then(() => {
           } not found`,
           stack: 'not available',
         }}
-      const {command, target, parameter, operation_in_focus} = arg2
+      const {
+        command, target, parameter,
+        history_branch_in_focus, operation_in_focus
+      } = arg2
       if (operation_in_focus)
         return {error: {
           code: 'db is in read-only mode',
@@ -259,8 +262,14 @@ app.whenReady().then(() => {
           }`,
           stack: 'not available',
         }}
+      if (!history_branch_in_focus)
+        return {error: {
+          code: 'history branch not specified',
+          message: `can't add new operation to history because branch not specified`,
+          stack: 'not available',
+        }}
       const id = uuidv7()
-      return add_operation(first_optree_table_id, {id, command, target, parameter})
+      return add_operation(history_branch_in_focus, {id, command, target, parameter})
     } else if (arg === 'event-db-show-history') {
       if (!is_table_exist(first_optree_table_name).exists)
         return {error: {
