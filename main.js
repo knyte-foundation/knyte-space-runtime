@@ -265,7 +265,6 @@ app.whenReady().then(() => {
     } else if (arg === 'event-db-get-history-line') {
       let root_branch = arg2
       let root_operation = arg3
-	  console.log('get history line for branch', root_branch, 'operation', root_operation)
       const line = []
       const branch_sequence = []
       while (true) {
@@ -292,7 +291,6 @@ app.whenReady().then(() => {
           return {error: {code, message, stack}}
         }
       }
-	  console.log('branch_sequence', branch_sequence)
       branch_sequence.reverse()
       for (let i = 0; i < branch_sequence.length; ++i) {
         const {root_operation, operations} = branch_sequence[i]
@@ -303,7 +301,6 @@ app.whenReady().then(() => {
             break
         }
       }
-	  console.log('line', line)
       return {line}
     } else if (arg === 'event-db-get-history-branches') {
       let branch_names
