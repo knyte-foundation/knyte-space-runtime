@@ -24,9 +24,10 @@ window.addEventListener('DOMContentLoaded', () => {
           const selection_color = is_present ? '#FFB266' : '#F2AAEC'
           node.setAttribute('fill', selection_color)
           svg.dataset.operation_in_focus = node.id
+          svg.dataset.history_branch_in_focus = node.dataset.history_branch_id
           ipcRenderer.send(
             'asynchronous-message', 'event-set-operation-in-focus',
-            node.id, is_present
+            node.id, is_present, node.dataset.history_branch_id
           )
         }
         hixel_bodies.innerHTML = ''
@@ -43,7 +44,8 @@ window.addEventListener('DOMContentLoaded', () => {
           return
         }
         {
-          const branch = reply.branches[uuid_nil]
+          const branch_id = uuid_nil // first branch id
+          const branch = reply.branches[branch_id]
           let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
           for (let i = 0; i < branch.length; ++i) {
             const operation = branch[i]
@@ -51,6 +53,7 @@ window.addEventListener('DOMContentLoaded', () => {
               'http://www.w3.org/2000/svg', 'circle'
             );
             node.id = operation.id
+            node.dataset.history_branch_id = branch_id
             node.classList.add('hixel-selectable')
             node.setAttribute('cx', cx)
             node.setAttribute('cy', cy)
@@ -89,13 +92,13 @@ window.addEventListener('DOMContentLoaded', () => {
           const branch = reply.branches[branch_id]
           const first_operation = branch[0]
           const root_operation = first_operation.parameter
-          sorted_branches.push({root_operation, branch})
+          sorted_branches.push({root_operation, branch, branch_id})
         }
         sorted_branches.sort((a, b) => b.root_operation.localeCompare(a.root_operation))
         console.log('sorted_branches', sorted_branches)
         let cx = 32 + 80
         for (let i = 0; i < sorted_branches.length; ++i) {
-          const {branch, root_operation} = sorted_branches[i]
+          const {root_operation, branch, branch_id} = sorted_branches[i]
           const root_hixel = document.getElementById(root_operation)
           const node_stroke_color = root_hixel ? '#9DA2A6' : 'red'
           const root_x = root_hixel ? parseFloat(root_hixel.getAttribute('cx')) : 0
@@ -108,6 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
               'http://www.w3.org/2000/svg', 'circle'
             );
             node.id = operation.id
+            node.dataset.history_branch_id = branch_id
             node.classList.add('hixel-selectable')
             node.setAttribute('cx', cx)
             node.setAttribute('cy', cy)
@@ -176,7 +180,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('button-add-history-branch').addEventListener('click', () => {
     const svg = document.getElementById('svg-history');
     const root_operation_id = svg.dataset.operation_in_focus
-    const root_branch_id = null
+    const root_branch_id = svg.dataset.history_branch_in_focus
     ipcRenderer
       .invoke(
         'invoke-handle-message', 'event-db-add-history-branch',

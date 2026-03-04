@@ -303,7 +303,7 @@ app.whenReady().then(() => {
     } else if (arg === 'event-db-add-history-branch') {
       const root_branch_id = arg2 || uuid_nil
       const root_operation_id = arg3 || uuid_nil
-      const new_branch_id = (/* root_branch_id !== uuid_nil && */root_operation_id !== uuid_nil)
+      const new_branch_id = (root_operation_id !== uuid_nil)
         ? uuidv7()
         : uuid_nil
       const result = create_history_branch(new_branch_id, root_branch_id, root_operation_id)
@@ -318,18 +318,19 @@ app.whenReady().then(() => {
     return {uknown_command: true}
   })
 
-  ipcMain.on('asynchronous-message', (event, arg, arg2, arg3) => {
+  ipcMain.on('asynchronous-message', (event, arg, arg2, arg3, arg4) => {
     if (arg === 'event-register-ipc-render') {
       const render_name = arg2
       registered_ipc_renders[render_name] = event.sender
     } else if (arg === 'event-set-operation-in-focus') {
       const operation_in_focus = arg2
       const is_focus_on_present = arg3
+      const history_branch_in_focus = arg4
       // TODO: determine is_focus_on_present based on main and actual db
       const ipc_graph = registered_ipc_renders['graph']
       ipc_graph && ipc_graph.send(
         'asynchronous-reply', 'event-set-operation-in-focus',
-        is_focus_on_present ? '' : operation_in_focus
+        is_focus_on_present ? '' : operation_in_focus, history_branch_in_focus
       )
     } else if (arg === 'event-add-operation') {
       const ipc_history = registered_ipc_renders['history']

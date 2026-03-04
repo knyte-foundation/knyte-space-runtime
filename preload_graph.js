@@ -123,10 +123,12 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('button-show-knytes').addEventListener('click',
     handle_click_show_knytes
   )
-  ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
+  ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3) => {
     if (arg === 'event-set-operation-in-focus') {
       const new_last_operation_id = arg2
+      const new_focused_branch_id = arg3
       document.getElementById('input-last-operation-id').value = new_last_operation_id
+      document.getElementById('input-focused-branch-id').value = new_focused_branch_id
       handle_click_show_knytes()
     }
   })
