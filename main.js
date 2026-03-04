@@ -337,6 +337,11 @@ app.whenReady().then(() => {
       ipc_history && ipc_history.send(
         'asynchronous-reply', 'event-add-operation'
       )
+    } else if (arg === 'event-add-history-branch') {
+      const ipc_history = registered_ipc_renders['history']
+      ipc_history && ipc_history.send(
+        'asynchronous-reply', 'event-add-history-branch'
+      )
     }
   })
 

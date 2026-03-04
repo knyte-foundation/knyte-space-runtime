@@ -85,20 +85,40 @@ window.addEventListener('DOMContentLoaded', () => {
           present_operation_ids[node.id] = true
           default_operation_in_focus = node
         }
-        const sorted_branches = [];
+        const sorted_branches = {}; // {root_branch: [root_operations]}
         for (let branch_id in reply.branches) {
           if (branch_id === uuid_nil)
             continue
           const branch = reply.branches[branch_id]
           const first_operation = branch[0]
+          const root_branch = first_operation.target
           const root_operation = first_operation.parameter
-          sorted_branches.push({root_operation, branch, branch_id})
+          !(root_branch in sorted_branches) && (sorted_branches[root_branch] = [])
+          sorted_branches[root_branch].push({
+            root_branch, root_operation, branch, branch_id
+          })
         }
-        sorted_branches.sort((a, b) => b.root_operation.localeCompare(a.root_operation))
-        console.log('sorted_branches', sorted_branches)
+        for (let root_branch in sorted_branches)
+          sorted_branches[root_branch].sort((a, b) => {
+            if (a.root_operation < b.root_operation) return 1
+            if (a.root_operation > b.root_operation) return -1
+            return 0
+          })
+        const render_sequence = []
+        function fill_render_sequence(root_branch) {
+          console.log('fill_render_sequence', root_branch)
+          const sequence = sorted_branches[root_branch]
+          for (let i = 0; i < sequence.length; ++i) {
+            const element = sequence[i]
+            render_sequence.push(element)
+            if (element.branch_id in sorted_branches)
+              fill_render_sequence(element.branch_id)
+          }
+        }
+        fill_render_sequence(uuid_nil)
         let cx = 32 + 80
-        for (let i = 0; i < sorted_branches.length; ++i) {
-          const {root_operation, branch, branch_id} = sorted_branches[i]
+        for (let i = 0; i < render_sequence.length; ++i) {
+          const {root_operation, branch, branch_id} = render_sequence[i]
           const root_hixel = document.getElementById(root_operation)
           const node_stroke_color = root_hixel ? '#9DA2A6' : 'red'
           const root_x = root_hixel ? parseFloat(root_hixel.getAttribute('cx')) : 0
@@ -171,7 +191,8 @@ window.addEventListener('DOMContentLoaded', () => {
           }
           cx += 80
         }
-        default_operation_in_focus && set_operation_in_focus(default_operation_in_focus)
+        if (default_operation_in_focus)
+          set_operation_in_focus(default_operation_in_focus)
       })
   }
   document.getElementById('button-render-history').addEventListener('click',
@@ -187,15 +208,21 @@ window.addEventListener('DOMContentLoaded', () => {
         root_branch_id, root_operation_id
       )
       .then((reply) => {
-        if (!reply.id) {
+        if (reply.id) {
+          ipcRenderer.send(
+            'asynchronous-message', 'event-add-history-branch'
+          )
+          alert(`History branch ${reply.id} added`)
+        } else {
           alert(`ERROR: ${reply.error ? reply.error.message : 'unknown'}`)
-          return
         }
-        alert(`History branch ${reply.id} added`)
       })
   })
   ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
     if (arg === 'event-add-operation') {
+      handle_click_show_history()
+    }
+    else if (arg === 'event-add-history-branch') {
       handle_click_show_history()
     }
   })
