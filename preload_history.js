@@ -23,6 +23,7 @@ window.addEventListener('DOMContentLoaded', () => {
           const is_present = node.id in present_operation_ids
           const selection_color = is_present ? '#FFB266' : '#F2AAEC'
           node.setAttribute('fill', selection_color)
+          svg.dataset.operation_is_present = is_present
           svg.dataset.operation_in_focus = node.id
           svg.dataset.history_branch_in_focus = node.dataset.history_branch_id
           ipcRenderer.send(
@@ -33,7 +34,8 @@ window.addEventListener('DOMContentLoaded', () => {
         hixel_bodies.innerHTML = ''
         hixel_links.innerHTML = ''
         present_operation_ids = {}
-        let default_operation_in_focus
+        let default_operation_in_focus_id
+        const present_operations_in_branches = {}
         if (reply.error) {
           alert(`ERROR: ${reply.error.message}`)
           return
@@ -82,7 +84,8 @@ window.addEventListener('DOMContentLoaded', () => {
             cy += 80
           }
           present_operation_ids[node.id] = true
-          default_operation_in_focus = node
+          present_operations_in_branches[branch_id] = node.id
+          default_operation_in_focus_id = node.id
         }
         const sorted_branches = {}; // {root_branch: [root_operations]}
         for (let branch_id in reply.branches) {
@@ -159,7 +162,6 @@ window.addEventListener('DOMContentLoaded', () => {
             cy_prior = cy
             cy += 80
           }
-          present_operation_ids[node.id] = true
           if (root_hixel) {
             {
               const link = document.createElementNS(
@@ -188,14 +190,24 @@ window.addEventListener('DOMContentLoaded', () => {
               hixel_links.append(link)
             }
           }
+          present_operation_ids[node.id] = true
+          present_operations_in_branches[branch_id] = node.id
           cx += 80
         }
-        const prior_operation_in_focus = svg.dataset.operation_in_focus
-          ? document.getElementById(svg.dataset.operation_in_focus)
-          : null
-        const initial_operation_in_focus = prior_operation_in_focus || default_operation_in_focus
-        if (initial_operation_in_focus)
-          set_operation_in_focus(initial_operation_in_focus)
+        const prior_operation_in_focus = svg.dataset.operation_in_focus || null
+        const prior_branch_in_focus = svg.dataset.history_branch_in_focus
+        const prior_is_present = svg.dataset.operation_is_present
+        let initial_operation_in_focus
+        if (!prior_operation_in_focus)
+          initial_operation_in_focus = default_operation_in_focus_id
+        else if (prior_is_present !== 'true')
+          initial_operation_in_focus = prior_operation_in_focus
+        else
+          initial_operation_in_focus = present_operations_in_branches[prior_branch_in_focus]
+        if (initial_operation_in_focus) {
+          const node = document.getElementById(initial_operation_in_focus)
+          node && set_operation_in_focus(node)
+        }
       })
   }
   document.getElementById('button-render-history').addEventListener('click',
