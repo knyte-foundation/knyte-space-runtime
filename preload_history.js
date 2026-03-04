@@ -32,14 +32,13 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         hixel_bodies.innerHTML = ''
         hixel_links.innerHTML = ''
+        present_operation_ids = {}
         let default_operation_in_focus
         if (reply.error) {
-          present_operation_ids = {}
           alert(`ERROR: ${reply.error.message}`)
           return
         }
         if (!(uuid_nil in reply.branches)) {
-          present_operation_ids = {}
           alert(`ERROR: first history branch ${uuid_nil} not found`)
           return
         }
@@ -191,8 +190,12 @@ window.addEventListener('DOMContentLoaded', () => {
           }
           cx += 80
         }
-        if (default_operation_in_focus)
-          set_operation_in_focus(default_operation_in_focus)
+        const prior_operation_in_focus = svg.dataset.operation_in_focus
+          ? document.getElementById(svg.dataset.operation_in_focus)
+          : null
+        const initial_operation_in_focus = prior_operation_in_focus || default_operation_in_focus
+        if (initial_operation_in_focus)
+          set_operation_in_focus(initial_operation_in_focus)
       })
   }
   document.getElementById('button-render-history').addEventListener('click',
