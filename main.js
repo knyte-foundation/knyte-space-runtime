@@ -141,7 +141,7 @@ function create_history_branch(
     `).run()
     const id = uuidv7()
     add_operation(history_branch_id, {
-      id, command: 'create branch',
+      id, command: '019cb3d8-82be-7c3f-b40f-a2534c42314a', // create branch
       target: root_branch_id, parameter: root_operation_id
     })
     console.log(`Table "${history_branch_name}" created successfully.`)
