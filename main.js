@@ -262,18 +262,49 @@ app.whenReady().then(() => {
         }}
       const id = uuidv7()
       return add_operation(history_branch_in_focus, {id, command, target, parameter})
-    } else if (arg === 'event-db-show-history') {
-      if (!is_table_exist(first_optree_table_name).exists)
-        return {error: {
-          code: `history branch ${first_optree_table_name} not found`,
-          message: `can't get history because branch ${
-            first_optree_table_name
-          } not found`,
-          stack: 'not available',
-        }}
-      return db.prepare(
-        `SELECT * FROM '${first_optree_table_name}'`
-      ).all()
+    } else if (arg === 'event-db-get-history-line') {
+      let root_branch = arg2
+      let root_operation = arg3
+	  console.log('get history line for branch', root_branch, 'operation', root_operation)
+      const line = []
+      const branch_sequence = []
+      while (true) {
+        const optree_name = get_optree_name(root_branch)
+        try {
+          const operations = db.prepare(
+            `SELECT * FROM '${optree_name}'`
+          ).all()
+          const first = operations[0]
+          if (first.command !== '019cb3d8-82be-7c3f-b40f-a2534c42314a') { // create branch
+            return {error: {
+              code: 'first operation command in history branch must be "create branch"',
+              message: 'can\'t get history line because first operation command is not "create branch"',
+              stack: 'not available'
+            }}
+          }
+          branch_sequence.push({root_branch, root_operation, operations})
+          root_branch = first.target
+          root_operation = first.parameter
+          if (root_branch === uuid_nil && root_operation === uuid_nil)
+            break
+        } catch (error) {
+          const {code, message, stack} = error
+          return {error: {code, message, stack}}
+        }
+      }
+	  console.log('branch_sequence', branch_sequence)
+      branch_sequence.reverse()
+      for (let i = 0; i < branch_sequence.length; ++i) {
+        const {root_operation, operations} = branch_sequence[i]
+        for (let j = 0; j < operations.length; ++j) {
+          const operation = operations[j]
+          line.push(operation)
+          if (operation.id === root_operation)
+            break
+        }
+      }
+	  console.log('line', line)
+      return {line}
     } else if (arg === 'event-db-get-history-branches') {
       let branch_names
       try {

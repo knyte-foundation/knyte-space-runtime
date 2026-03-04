@@ -87,19 +87,23 @@ window.addEventListener('DOMContentLoaded', () => {
   })
   function handle_click_show_knytes() {
     const result = document.getElementById('result-show-knytes')
+    const focused_branch_id = document.getElementById('input-focused-branch-id').value
     const last_operation_id = document.getElementById('input-last-operation-id').value
     result.textContent = 'loading...'
     setTimeout(() => {
       ipcRenderer
-        .invoke('invoke-handle-message', 'event-db-show-history')
+        .invoke(
+          'invoke-handle-message', 'event-db-get-history-line',
+          focused_branch_id, last_operation_id
+        )
         .then((reply) => {
-          if (reply.error) {
-            result.textContent = `ERROR: ${reply.error.message}`
+          if (!reply.line) {
+            result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
             return
           }
           const knytes = {};
-          for (let i = 0; i < reply.length; ++i) {
-            const {id, command, target, parameter} = reply[i]
+          for (let i = 0; i < reply.line.length; ++i) {
+            const {id, command, target, parameter} = reply.line[i]
             if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
               // create knyte
               !knytes[target] && (knytes[target] = {})
@@ -116,8 +120,6 @@ window.addEventListener('DOMContentLoaded', () => {
               // set knyte content
               knytes[target] && (knytes[target].content = parameter)
             }
-            if (id === last_operation_id)
-              break
           }
           result.textContent = JSON.stringify(knytes, null, '\t')
         })
