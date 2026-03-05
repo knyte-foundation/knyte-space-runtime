@@ -111,6 +111,17 @@ function is_table_exist(name) {
     return {exists: false, error: {code, message, stack}}
   }
 }
+function is_row_exist(name, id) {
+  try {
+    const result = db.prepare(`
+      SELECT id FROM '${name}' WHERE id='${id}';
+    `).all()
+    return {exists: result && result.length > 0}
+  } catch (error) {
+    const {code, message, stack} = error
+    return {exists: false, error: {code, message, stack}}
+  }
+}
 function add_operation(history_branch_id, desc) {
   const table_name = get_optree_name(history_branch_id)
   const {id, command, target, parameter} = desc
@@ -335,6 +346,34 @@ app.whenReady().then(() => {
       const new_branch_id = (root_operation_id !== uuid_nil)
         ? uuidv7()
         : uuid_nil
+      if (new_branch_id === uuid_nil) {
+        if (root_branch_id !== uuid_nil || root_operation_id !== uuid_nil)
+          return {error: {
+            code: `root branch and root operation must be ${uuid_nil}`,
+            message: `can't add branch because root branch or root operation is not ${uuid_nil}`,
+            stack: 'not available'
+          }}
+      } else {
+        const {exists, error} = is_row_exist(
+          get_optree_name(root_branch_id), root_operation_id
+        )
+        if (error)
+          return {error}
+        if (!exists)
+          return {error: {
+            code: `root operation ${
+              root_operation_id
+            } not found in branch ${
+              root_branch_id
+            }`,
+            message: `can't add branch for not existing operation ${
+              root_operation_id
+            } from branch ${
+              root_branch_id
+            }`,
+            stack: 'not available'
+          }}
+      }
       const result = create_history_branch(new_branch_id, root_branch_id, root_operation_id)
       if (result.id)
         return {id: result.id}
