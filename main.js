@@ -69,10 +69,13 @@ function createAllWindows() {
 
 const uuid_length = uuid_nil.length;
 const first_optree_table_id = uuid_nil
-function get_optree_name(id) {
+function optree_id_to_name(id) {
   return `optree_${id}`
 }
-const first_optree_table_name = get_optree_name(first_optree_table_id)
+function optree_name_to_id(name) {
+  return name.split('optree_')[1]
+}
+const first_optree_table_name = optree_id_to_name(first_optree_table_id)
 function connect_db() {
   db = require("better-sqlite3")(db_path, {
     verbose: console.log,
@@ -123,7 +126,7 @@ function is_row_exist(name, id) {
   }
 }
 function add_operation(history_branch_id, desc) {
-  const table_name = get_optree_name(history_branch_id)
+  const table_name = optree_id_to_name(history_branch_id)
   const {id, command, target, parameter} = desc
   try {
     db.prepare(
@@ -140,7 +143,7 @@ function add_operation(history_branch_id, desc) {
 function create_history_branch(
   history_branch_id, root_branch_id, root_operation_id
 ) {
-  const history_branch_name = get_optree_name(history_branch_id)
+  const history_branch_name = optree_id_to_name(history_branch_id)
   try {
     db.prepare(`
       CREATE TABLE '${history_branch_name}' (
@@ -156,7 +159,7 @@ function create_history_branch(
       target: root_branch_id, parameter: root_operation_id
     })
     console.log(`Table "${history_branch_name}" created successfully.`)
-    return {id: history_branch_name}
+    return {id: history_branch_id}
   } catch (error) {
     console.error(`Error creating table "${history_branch_name}"`, error)
     const {code, message, stack} = error
@@ -272,7 +275,7 @@ app.whenReady().then(() => {
       let operation_in_present;
       try {
         const result = db.prepare(
-          `SELECT id FROM '${get_optree_name(history_branch_in_focus)}' ORDER BY id DESC LIMIT 1;`
+          `SELECT id FROM '${optree_id_to_name(history_branch_in_focus)}' ORDER BY id DESC LIMIT 1;`
         ).get()
         console.log('operation_in_present', result)
         operation_in_present = result.id
@@ -298,10 +301,9 @@ app.whenReady().then(() => {
       const line = []
       const branch_sequence = []
       while (true) {
-        const optree_name = get_optree_name(root_branch)
         try {
           const operations = db.prepare(
-            `SELECT * FROM '${optree_name}'`
+            `SELECT * FROM '${optree_id_to_name(root_branch)}'`
           ).all()
           const first = operations[0]
           if (first.command !== '019cb3d8-82be-7c3f-b40f-a2534c42314a') { // create branch
@@ -374,7 +376,7 @@ app.whenReady().then(() => {
           }}
       } else {
         const {exists, error} = is_row_exist(
-          get_optree_name(root_branch_id), root_operation_id
+          optree_id_to_name(root_branch_id), root_operation_id
         )
         if (error)
           return {error}

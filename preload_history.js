@@ -5,6 +5,12 @@ const uuid_nil = '00000000-0000-0000-0000-000000000000'
   // const { NIL: uuid_nil } = require('uuid')
 let present_operation_ids = {};
 
+function optree_id_to_name(id) {
+  return `optree_${id}`
+}
+function optree_name_to_id(name) {
+  return name.split('optree_')[1]
+}
 window.addEventListener('DOMContentLoaded', () => {
   function handle_click_show_history() {
     const svg = document.getElementById('svg-history');
@@ -230,7 +236,7 @@ window.addEventListener('DOMContentLoaded', () => {
           ipcRenderer.send(
             'asynchronous-message', 'event-add-history-branch'
           )
-          result.textContent = `optree_${reply.id}`
+          result.textContent = optree_id_to_name(reply.id)
         } else {
           result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
         }
