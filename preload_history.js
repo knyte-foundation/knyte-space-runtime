@@ -22,12 +22,14 @@ window.addEventListener('DOMContentLoaded', () => {
           const is_present = node.id in present_operation_ids
           const selection_color = is_present ? '#FFB266' : '#F2AAEC'
           node.setAttribute('fill', selection_color)
+          const history_branch_in_focus = node.dataset.history_branch_id
+          const operation_in_focus = node.id
+          svg.dataset.history_branch_in_focus = history_branch_in_focus
           svg.dataset.operation_is_present = is_present
-          svg.dataset.operation_in_focus = node.id
-          svg.dataset.history_branch_in_focus = node.dataset.history_branch_id
+          svg.dataset.operation_in_focus = operation_in_focus
           ipcRenderer.send(
             'asynchronous-message', 'event-set-operation-in-focus',
-            node.id, is_present, node.dataset.history_branch_id
+            history_branch_in_focus, operation_in_focus, is_present
           )
         }
         hixel_bodies.innerHTML = ''

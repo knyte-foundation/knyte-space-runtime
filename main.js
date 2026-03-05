@@ -257,18 +257,37 @@ app.whenReady().then(() => {
         command, target, parameter,
         history_branch_in_focus, operation_in_focus
       } = arg2
-      if (operation_in_focus)
-        return {error: {
-          code: 'db is in read-only mode',
-          message: `can't add new operation to history because operation in focus = ${
-            operation_in_focus
-          }`,
-          stack: 'not available',
-        }}
       if (!history_branch_in_focus)
         return {error: {
           code: 'history branch not specified',
           message: `can't add new operation to history because branch not specified`,
+          stack: 'not available',
+        }}
+      if (!operation_in_focus)
+        return {error: {
+          code: 'operation in focus not specified',
+          message: `can't add new operation to history because operation in focus not specified`,
+          stack: 'not available',
+        }}
+      let operation_in_present;
+      try {
+        const result = db.prepare(
+          `SELECT id FROM '${get_optree_name(history_branch_in_focus)}' ORDER BY id DESC LIMIT 1;`
+        ).get()
+        console.log('operation_in_present', result)
+        operation_in_present = result.id
+      } catch (error) {
+        const {code, message, stack} = error
+        return {error: {code, message, stack}}
+      }
+      if (operation_in_focus !== operation_in_present)
+        return {error: {
+          code: 'db is in read-only mode',
+          message: `can't add new operation to history because operation in focus ${
+            operation_in_focus
+          } !== operation in present ${
+            operation_in_present
+          }`,
           stack: 'not available',
         }}
       const id = uuidv7()
@@ -391,14 +410,14 @@ app.whenReady().then(() => {
       const render_name = arg2
       registered_ipc_renders[render_name] = event.sender
     } else if (arg === 'event-set-operation-in-focus') {
-      const operation_in_focus = arg2
-      const is_focus_on_present = arg3
-      const history_branch_in_focus = arg4
+      const history_branch_in_focus = arg2
+      const operation_in_focus = arg3
+      const is_focus_on_present = arg4
       // TODO: determine is_focus_on_present based on main and actual db
       const ipc_graph = registered_ipc_renders['graph']
       ipc_graph && ipc_graph.send(
         'asynchronous-reply', 'event-set-operation-in-focus',
-        is_focus_on_present ? '' : operation_in_focus, history_branch_in_focus
+        history_branch_in_focus, operation_in_focus, is_focus_on_present
       )
     } else if (arg === 'event-add-operation') {
       const ipc_history = registered_ipc_renders['history']
