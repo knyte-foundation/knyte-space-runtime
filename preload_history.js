@@ -87,6 +87,7 @@ window.addEventListener('DOMContentLoaded', () => {
           default_operation_in_focus_id = node.id
         }
         const sorted_branches = {}; // {root_branch: [root_operations]}
+        sorted_branches[uuid_nil] = []
         for (let branch_id in reply.branches) {
           if (branch_id === uuid_nil)
             continue
