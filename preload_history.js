@@ -227,7 +227,7 @@ window.addEventListener('DOMContentLoaded', () => {
           ipcRenderer.send(
             'asynchronous-message', 'event-add-history-branch'
           )
-          result.textContent = `History branch ${reply.id} added`
+          result.textContent = `optree_${reply.id}`
         } else {
           result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
         }
