@@ -7,7 +7,7 @@ body {
 h1 {
   color: #8AD6F2;
 }
-button {
+button, input {
   font-family: meslo;
 }
 #svg-history {
