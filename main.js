@@ -67,14 +67,12 @@ function createAllWindows() {
   create_space_window()
 }
 
-const first_optree_table_id = uuid_nil
 function optree_id_to_name(id) {
   return `optree_${id}`
 }
 function optree_name_to_id(name) {
   return name.split('optree_')[1]
 }
-const first_optree_table_name = optree_id_to_name(first_optree_table_id)
 function connect_db() {
   db = require("better-sqlite3")(db_path, {
     verbose: console.log,
@@ -343,10 +341,8 @@ app.whenReady().then(() => {
         `).all()
         if (branch_names.length === 0)
           return {error: {
-            code: `history branch ${first_optree_table_name} not found`,
-            message: `can't get history because branch ${
-              first_optree_table_name
-            } not found`,
+            code: `history have no branches`,
+            message: `can't get history because it has no branches`,
             stack: 'not available',
           }}
       } catch (error) {

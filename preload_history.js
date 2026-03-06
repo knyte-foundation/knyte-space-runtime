@@ -47,11 +47,7 @@ window.addEventListener('DOMContentLoaded', () => {
           alert(`ERROR: ${reply.error.message}`)
           return
         }
-        if (!(uuid_nil in reply.branches)) {
-          alert(`ERROR: first history branch ${uuid_nil} not found`)
-          return
-        }
-        {
+        if (uuid_nil in reply.branches) {
           const branch_id = uuid_nil // first branch id
           const branch = reply.branches[branch_id]
           let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
