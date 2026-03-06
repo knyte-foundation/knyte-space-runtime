@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain } = require('electron/main')
 const { v7: uuidv7, NIL: uuid_nil } = require('uuid')
+const first_history_branch_id = uuid_nil
 const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
@@ -363,8 +364,8 @@ app.whenReady().then(() => {
       const root_operation_id = arg3 || uuid_nil
       const new_branch_id = (root_operation_id !== uuid_nil)
         ? uuidv7()
-        : uuid_nil
-      if (new_branch_id === uuid_nil) {
+        : first_history_branch_id
+      if (new_branch_id === first_history_branch_id) {
         if (root_branch_id !== uuid_nil || root_operation_id !== uuid_nil)
           return {error: {
             code: `root branch and root operation must be ${uuid_nil}`,

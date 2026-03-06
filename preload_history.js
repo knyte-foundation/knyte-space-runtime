@@ -1,8 +1,9 @@
 const { ipcRenderer } = require('electron/renderer')
-const uuid_nil = '00000000-0000-0000-0000-000000000000'
 // TODO: figure out how to use proper module instead
 // for now I can't include uuid to preload process, have no idea why
   // const { NIL: uuid_nil } = require('uuid')
+const uuid_nil = '00000000-0000-0000-0000-000000000000'
+const first_history_branch_id = uuid_nil
 let present_operation_ids = {};
 
 function optree_id_to_name(id) {
@@ -47,8 +48,8 @@ window.addEventListener('DOMContentLoaded', () => {
           alert(`ERROR: ${reply.error.message}`)
           return
         }
-        if (uuid_nil in reply.branches) {
-          const branch_id = uuid_nil // first branch id
+        if (first_history_branch_id in reply.branches) {
+          const branch_id = first_history_branch_id
           const branch = reply.branches[branch_id]
           let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
           for (let i = 0; i < branch.length; ++i) {
@@ -91,9 +92,9 @@ window.addEventListener('DOMContentLoaded', () => {
           default_operation_in_focus_id = node.id
         }
         const sorted_branches = {}; // {root_branch: [root_operations]}
-        sorted_branches[uuid_nil] = []
+        sorted_branches[first_history_branch_id] = []
         for (let branch_id in reply.branches) {
-          if (branch_id === uuid_nil)
+          if (branch_id === first_history_branch_id)
             continue
           const branch = reply.branches[branch_id]
           const first_operation = branch[0]
@@ -121,7 +122,7 @@ window.addEventListener('DOMContentLoaded', () => {
               fill_render_sequence(element.branch_id)
           }
         }
-        fill_render_sequence(uuid_nil)
+        fill_render_sequence(first_history_branch_id)
         let cx = 32 + 80
         for (let i = 0; i < render_sequence.length; ++i) {
           const {root_operation, branch, branch_id} = render_sequence[i]
