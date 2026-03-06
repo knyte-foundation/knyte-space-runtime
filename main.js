@@ -67,7 +67,6 @@ function createAllWindows() {
   create_space_window()
 }
 
-const uuid_length = uuid_nil.length;
 const first_optree_table_id = uuid_nil
 function optree_id_to_name(id) {
   return `optree_${id}`
@@ -87,6 +86,7 @@ function connect_db() {
 
   {
     const table_name = 'contents'
+    const uuid_length = uuid_nil.length;
     try {
       db.prepare(`
         CREATE TABLE IF NOT EXISTS ${table_name} (
@@ -144,6 +144,7 @@ function create_history_branch(
   history_branch_id, root_branch_id, root_operation_id
 ) {
   const history_branch_name = optree_id_to_name(history_branch_id)
+  const uuid_length = uuid_nil.length;
   try {
     db.prepare(`
       CREATE TABLE '${history_branch_name}' (
