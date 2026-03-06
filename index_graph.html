@@ -1,78 +1,79 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link rel="stylesheet" href="node_modules/meslo/meslo.css">
-    <link rel="stylesheet" href="style.css">
-    <title>graph</title>
-  </head>
-  <body>
-    <p>
-      Db table contents
-      <div>
-        <textarea id="input-append-content"></textarea>
-        <button id="button-append-content">
-          append content
-        </button>
-        <span id="result-append-content"></span>
-      </div>
-      <div>
-        <textarea id="input-find-content-by-text"></textarea>
-        <button id="button-find-content-by-text">
-          find content by text
-        </button>
-        <span id="result-find-content-by-text"></span>
-      </div>
-      <div>
-        <input id="input-find-content-by-id" type="text" placeholder="content id" size="38">
-        <button id="button-find-content-by-id">
-          find content by id
-        </button>
-        <textarea id="result-find-content-by-id" disabled></textarea>
-      </div>
-      <div>
-        <button id="button-show-contents">
-          show contents
-        </button>
-      </div>
-      <pre id="result-show-contents"></pre>
-    </p>
-    <p>
-      Db table optree_*
-      <div>
-        <select id="select-operation-command">
-          <option value="0188dd27-0a2a-746a-976b-b705e8b16a1d">create knyte</option>
-          <option value="0188dd27-0d1f-7d9f-8d58-b928173ace6f">remove knyte</option>
-          <option value="0188dd27-0f25-7763-8a72-fcdb42a3432f">set knyte initial</option>
-          <option value="0188dd27-1114-777d-879a-d1b8bd08f08d">set knyte terminal</option>
-          <option value="0188dd27-12f5-732d-b53d-6e9519f5ac29">set knyte content</option>
-        </select>
-        <input id="input-operation-target" type="text" size="36" placeholder="target id">
-        <input id="input-operation-parameter" type="text" size="36" placeholder="parameter id">
-        <button id="button-add-operation">add operation</button>
-        <span id="result-add-operation"></span>
-      </div>
-    </p>
-    <p>
-      Knytes
-      <button id="button-show-knytes">show knytes</button>
-      in focus: 
-      branch
-      <input id="input-focused-branch-id"
-        title="history branch id" placeholder="not specified" size="36" readonly
-      >
-      operation
-      <input id="input-last-operation-id"
-        title="operation id" placeholder="present moment" size="36" readonly
-      >
-      <span id ="result-is-present"></span>
-      time
-      <pre id="result-show-knytes"></pre>
-    </p>
-    
-    <!-- You can also require other files to run in this process -->
-    <script src="./render_graph.js"></script>
-  </body>
+
+<head>
+	<meta charset="UTF-8">
+	<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+	<link rel="stylesheet" href="node_modules/meslo/meslo.css">
+	<link rel="stylesheet" href="style.css">
+	<title>graph</title>
+</head>
+
+<body>
+	<p>
+		Db table contents
+	<div>
+		<textarea id="input-append-content"></textarea>
+		<button id="button-append-content">
+			append content
+		</button>
+		<span id="result-append-content"></span>
+	</div>
+	<div>
+		<textarea id="input-find-content-by-text"></textarea>
+		<button id="button-find-content-by-text">
+			find content by text
+		</button>
+		<span id="result-find-content-by-text"></span>
+	</div>
+	<div>
+		<input id="input-find-content-by-id" type="text" placeholder="content id" size="38">
+		<button id="button-find-content-by-id">
+			find content by id
+		</button>
+		<textarea id="result-find-content-by-id" disabled></textarea>
+	</div>
+	<div>
+		<button id="button-show-contents">
+			show contents
+		</button>
+	</div>
+	<pre id="result-show-contents"></pre>
+	</p>
+	<p>
+		Db table optree_*
+	<div>
+		<select id="select-operation-command">
+			<option value="0188dd27-0a2a-746a-976b-b705e8b16a1d">create knyte</option>
+			<option value="0188dd27-0d1f-7d9f-8d58-b928173ace6f">remove knyte</option>
+			<option value="0188dd27-0f25-7763-8a72-fcdb42a3432f">set knyte initial</option>
+			<option value="0188dd27-1114-777d-879a-d1b8bd08f08d">set knyte terminal</option>
+			<option value="0188dd27-12f5-732d-b53d-6e9519f5ac29">set knyte content</option>
+		</select>
+		<input id="input-operation-target" type="text" size="36" placeholder="target id">
+		<input id="input-operation-parameter" type="text" size="36" placeholder="parameter id">
+		<button id="button-add-operation">add operation</button>
+		<span id="result-add-operation"></span>
+	</div>
+	</p>
+	<p>
+		Knytes
+		<button id="button-show-knytes">show knytes</button>
+		in focus:
+		branch
+		<input id="input-focused-branch-id" title="history branch id" placeholder="not specified"
+			size="36" readonly>
+		operation
+		<input id="input-last-operation-id" title="operation id" placeholder="present moment" size="36"
+			readonly>
+		<span id="result-is-present"></span>
+		time
+	<pre id="result-show-knytes"></pre>
+	</p>
+
+	<!-- You can also require other files to run in this process -->
+	<script src="./render_graph.js"></script>
+</body>
+
 </html>

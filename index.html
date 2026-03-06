@@ -1,55 +1,58 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link rel="stylesheet" href="node_modules/meslo/meslo.css">
-    <link rel="stylesheet" href="style.css">
-    <title>system</title>
-  </head>
-  <body>
-    <h1>knyte.space runtime</h1>
-    <ul>
-      <li>
-        Node.js <span id="node-version"></span>
-      </li>
-      <li>
-        Chromium <span id="chrome-version"></span>
-      </li>
-      <li>
-        Electron <span id="electron-version"></span>
-      </li>
-      <li>
-        Executable root path "<span id="root-path"></span>"
-      </li>
-      <li>
-        DB userdata path "<span id="db-path"></span>"
-      </li>
-      <li>
-        Typical RAM limits: 4 GB for render process, 2 GB for ArrayBuffer
-      </li>
-    </ul>
-    <p>
-      <button id="button-memtest-node">
-        memtest node.js
-      </button>
-      <span id="result-memtest-node"></span>
-      <button id="button-memtest-chromium">
-        memtest chromium
-      </button>
-      <span id="result-memtest-chromium"></span>
-    </p>
-    <p>
-      Spaces
-      <div>
-        <button id="button-add-space">
-          add space
-        </button>
-      </div>
-    </p>
 
-    <!-- You can also require other files to run in this process -->
-    <script src="./renderer.js"></script>
-  </body>
+<head>
+	<meta charset="UTF-8">
+	<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+	<link rel="stylesheet" href="node_modules/meslo/meslo.css">
+	<link rel="stylesheet" href="style.css">
+	<title>system</title>
+</head>
+
+<body>
+	<h1>knyte.space runtime</h1>
+	<ul>
+		<li>
+			Node.js <span id="node-version"></span>
+		</li>
+		<li>
+			Chromium <span id="chrome-version"></span>
+		</li>
+		<li>
+			Electron <span id="electron-version"></span>
+		</li>
+		<li>
+			Executable root path "<span id="root-path"></span>"
+		</li>
+		<li>
+			DB userdata path "<span id="db-path"></span>"
+		</li>
+		<li>
+			Typical RAM limits: 4 GB for render process, 2 GB for ArrayBuffer
+		</li>
+	</ul>
+	<p>
+		<button id="button-memtest-node">
+			memtest node.js
+		</button>
+		<span id="result-memtest-node"></span>
+		<button id="button-memtest-chromium">
+			memtest chromium
+		</button>
+		<span id="result-memtest-chromium"></span>
+	</p>
+	<p>
+		Spaces
+	<div>
+		<button id="button-add-space">
+			add space
+		</button>
+	</div>
+	</p>
+
+	<!-- You can also require other files to run in this process -->
+	<script src="./renderer.js"></script>
+</body>
+
 </html>

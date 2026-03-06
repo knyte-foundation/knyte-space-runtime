@@ -1,20 +1,25 @@
 body {
-  background-color: #1C2333;
-  color: #F5F9FC;
-  font-family: meslo;
-  margin: 32px;
+	background-color: #1C2333;
+	color: #F5F9FC;
+	font-family: meslo;
+	margin: 32px;
 }
+
 h1 {
-  color: #8AD6F2;
+	color: #8AD6F2;
 }
-button, input {
-  font-family: meslo;
+
+button,
+input {
+	font-family: meslo;
 }
+
 #svg-history {
-  background-color: #1C2333; 
-  width: 100%;
-  height: calc(100vh - (32px + 32px) - (24px + 16px) - 6px);
+	background-color: #1C2333;
+	width: 100%;
+	height: calc(100vh - (32px + 32px) - (24px + 16px) - 6px);
 }
+
 .hixel-selectable:hover {
-  filter: drop-shadow(0px 0px 6px silver);
+	filter: drop-shadow(0px 0px 6px silver);
 }

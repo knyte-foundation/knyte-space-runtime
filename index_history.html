@@ -1,65 +1,57 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link rel="stylesheet" href="node_modules/meslo/meslo.css">
-    <link rel="stylesheet" href="style.css">
-    <title>history</title>
-  </head>
-  <body>
-    <dialog id="result-operation-id-dialog">
-      <p>operation id</p>
-      <input id="result-operation-id-text" size="36">
-    </dialog>    
-    <p>
-      <button id="button-render-history">
-        Render history
-      </button>
-      <button id="button-add-history-branch">
-        Add history branch
-      </button>
-      <span id="result-add-history-branch">
-      </span>
-    </p>
-    <div>
-      <svg id="svg-history"
-        version="1.1" xmlns="http://www.w3.org/2000/svg"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-      >
-        <marker id="marker_trace_start"
-          markerWidth="2" markerHeight="4" refX="1" refY="2"
-          orient="auto"
-        >
-          <polygon points="1 0, 1 4" stroke="#9DA2A6">
-          </polygon>
-        </marker>
-        <marker id="marker_trace_end"
-          markerWidth="5" markerHeight="4" refX="0.5" refY="2"
-          orient="auto"
-        >
-          <polygon points="0 0, 5 2, 0 4" fill="#9DA2A6">
-          </polygon>
-        </marker>
-        <g class="steering">
-          <g class="hixel-bodies">
-            <circle
-              cx="100" cy="100" r="30"
-              stroke="red" fill="orange"
-            >
-            </circle>
-          </g>
-          <g class="hixel-links">
-          </g>
-        </g>
-        <g class="positioning">
-          <g class="ghosts"></g>
-        </g>
-      </svg>
-    </div>
 
-    <!-- You can also require other files to run in this process -->
-    <script src="./renderer_history.js"></script>
-  </body>
+<head>
+	<meta charset="UTF-8">
+	<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+	<link rel="stylesheet" href="node_modules/meslo/meslo.css">
+	<link rel="stylesheet" href="style.css">
+	<title>history</title>
+</head>
+
+<body>
+	<dialog id="result-operation-id-dialog">
+		<p>operation id</p>
+		<input id="result-operation-id-text" size="36">
+	</dialog>
+	<p>
+		<button id="button-render-history">
+			Render history
+		</button>
+		<button id="button-add-history-branch">
+			Add history branch
+		</button>
+		<span id="result-add-history-branch">
+		</span>
+	</p>
+	<div>
+		<svg id="svg-history" version="1.1" xmlns="http://www.w3.org/2000/svg"
+			xmlns:xlink="http://www.w3.org/1999/xlink">
+			<marker id="marker_trace_start" markerWidth="2" markerHeight="4" refX="1" refY="2" orient="auto">
+				<polygon points="1 0, 1 4" stroke="#9DA2A6">
+				</polygon>
+			</marker>
+			<marker id="marker_trace_end" markerWidth="5" markerHeight="4" refX="0.5" refY="2" orient="auto">
+				<polygon points="0 0, 5 2, 0 4" fill="#9DA2A6">
+				</polygon>
+			</marker>
+			<g class="steering">
+				<g class="hixel-bodies">
+					<circle cx="100" cy="100" r="30" stroke="red" fill="orange">
+					</circle>
+				</g>
+				<g class="hixel-links">
+				</g>
+			</g>
+			<g class="positioning">
+				<g class="ghosts"></g>
+			</g>
+		</svg>
+	</div>
+
+	<!-- You can also require other files to run in this process -->
+	<script src="./renderer_history.js"></script>
+</body>
+
 </html>
