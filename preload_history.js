@@ -1,9 +1,5 @@
 const { ipcRenderer } = require('electron/renderer')
-// TODO: figure out how to use proper module instead
-// for now I can't include uuid to preload process, have no idea why
-// const { NIL: uuid_nil } = require('uuid')
-const uuid_nil = '00000000-0000-0000-0000-000000000000'
-const first_history_branch_id = uuid_nil
+const first_history_branch_id = ipcRenderer.sendSync('synchronous-message', 'uuid_nil')
 let present_operation_ids = {};
 
 function optree_id_to_name(id) {
