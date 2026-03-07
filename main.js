@@ -7,7 +7,7 @@ const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
 let db, space_window_number = 0, registered_ipc_renders = {}
 
-function create_space_window() {
+function create_space_window(space_id) {
 	const y_offset = (++space_window_number) * 30
 	const space_window = new BrowserWindow({
 		width: 1792,
@@ -17,7 +17,8 @@ function create_space_window() {
 		webPreferences: {
 			preload: path.join(app_root_path, 'preload_space.js'),
 			additionalArguments: [
-				`--window-caption-number=${space_window_number}`
+				`--window-caption-number=${space_window_number}`,
+				`--space_knyte-id=${space_id}`,
 			]
 		}
 	})
@@ -212,9 +213,10 @@ app.whenReady().then(() => {
 			const max_buffer_size = await check_max_memory(true)
 			return { max_engine_size, max_buffer_size }
 		} else if (arg === 'event-windows-add-space') {
+			const space_id = arg2
 			// space
-			create_space_window()
-			return { result: 'space added' }
+			create_space_window(space_id)
+			return { result: `space ${space_id} added` }
 		} else if (arg === 'event-db-append-content') {
 			function append_content(sql, id, content) {
 				try {
