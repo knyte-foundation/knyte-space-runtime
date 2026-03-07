@@ -132,6 +132,18 @@ window.addEventListener('DOMContentLoaded', () => {
 		document.getElementById('result-generate-knit').value =
 			ipcRenderer.sendSync('synchronous-message', 'uuidv7')
 	})
+	document.getElementById('button-get-operation').addEventListener('click', () => {
+		document.getElementById('result-get-operation').textContent = 'not implemented yet'
+	})
+	document.getElementById('button-link').addEventListener('click', () => {
+		document.getElementById('result-link').textContent = 'not implemented yet'
+	})
+	document.getElementById('button-edit-start').addEventListener('click', () => {
+		document.getElementById('input-edit-content').textContent = 'not implemented yet'
+	})
+	document.getElementById('button-edit-submit').addEventListener('click', () => {
+		document.getElementById('result-edit').textContent = 'not implemented yet'
+	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
 		if (arg === 'event-set-operation-in-focus') {
 			const new_focused_branch_id = arg2
