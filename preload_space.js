@@ -1,3 +1,4 @@
+const { ipcRenderer } = require('electron/renderer')
 let space_number = 0, space_id
 const arg1 = `--window-caption-number=`
 const arg2 = `--space_knyte-id=`
@@ -10,7 +11,15 @@ for (let i = 0; i < process.argv.length; ++i) {
 }
 window.addEventListener('DOMContentLoaded', () => {
 	document.title = `${document.title} ${space_number} ${space_id}`
-	const e = document.getElementById('placeholder')
-	e.textContent = `${e.textContent} ${space_number} ${space_id}`
+	ipcRenderer
+		.invoke('invoke-handle-message', 'event-get-space-desc', space_id)
+		.then((reply) => {
+			const {desc, error} = reply
+			const placeholder = document.getElementById('placeholder')
+			placeholder.style.color = error ? 'red' : ''
+			placeholder.textContent = JSON.stringify(
+				desc || error, null, '\t'
+			)
+		})
 })
 console.log(`preload_space.js ${space_number} ${space_id} ready`)

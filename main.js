@@ -1,6 +1,8 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, ipcMain } = require('electron/main')
-const { v7: uuidv7, NIL: uuid_nil } = require('uuid')
+const {
+	v7: uuidv7, NIL: uuid_nil, validate: uuid_validate, version: uuid_version
+} = require('uuid')
 const first_history_branch_id = uuid_nil
 const path = require('node:path')
 const app_root_path = __dirname
@@ -413,6 +415,15 @@ app.whenReady().then(() => {
 					stack: result.error?.stack
 				}
 			}
+		} else if (arg === 'event-get-space-desc') {
+			const space_id = arg2, focus_branch_id = null, focus_operation_id = null
+			if (uuid_validate(space_id) && uuid_version(space_id))
+				return {desc: {
+					focus_branch_id, focus_operation_id, space_id,
+					message: 'not implemented'
+				}}
+			else
+				return {error: {message: 'space_id is not valid uuid v7'}}
 		}
 		return { uknown_command: true }
 	})
