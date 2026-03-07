@@ -128,6 +128,10 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('button-show-knytes').addEventListener('click',
 		handle_click_show_knytes
 	)
+	document.getElementById('button-generate-knit').addEventListener('click', () => {
+		document.getElementById('result-generate-knit').value =
+			ipcRenderer.sendSync('synchronous-message', 'uuidv7')
+	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
 		if (arg === 'event-set-operation-in-focus') {
 			const new_focused_branch_id = arg2

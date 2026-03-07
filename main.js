@@ -443,6 +443,15 @@ app.whenReady().then(() => {
 		}
 	})
 
+	ipcMain.on('synchronous-message', (event, arg) => {
+		let result = 'unknown command'
+		if (arg === 'uuid_nil')
+			result = uuid_nil
+		else if (arg === 'uuidv7')
+			result = uuidv7()
+		event.returnValue = result
+	})
+
 	app.on('activate', function () {
 		// On macOS it's common to re-create a window in the app when the
 		// dock icon is clicked and there are no other windows open.
