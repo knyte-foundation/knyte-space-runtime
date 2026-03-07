@@ -6,7 +6,7 @@ for (let i = 0; i < process.argv.length; ++i) {
 	if (arg.indexOf(arg1) > -1)
 		space_number = parseInt(arg.split(arg1)[1])
 	else if (arg.indexOf(arg2) > -1)
-		space_id = parseInt(arg.split(arg2)[1])
+		space_id = arg.split(arg2)[1]
 }
 window.addEventListener('DOMContentLoaded', () => {
 	document.title = `${document.title} ${space_number} ${space_id}`

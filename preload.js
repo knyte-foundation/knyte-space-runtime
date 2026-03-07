@@ -33,14 +33,22 @@ window.addEventListener('DOMContentLoaded', () => {
 					JSON.stringify(reply)
 			})
 	})
-	const space_dialog = document.getElementById('dialog-open-space');
+	const space_dialog = document.getElementById('dialog-open-space')
 	space_dialog.addEventListener('close', () => {
+		if (!space_dialog.returnValue)
+			return
 		ipcRenderer
 			.invoke(
 				'invoke-handle-message', 'event-windows-add-space',
 				space_dialog.returnValue
 			)
 			.then((reply) => console.log(reply.result))
+	})
+	document.getElementById('input-space-id').addEventListener('keypress', (event) => {
+		if (event.key === 'Enter') {
+			event.preventDefault()
+			document.getElementById('button-open-space').click()
+		}
 	})
 	document.getElementById('button-open-space').addEventListener('click', () => {
 		const result = document.getElementById('input-space-id').value
