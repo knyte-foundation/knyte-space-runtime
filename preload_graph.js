@@ -135,6 +135,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			const new_is_focus_on_present = arg4
 			document.getElementById('input-focused-branch-id').value = new_focused_branch_id
 			document.getElementById('input-last-operation-id').value = new_last_operation_id
+			document.getElementById('caption-focused-branch-id').textContent = new_focused_branch_id
 			document.getElementById('result-is-present').textContent = new_is_focus_on_present
 				? 'present' : 'past'
 			handle_click_show_knytes()
