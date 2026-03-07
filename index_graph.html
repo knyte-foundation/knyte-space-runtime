@@ -11,66 +11,96 @@
 </head>
 
 <body>
-	<p>
-		Db table contents
 	<div>
-		<textarea id="input-append-content"></textarea>
-		<button id="button-append-content">
-			append content
-		</button>
-		<span id="result-append-content"></span>
+		<h2>Db table contents</h2>
+		<div>
+			<textarea id="input-append-content"></textarea>
+			<button id="button-append-content">
+				append content
+			</button>
+			<span id="result-append-content"></span>
+		</div>
+		<div>
+			<textarea id="input-find-content-by-text"></textarea>
+			<button id="button-find-content-by-text">
+				find content by text
+			</button>
+			<span id="result-find-content-by-text"></span>
+		</div>
+		<div>
+			<input id="input-find-content-by-id" type="text" placeholder="content id" size="38">
+			<button id="button-find-content-by-id">
+				find content by id
+			</button>
+			<textarea id="result-find-content-by-id" disabled></textarea>
+		</div>
+		<div class="paragraph">
+			<button id="button-show-contents">
+				show contents
+			</button>
+			<pre id="result-show-contents"></pre>
+		</div>
 	</div>
 	<div>
-		<textarea id="input-find-content-by-text"></textarea>
-		<button id="button-find-content-by-text">
-			find content by text
-		</button>
-		<span id="result-find-content-by-text"></span>
-	</div>
+		<h2>Db table optree_<span id="caption-focused-branch-id"></span></h2>
+		<div>
+			<h3>Raw</h3>
+			<div class="paragraph">
+				<select id="select-operation-command">
+					<option value="0188dd27-0a2a-746a-976b-b705e8b16a1d">create knyte</option>
+					<option value="0188dd27-0d1f-7d9f-8d58-b928173ace6f">remove knyte</option>
+					<option value="0188dd27-0f25-7763-8a72-fcdb42a3432f">set knyte initial</option>
+					<option value="0188dd27-1114-777d-879a-d1b8bd08f08d">set knyte terminal</option>
+					<option value="0188dd27-12f5-732d-b53d-6e9519f5ac29">set knyte content</option>
+				</select>
+				<input id="input-operation-target" type="text" size="36" placeholder="target id">
+				<input id="input-operation-parameter" type="text" size="36" placeholder="parameter id">
+				<button id="button-add-operation">add operation</button>
+				<span id="result-add-operation"></span>
+			</div>
+			<div class="paragraph">
+				<input id="input-operation-id" type="text" size="36" placeholder="operation id">
+				<button id="button-get-operation">get operation</button>
+				<pre id="result-get-operation"></pre>
+			</div>
+		</div>
+		<div>
+			<h3>Link</h3>
+			<div>
+				<input id="input-link-initial" type="text" size="36" placeholder="initial id">
+				<input id="input-link-link" type="text" size="36" placeholder="link id">
+				<input id="input-link-terminal" type="text" size="36" placeholder="terminal id">
+				<button id="button-link">link</button>
+				<span id="result-link"></span>
+			</div>
+		</div>
+		<div>
+			<h3>Edit</h3>
+			<div>
+				<input id="input-edit-target" type="text" size="36" placeholder="target id">
+				<button id="button-edit-start">edit</button>
+				<textarea id="input-edit-content"></textarea>
+				<button id="button-edit-submit">submit</button>
+				<span id="result-edit"></span>
+			</div>
+		</div>
 	<div>
-		<input id="input-find-content-by-id" type="text" placeholder="content id" size="38">
-		<button id="button-find-content-by-id">
-			find content by id
-		</button>
-		<textarea id="result-find-content-by-id" disabled></textarea>
 	</div>
-	<div>
-		<button id="button-show-contents">
-			show contents
-		</button>
+		<h2>Knytes</h2>
+		<div>
+			<button id="button-show-knytes">show knytes</button>
+			in focus:
+			branch
+			<input id="input-focused-branch-id" title="history branch id" placeholder="not specified"
+				size="36" readonly>
+			operation
+			<input id="input-last-operation-id" title="operation id" placeholder="present moment" size="36"
+				readonly>
+			<span id="result-is-present"></span>
+			time
+		</div>		
+		<pre id="result-show-knytes"></pre>
 	</div>
-	<pre id="result-show-contents"></pre>
-	</p>
-	<p>
-		Db table optree_*
-	<div>
-		<select id="select-operation-command">
-			<option value="0188dd27-0a2a-746a-976b-b705e8b16a1d">create knyte</option>
-			<option value="0188dd27-0d1f-7d9f-8d58-b928173ace6f">remove knyte</option>
-			<option value="0188dd27-0f25-7763-8a72-fcdb42a3432f">set knyte initial</option>
-			<option value="0188dd27-1114-777d-879a-d1b8bd08f08d">set knyte terminal</option>
-			<option value="0188dd27-12f5-732d-b53d-6e9519f5ac29">set knyte content</option>
-		</select>
-		<input id="input-operation-target" type="text" size="36" placeholder="target id">
-		<input id="input-operation-parameter" type="text" size="36" placeholder="parameter id">
-		<button id="button-add-operation">add operation</button>
-		<span id="result-add-operation"></span>
-	</div>
-	</p>
-	<p>
-		Knytes
-		<button id="button-show-knytes">show knytes</button>
-		in focus:
-		branch
-		<input id="input-focused-branch-id" title="history branch id" placeholder="not specified"
-			size="36" readonly>
-		operation
-		<input id="input-last-operation-id" title="operation id" placeholder="present moment" size="36"
-			readonly>
-		<span id="result-is-present"></span>
-		time
-	<pre id="result-show-knytes"></pre>
-	</p>
 
 	<!-- You can also require other files to run in this process -->
 	<script src="./render_graph.js"></script>
