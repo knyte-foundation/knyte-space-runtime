@@ -8,15 +8,16 @@ const db_path = path.join(app.getPath('userData'), 'db.sqlite')
 let db, space_window_number = 0, registered_ipc_renders = {}
 
 function create_space_window() {
+	const y_offset = (++space_window_number) * 30
 	const space_window = new BrowserWindow({
 		width: 1792,
-		height: 1000,
+		height: 1020 - y_offset,
 		x: 0,
-		y: 50,
+		y: 25 + y_offset,
 		webPreferences: {
 			preload: path.join(app_root_path, 'preload_space.js'),
 			additionalArguments: [
-				`--window-caption-number=${++space_window_number}`
+				`--window-caption-number=${space_window_number}`
 			]
 		}
 	})
@@ -27,7 +28,7 @@ function createAllWindows() {
 	// system
 	// Create the browser window.
 	const system_window = new BrowserWindow({
-		width: 300,
+		width: 600,
 		height: 1000,
 		x: 0,
 		y: 0,
@@ -42,9 +43,9 @@ function createAllWindows() {
 
 	// history
 	const history_window = new BrowserWindow({
-		width: 600,
+		width: 796,
 		height: 1000,
-		x: 300,
+		x: 100,
 		y: 0,
 		webPreferences: {
 			preload: path.join(app_root_path, 'preload_history.js')
@@ -54,18 +55,15 @@ function createAllWindows() {
 
 	// graph
 	const graph_window = new BrowserWindow({
-		width: 892,
+		width: 896,
 		height: 1000,
-		x: 900,
+		x: 896,
 		y: 0,
 		webPreferences: {
 			preload: path.join(app_root_path, 'preload_graph.js')
 		}
 	})
 	graph_window.loadFile('index_graph.html')
-
-	// space
-	create_space_window()
 }
 
 function optree_id_to_name(id) {
@@ -214,6 +212,7 @@ app.whenReady().then(() => {
 			const max_buffer_size = await check_max_memory(true)
 			return { max_engine_size, max_buffer_size }
 		} else if (arg === 'event-windows-add-space') {
+			// space
 			create_space_window()
 			return { result: 'space added' }
 		} else if (arg === 'event-db-append-content') {

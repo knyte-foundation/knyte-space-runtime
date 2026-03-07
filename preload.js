@@ -36,6 +36,6 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('button-add-space').addEventListener('click', () => {
 		ipcRenderer
 			.invoke('invoke-handle-message', 'event-windows-add-space')
-			.then((reply) => alert(reply.result))
+			.then((reply) => console.log(reply.result))
 	})
 })
