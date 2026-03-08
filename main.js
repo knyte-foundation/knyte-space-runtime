@@ -433,7 +433,7 @@ app.whenReady().then(() => {
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-show-history-on-start'
-			)			
+			)
 		}
 	}
 
@@ -474,11 +474,14 @@ app.whenReady().then(() => {
 		event.returnValue = result
 	})
 
-	app.on('activate', function () {
+	app.on('activate', () => {
 		// On macOS it's common to re-create a window in the app when the
 		// dock icon is clicked and there are no other windows open.
-		if (BrowserWindow.getAllWindows().length === 0)
+		if (BrowserWindow.getAllWindows().length === 0) {
+			space_window_number = 0
+			registered_ipc_renders = {}
 			createAllWindows()
+		}
 	})
 })
 
