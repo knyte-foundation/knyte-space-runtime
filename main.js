@@ -10,7 +10,8 @@ const db_path = path.join(app.getPath('userData'), 'db.sqlite')
 let db, space_window_number = 0, registered_ipc_renders = {}
 
 function create_space_window(space_id) {
-	const y_offset = (++space_window_number) * 30
+	const space_number = ++space_window_number
+	const y_offset = space_number * 30
 	const space_window = new BrowserWindow({
 		width: 1792,
 		height: 1020 - y_offset,
@@ -19,12 +20,16 @@ function create_space_window(space_id) {
 		webPreferences: {
 			preload: path.join(app_root_path, 'preload_space.js'),
 			additionalArguments: [
-				`--window-caption-number=${space_window_number}`,
+				`--window-caption-number=${space_number}`,
 				`--space_knyte-id=${space_id}`,
 			]
 		}
 	})
 	space_window.loadFile('index_space.html')
+	const window_id = `space ${space_number}`
+	space_window.on('closed', () => {
+		console.log(`${window_id} window closed`)
+	})
 }
 
 function createAllWindows() {
@@ -43,6 +48,9 @@ function createAllWindows() {
 	system_window.loadFile('index.html')
 	// Open the DevTools.
 	// mainWindow.webContents.openDevTools()
+	system_window.on('closed', () => {
+		console.log('system window closed')
+	})
 
 	// history
 	const history_window = new BrowserWindow({
@@ -55,6 +63,9 @@ function createAllWindows() {
 		}
 	})
 	history_window.loadFile('index_history.html')
+	history_window.on('closed', () => {
+		console.log('history window closed')
+	})
 
 	// graph
 	const graph_window = new BrowserWindow({
@@ -67,6 +78,9 @@ function createAllWindows() {
 		}
 	})
 	graph_window.loadFile('index_graph.html')
+	graph_window.on('closed', () => {
+		console.log('graph window closed')
+	})
 }
 
 function optree_id_to_name(id) {
