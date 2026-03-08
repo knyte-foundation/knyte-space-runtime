@@ -540,9 +540,15 @@ app.whenReady().then(() => {
 						stack: 'not available'
 					}
 				}
+			const is_present = present_operations_in_branches[branch_id].id === operation_id
 			history_focus.branch_id = branch_id
 			history_focus.operation_id = operation_id
-			history_focus.is_present = present_operations_in_branches[branch_id].id === operation_id
+			history_focus.is_present = is_present
+			const ipc_graph = registered_ipc_renders['graph']
+			ipc_graph && ipc_graph.send(
+				'asynchronous-reply', 'event-set-operation-in-focus',
+				branch_id, operation_id, is_present
+			)
 			return {history_focus}
 		}
 		return { uknown_command: true }
@@ -572,16 +578,6 @@ app.whenReady().then(() => {
 			const render_name = arg2
 			registered_ipc_renders[render_name] = event.sender
 			handle_all_windows_registered()
-		} else if (arg === 'event-set-operation-in-focus') {
-			const history_branch_in_focus = arg2
-			const operation_in_focus = arg3
-			const is_focus_on_present = arg4
-			// TODO: determine is_focus_on_present based on main and actual db
-			const ipc_graph = registered_ipc_renders['graph']
-			ipc_graph && ipc_graph.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
-				history_branch_in_focus, operation_in_focus, is_focus_on_present
-			)
 		} else if (arg === 'event-add-operation') {
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
