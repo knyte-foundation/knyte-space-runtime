@@ -145,10 +145,13 @@ window.addEventListener('DOMContentLoaded', () => {
 			})
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
-		if (
-			arg === 'event-add-operation'
-		) {
-			alert(`${arg} handler not implemented yet`)
+		if (arg === 'event-add-operation') {
+			// TODO: optimize history view update
+			const render_sequence = arg2
+			const history_focus = arg3
+			const {branch_id, operation_id, is_present} = history_focus
+			handle_show_history(render_sequence)
+			highlight_focus(branch_id, operation_id, is_present)
 		} else if (arg === 'event-add-history-branch') {
 			const render_sequence = arg2
 			const history_focus = arg3

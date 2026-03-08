@@ -229,14 +229,16 @@ function build_history(init_focus) {
 			const { branch, branch_id } = history_render_sequence[i]
 			const last_operation_id = branch.length ? branch[branch.length - 1] : null
 			present_operation_ids[last_operation_id] = true
-			present_operations_in_branches[branch_id] = last_operation_id		
+			present_operations_in_branches[branch_id] = last_operation_id
 		}
 		// set initial history focus on startup
 		if (init_focus) {
 			// TODO: handle here restoring of saved history_focus
-			history_focus.branch_id = first_history_branch_id
-			history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
-			history_focus.is_present = true
+			if (first_history_branch_id in present_operations_in_branches) {
+				history_focus.branch_id = first_history_branch_id
+				history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
+				history_focus.is_present = true
+			}
 		}
 	} else if (error) {
 		console.log(error)
@@ -419,7 +421,11 @@ app.whenReady().then(() => {
 					}
 				}
 			const id = uuidv7()
-			return add_operation(history_branch_in_focus, { id, command, target, parameter })
+			const result = add_operation(history_branch_in_focus, { id, command, target, parameter })
+			if (!result.error)
+				build_history(false)	// TODO: optimize by patching present_operation_ids,
+										// present_operations_in_branches, history_render_sequence
+			return result
 		} else if (arg === 'event-db-get-history-line') {
 			let root_branch = arg2
 			let root_operation = arg3
@@ -587,7 +593,8 @@ app.whenReady().then(() => {
 		} else if (arg === 'event-add-operation') {
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-add-operation'
+				'asynchronous-reply', 'event-add-operation',
+				history_render_sequence, history_focus
 			)
 		} else if (arg === 'event-add-history-branch') {
 			const ipc_history = registered_ipc_renders['history']
