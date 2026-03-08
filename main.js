@@ -423,20 +423,30 @@ app.whenReady().then(() => {
 			const id = uuidv7()
 			const result = add_operation(history_branch_in_focus, { id, command, target, parameter })
 			if (!result.error) {
-				build_history()	// TODO: optimize by patching present_operation_ids,
-								// present_operations_in_branches, history_render_sequence
-				{
-					history_focus.operation_id = id
-					history_focus.is_present = true;
-				}
-				{
-					const {branch_id, operation_id, is_present} = history_focus
-					const ipc_graph = registered_ipc_renders['graph']
-					ipc_graph && ipc_graph.send(
-						'asynchronous-reply', 'event-set-operation-in-focus',
-						branch_id, operation_id, is_present
-					)
-				}
+				// patch history
+				const operation = {id, command, target, parameter}
+				delete present_operation_ids[history_focus.operation_id]
+				present_operation_ids[id] = true
+				present_operations_in_branches[history_branch_in_focus] = operation
+				let branch_to_append
+				for (let i = 0; i < history_render_sequence.length; ++i)
+					if (history_render_sequence[i].branch_id === history_branch_in_focus) {
+						branch_to_append = history_render_sequence[i].branch
+						break
+					}
+				branch_to_append && branch_to_append.push(operation)
+
+				// update actual focus
+				history_focus.operation_id = id
+				history_focus.is_present = true;
+
+				// update graph focus
+				const {branch_id, operation_id, is_present} = history_focus
+				const ipc_graph = registered_ipc_renders['graph']
+				ipc_graph && ipc_graph.send(
+					'asynchronous-reply', 'event-set-operation-in-focus',
+					branch_id, operation_id, is_present
+				)
 			}
 			return result
 		} else if (arg === 'event-db-get-history-line') {
