@@ -177,7 +177,7 @@ function get_history_branches() {
 	}
 	return { branches }
 }
-function build_history(init_focus) {
+function build_history() {
 	const {branches, error} = get_history_branches();
 	if (branches) {
 		present_operation_ids = {}
@@ -231,17 +231,16 @@ function build_history(init_focus) {
 			present_operation_ids[last_operation_id] = true
 			present_operations_in_branches[branch_id] = last_operation_id
 		}
-		// set initial history focus on startup
-		if (init_focus) {
-			// TODO: handle here restoring of saved history_focus
-			if (first_history_branch_id in present_operations_in_branches) {
-				history_focus.branch_id = first_history_branch_id
-				history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
-				history_focus.is_present = true
-			}
-		}
 	} else if (error) {
 		console.log(error)
+	}
+}
+function init_history_focus() {
+	// TODO: handle here restoring of saved history_focus
+	if (first_history_branch_id in present_operations_in_branches) {
+		history_focus.branch_id = first_history_branch_id
+		history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
+		history_focus.is_present = true
 	}
 }
 function add_operation(history_branch_id, desc) {
@@ -319,7 +318,8 @@ async function check_max_memory(is_buffer) {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
 	connect_db()
-	build_history(true)
+	build_history()
+	init_history_focus()
 	createAllWindows()
 
 	ipcMain.handle('invoke-handle-message', async (event, arg, arg2, arg3) => {
@@ -423,8 +423,8 @@ app.whenReady().then(() => {
 			const id = uuidv7()
 			const result = add_operation(history_branch_in_focus, { id, command, target, parameter })
 			if (!result.error)
-				build_history(false)	// TODO: optimize by patching present_operation_ids,
-										// present_operations_in_branches, history_render_sequence
+				build_history()	// TODO: optimize by patching present_operation_ids,
+								// present_operations_in_branches, history_render_sequence
 			return result
 		} else if (arg === 'event-db-get-history-line') {
 			let root_branch = arg2
@@ -505,7 +505,7 @@ app.whenReady().then(() => {
 			}
 			const result = create_history_branch(new_branch_id, root_branch_id, root_operation_id)
 			if (result.id) {
-				build_history(false)
+				build_history()
 				return { id: result.id }
 			}
 			else return {
