@@ -64,6 +64,7 @@ function createAllWindows() {
 	})
 	history_window.loadFile('index_history.html')
 	history_window.on('closed', () => {
+		delete registered_ipc_renders['history']
 		console.log('history window closed')
 	})
 
@@ -79,6 +80,7 @@ function createAllWindows() {
 	})
 	graph_window.loadFile('index_graph.html')
 	graph_window.on('closed', () => {
+		delete registered_ipc_renders['graph']
 		console.log('graph window closed')
 	})
 }
