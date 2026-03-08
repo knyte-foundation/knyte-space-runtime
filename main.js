@@ -428,10 +428,20 @@ app.whenReady().then(() => {
 		return { uknown_command: true }
 	})
 
+	function handle_all_windows_registered() {
+		if (registered_ipc_renders['history'] && registered_ipc_renders['graph']) {
+			const ipc_history = registered_ipc_renders['history']
+			ipc_history && ipc_history.send(
+				'asynchronous-reply', 'event-show-history-on-start'
+			)			
+		}
+	}
+
 	ipcMain.on('asynchronous-message', (event, arg, arg2, arg3, arg4) => {
 		if (arg === 'event-register-ipc-render') {
 			const render_name = arg2
 			registered_ipc_renders[render_name] = event.sender
+			handle_all_windows_registered()
 		} else if (arg === 'event-set-operation-in-focus') {
 			const history_branch_in_focus = arg2
 			const operation_in_focus = arg3

@@ -236,10 +236,11 @@ window.addEventListener('DOMContentLoaded', () => {
 			})
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
-		if (arg === 'event-add-operation') {
-			handle_click_show_history()
-		}
-		else if (arg === 'event-add-history-branch') {
+		if (
+			arg === 'event-add-operation' ||
+			arg === 'event-add-history-branch' ||
+			arg === 'event-show-history-on-start'
+		) {
 			handle_click_show_history()
 		}
 	})
