@@ -146,6 +146,11 @@ function is_row_exist(name, id) {
 		return { exists: false, error: { code, message, stack } }
 	}
 }
+function get_history_branch(name) {
+	return db.prepare(
+		`SELECT * FROM '${name}'`
+	).all()
+}
 function get_history_branches() {
 	let branch_names
 	try {
@@ -167,10 +172,8 @@ function get_history_branches() {
 	const branches = {}
 	for (let i = 0; i < branch_names.length; ++i) {
 		const { name } = branch_names[i]
-		const id = name.split('optree_')[1]
-		branches[id] = db.prepare(
-			`SELECT * FROM '${name}'`
-		).all()
+		const id = optree_name_to_id(name)
+		branches[id] = get_history_branch(name)
 	}
 	return { branches }
 }
@@ -495,8 +498,11 @@ app.whenReady().then(() => {
 					}
 			}
 			const result = create_history_branch(new_branch_id, root_branch_id, root_operation_id)
-			if (result.id)
+			if (result.id) {
+				build_history(false)	// TODO: optimize by patching present_operation_ids,
+										// present_operations_in_branches, history_render_sequence
 				return { id: result.id }
+			}
 			else return {
 				error: {
 					code: result.error?.code,
@@ -584,7 +590,6 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-operation'
 			)
 		} else if (arg === 'event-add-history-branch') {
-			build_history(false) // TODO: don't rebuild everything if possible
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-history-branch',
