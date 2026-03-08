@@ -422,9 +422,11 @@ app.whenReady().then(() => {
 				}
 			const id = uuidv7()
 			const result = add_operation(history_branch_in_focus, { id, command, target, parameter })
-			if (!result.error)
+			if (!result.error) {
 				build_history()	// TODO: optimize by patching present_operation_ids,
 								// present_operations_in_branches, history_render_sequence
+				history_focus.is_present = false;
+			}
 			return result
 		} else if (arg === 'event-db-get-history-line') {
 			let root_branch = arg2
