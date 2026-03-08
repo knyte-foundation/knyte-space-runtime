@@ -11,7 +11,6 @@ let db, space_window_number = 0, registered_ipc_renders = {}
 let present_operation_ids = {} // operation_id -> true
 let present_operations_in_branches = {} // history_branch_id -> operation_id
 let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
-
 const history_focus = {branch_id: null, operation_id: null, is_present: false}
 
 function create_space_window(space_id) {
@@ -232,7 +231,7 @@ function init_history() {
 		// set initial history focus on startup
 		// TODO: handle here restoring of saved history_focus
 		history_focus.branch_id = first_history_branch_id
-		history_focus.operation_id = present_operations_in_branches[first_history_branch_id]
+		history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
 		history_focus.is_present = true
 
 		console.log('history_render_sequence', history_render_sequence)
@@ -519,10 +518,20 @@ app.whenReady().then(() => {
 	})
 
 	function handle_all_windows_registered() {
-		if (registered_ipc_renders['history'] && registered_ipc_renders['graph']) {
-			const ipc_history = registered_ipc_renders['history']
-			ipc_history && ipc_history.send(
+		const ipc_history = registered_ipc_renders['history']
+		const ipc_graph = registered_ipc_renders['graph']
+		if (ipc_history && ipc_graph) {
+			ipc_history.send(
 				'asynchronous-reply', 'event-show-history-on-start', history_render_sequence
+			)
+			const {branch_id, operation_id, is_present} = history_focus
+			ipc_history.send(
+				'asynchronous-reply', 'event-set-operation-in-focus',
+				branch_id, operation_id, is_present
+			)
+			ipc_graph.send(
+				'asynchronous-reply', 'event-set-operation-in-focus',
+				branch_id, operation_id, is_present
 			)
 		}
 	}

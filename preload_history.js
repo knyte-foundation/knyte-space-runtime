@@ -98,7 +98,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('button-add-history-branch').addEventListener('click', () => {
 		alert('add-history-branch not implemented yet')
 	})
-	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
+	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
 		if (
 			arg === 'event-add-operation' ||
 			arg === 'event-add-history-branch'
@@ -108,6 +108,18 @@ window.addEventListener('DOMContentLoaded', () => {
 			const render_sequence = arg2
 			console.log('render_sequence', render_sequence)
 			handle_show_history(render_sequence)
+		} else if (arg === 'event-set-operation-in-focus') {
+			const new_focused_branch_id = arg2
+			const new_last_operation_id = arg3
+			const new_is_focus_on_present = arg4
+			//const svg = document.getElementById('svg-history');
+			// TODO: reset selection of prior focus node
+			const hixel_focus_node = document.getElementById(new_last_operation_id)
+			if (hixel_focus_node) {
+				const selection_color = new_is_focus_on_present ? '#FFB266' : '#F2AAEC'
+				hixel_focus_node.setAttribute('fill', selection_color)
+
+			}
 		}
 	})
 	ipcRenderer.send(
