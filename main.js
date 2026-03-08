@@ -10,7 +10,7 @@ const db_path = path.join(app.getPath('userData'), 'db.sqlite')
 let db, space_window_number = 0, registered_ipc_renders = {}
 let present_operation_ids = {} // operation_id -> true
 let present_operations_in_branches = {} // history_branch_id -> operation_id
-let render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
+let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
 
 const history_focus = {branch_id: null, operation_id: null, is_present: false}
 
@@ -180,7 +180,7 @@ function init_history() {
 	if (branches) {
 		present_operation_ids = {}
 		present_operations_in_branches = {}
-		render_sequence = []
+		history_render_sequence = []
 		if (first_history_branch_id in branches) {
 			const branch_id = first_history_branch_id
 			const branch = branches[branch_id]
@@ -188,7 +188,7 @@ function init_history() {
 			if (last_operation_id) {
 				present_operation_ids[last_operation_id] = true
 				present_operations_in_branches[branch_id] = last_operation_id
-				render_sequence.push({
+				history_render_sequence.push({
 					root_branch: uuid_nil, root_operation: uuid_nil, branch, branch_id
 				})
 			}
@@ -217,14 +217,14 @@ function init_history() {
 			const sequence = sorted_branches[root_branch]
 			for (let i = 0; i < sequence.length; ++i) {
 				const element = sequence[i]
-				render_sequence.push(element)
+				history_render_sequence.push(element)
 				if (element.branch_id in sorted_branches)
 					fill_render_sequence(element.branch_id)
 			}
 		}
 		fill_render_sequence(first_history_branch_id)
-		for (let i = 0; i < render_sequence.length; ++i) {
-			const { branch, branch_id } = render_sequence[i]
+		for (let i = 0; i < history_render_sequence.length; ++i) {
+			const { branch, branch_id } = history_render_sequence[i]
 			const last_operation_id = branch.length ? branch[branch.length - 1] : null
 			present_operation_ids[last_operation_id] = true
 			present_operations_in_branches[branch_id] = last_operation_id		
@@ -235,7 +235,7 @@ function init_history() {
 		history_focus.operation_id = present_operations_in_branches[first_history_branch_id]
 		history_focus.is_present = true
 
-		console.log('render_sequence', render_sequence)
+		console.log('history_render_sequence', history_render_sequence)
 	} else if (error) {
 		console.log(error)
 	}
