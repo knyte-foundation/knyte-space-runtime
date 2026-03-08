@@ -174,7 +174,7 @@ function get_history_branches() {
 	}
 	return { branches }
 }
-function init_history() {
+function build_history() {
 	const {branches, error} = get_history_branches();
 	if (branches) {
 		present_operation_ids = {}
@@ -314,7 +314,7 @@ async function check_max_memory(is_buffer) {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
 	connect_db()
-	init_history()
+	build_history()
 	createAllWindows()
 
 	ipcMain.handle('invoke-handle-message', async (event, arg, arg2, arg3) => {
@@ -584,9 +584,11 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-operation'
 			)
 		} else if (arg === 'event-add-history-branch') {
+			build_history()
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-add-history-branch'
+				'asynchronous-reply', 'event-add-history-branch',
+				history_render_sequence, history_focus
 			)
 		}
 	})
