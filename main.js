@@ -425,7 +425,18 @@ app.whenReady().then(() => {
 			if (!result.error) {
 				build_history()	// TODO: optimize by patching present_operation_ids,
 								// present_operations_in_branches, history_render_sequence
-				history_focus.is_present = false;
+				{
+					history_focus.operation_id = id
+					history_focus.is_present = true;
+				}
+				{
+					const {branch_id, operation_id, is_present} = history_focus
+					const ipc_graph = registered_ipc_renders['graph']
+					ipc_graph && ipc_graph.send(
+						'asynchronous-reply', 'event-set-operation-in-focus',
+						branch_id, operation_id, is_present
+					)
+				}
 			}
 			return result
 		} else if (arg === 'event-db-get-history-line') {
