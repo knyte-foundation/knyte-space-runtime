@@ -174,7 +174,7 @@ function get_history_branches() {
 	}
 	return { branches }
 }
-function build_history() {
+function build_history(init_focus) {
 	const {branches, error} = get_history_branches();
 	if (branches) {
 		present_operation_ids = {}
@@ -229,12 +229,12 @@ function build_history() {
 			present_operations_in_branches[branch_id] = last_operation_id		
 		}
 		// set initial history focus on startup
-		// TODO: handle here restoring of saved history_focus
-		history_focus.branch_id = first_history_branch_id
-		history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
-		history_focus.is_present = true
-
-		console.log('history_render_sequence', history_render_sequence)
+		if (init_focus) {
+			// TODO: handle here restoring of saved history_focus
+			history_focus.branch_id = first_history_branch_id
+			history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
+			history_focus.is_present = true
+		}
 	} else if (error) {
 		console.log(error)
 	}
@@ -314,7 +314,7 @@ async function check_max_memory(is_buffer) {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
 	connect_db()
-	build_history()
+	build_history(true)
 	createAllWindows()
 
 	ipcMain.handle('invoke-handle-message', async (event, arg, arg2, arg3) => {
@@ -584,7 +584,7 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-operation'
 			)
 		} else if (arg === 'event-add-history-branch') {
-			build_history()
+			build_history(false) // TODO: don't rebuild everything if possible
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-history-branch',
