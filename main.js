@@ -505,8 +505,17 @@ app.whenReady().then(() => {
 			}
 			const result = create_history_branch(new_branch_id, root_branch_id, root_operation_id)
 			if (result.id) {
-				build_history(false)	// TODO: optimize by patching present_operation_ids,
+				//build_history(false)	// TODO: optimize by patching present_operation_ids,
 										// present_operations_in_branches, history_render_sequence
+				// patch history state
+				const branch = get_history_branch(optree_id_to_name(result.id));
+				const new_operation = branch[0]
+				present_operation_ids[new_operation.id] = true
+				present_operations_in_branches[new_branch_id] = new_operation
+				history_render_sequence.push({
+					root_branch: root_branch_id, root_operation: root_operation_id, branch, branch_id: new_branch_id
+				})
+
 				return { id: result.id }
 			}
 			else return {
