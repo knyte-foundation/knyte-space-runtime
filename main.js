@@ -522,7 +522,7 @@ app.whenReady().then(() => {
 		if (registered_ipc_renders['history'] && registered_ipc_renders['graph']) {
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-show-history-on-start'
+				'asynchronous-reply', 'event-show-history-on-start', history_render_sequence
 			)
 		}
 	}

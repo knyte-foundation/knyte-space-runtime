@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron/renderer')
+const uuid_nil = ipcRenderer.sendSync('synchronous-message', 'uuid_nil')
 
 function optree_id_to_name(id) {
 	return `optree_${id}`
@@ -7,22 +8,106 @@ function optree_name_to_id(name) {
 	return name.split('optree_')[1]
 }
 window.addEventListener('DOMContentLoaded', () => {
-	function handle_click_show_history() {
-		alert('handle_click_show_history not implemented yet')
+	function handle_show_history(render_sequence) {
+		const svg = document.getElementById('svg-history');
+		const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
+		const hixel_links = svg.getElementsByClassName('hixel-links')[0]
+		function set_operation_in_focus(node) {
+			alert(`not implemented yet, node id ${node.id}`)
+		}
+		hixel_bodies.innerHTML = ''
+		hixel_links.innerHTML = ''
+		let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
+		for (let i = 0; i < render_sequence.length; ++i) {
+			const { root_operation, branch, branch_id } = render_sequence[i]
+			const root_hixel = root_operation === uuid_nil ? undefined : document.getElementById(root_operation)
+			const node_stroke_color = root_hixel !== null ? '#9DA2A6' : 'red'
+			// in 2 lines of code above
+				// root_hixel = null means it's not found, but required, warning situation, use red color
+				// and root_hixel = undefined means it's not required, use normal color
+			const root_x = root_hixel ? parseFloat(root_hixel.getAttribute('cx')) : 0
+			const root_y = root_hixel ? parseFloat(root_hixel.getAttribute('cy')) : 0
+			let cy = root_hixel ? root_y + 80 : 32,
+				r = 16, stroke_width = 4, cy_prior, node
+			for (let i = 0; i < branch.length; ++i) {
+				const operation = branch[i]
+				node = document.createElementNS(
+					'http://www.w3.org/2000/svg', 'circle'
+				);
+				node.id = operation.id
+				node.dataset.history_branch_id = branch_id
+				node.classList.add('hixel-selectable')
+				node.setAttribute('cx', cx)
+				node.setAttribute('cy', cy)
+				node.setAttribute('r', r)
+				node.setAttribute('stroke-width', stroke_width)
+				node.setAttribute('stroke', node_stroke_color)
+				node.setAttribute('fill', '#1C2333')
+				node.addEventListener('click', (event) => {
+					set_operation_in_focus(event.target)
+				})
+				hixel_bodies.append(node)
+				if (i > 0) {
+					const link = document.createElementNS(
+						'http://www.w3.org/2000/svg', 'line'
+					);
+					link.setAttribute('x1', cx)
+					link.setAttribute('y1', cy_prior + r + stroke_width + 1)
+					link.setAttribute('x2', cx)
+					link.setAttribute('y2', cy - r - 5 * stroke_width)
+					link.setAttribute('stroke-width', stroke_width)
+					link.setAttribute('stroke', '#9DA2A6')
+					link.setAttribute('marker-start', 'url(#marker_trace_start)')
+					link.setAttribute('marker-end', 'url(#marker_trace_end)')
+					hixel_links.append(link)
+				}
+				cy_prior = cy
+				cy += 80
+			}
+			if (root_hixel) {
+				{
+					const link = document.createElementNS(
+						'http://www.w3.org/2000/svg', 'line'
+					);
+					link.setAttribute('x1', root_x + r + stroke_width + 1)
+					link.setAttribute('y1', root_y)
+					link.setAttribute('x2', cx)
+					link.setAttribute('y2', root_y)
+					link.setAttribute('stroke-width', stroke_width)
+					link.setAttribute('stroke', '#9DA2A6')
+					link.setAttribute('marker-start', 'url(#marker_trace_start)')
+					hixel_links.append(link)
+				}
+				{
+					const link = document.createElementNS(
+						'http://www.w3.org/2000/svg', 'line'
+					);
+					link.setAttribute('x1', cx)
+					link.setAttribute('y1', root_y)
+					link.setAttribute('x2', cx)
+					link.setAttribute('y2', root_y + 80 - r - 5 * stroke_width)
+					link.setAttribute('stroke-width', stroke_width)
+					link.setAttribute('stroke', '#9DA2A6')
+					link.setAttribute('marker-end', 'url(#marker_trace_end)')
+					hixel_links.append(link)
+				}
+			}
+			cx += 80
+		}
 	}
-	document.getElementById('button-render-history').addEventListener('click',
-		handle_click_show_history
-	)
 	document.getElementById('button-add-history-branch').addEventListener('click', () => {
 		alert('add-history-branch not implemented yet')
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
 		if (
 			arg === 'event-add-operation' ||
-			arg === 'event-add-history-branch' ||
-			arg === 'event-show-history-on-start'
+			arg === 'event-add-history-branch'
 		) {
-			handle_click_show_history()
+			alert(`${arg} handler not implemented yet`)
+		} else if (arg === 'event-show-history-on-start') {
+			const render_sequence = arg2
+			console.log('render_sequence', render_sequence)
+			handle_show_history(render_sequence)
 		}
 	})
 	ipcRenderer.send(
