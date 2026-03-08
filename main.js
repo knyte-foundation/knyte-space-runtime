@@ -8,6 +8,11 @@ const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
 let db, space_window_number = 0, registered_ipc_renders = {}
+let present_operation_ids = {} // operation_id -> true
+let present_operations_in_branches = {} // history_branch_id -> operation_id
+let render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
+
+const history_focus = {branch_id: null, operation_id: null, is_present: false}
 
 function create_space_window(space_id) {
 	const space_number = ++space_window_number
@@ -142,6 +147,99 @@ function is_row_exist(name, id) {
 		return { exists: false, error: { code, message, stack } }
 	}
 }
+function get_history_branches() {
+	let branch_names
+	try {
+		branch_names = db.prepare(`
+			SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'optree_%';
+		`).all()
+		if (branch_names.length === 0)
+			return {
+				error: {
+					code: `history have no branches`,
+					message: `can't get history because it has no branches`,
+					stack: 'not available',
+				}
+			}
+	} catch (error) {
+		const { code, message, stack } = error
+		return { error: { code, message, stack } }
+	}
+	const branches = {}
+	for (let i = 0; i < branch_names.length; ++i) {
+		const { name } = branch_names[i]
+		const id = name.split('optree_')[1]
+		branches[id] = db.prepare(
+			`SELECT * FROM '${name}'`
+		).all()
+	}
+	return { branches }
+}
+function init_history() {
+	const {branches, error} = get_history_branches();
+	if (branches) {
+		present_operation_ids = {}
+		present_operations_in_branches = {}
+		render_sequence = []
+		if (first_history_branch_id in branches) {
+			const branch_id = first_history_branch_id
+			const branch = branches[branch_id]
+			const last_operation_id = branch.length ? branch[branch.length - 1] : null
+			if (last_operation_id) {
+				present_operation_ids[last_operation_id] = true
+				present_operations_in_branches[branch_id] = last_operation_id
+				render_sequence.push({
+					root_branch: uuid_nil, root_operation: uuid_nil, branch, branch_id
+				})
+			}
+		}
+		const sorted_branches = {}; // {root_branch: [root_operations]}
+		sorted_branches[first_history_branch_id] = []
+		for (let branch_id in branches) {
+			if (branch_id === first_history_branch_id)
+				continue
+			const branch = branches[branch_id]
+			const first_operation = branch[0]
+			const root_branch = first_operation.target
+			const root_operation = first_operation.parameter
+			!(root_branch in sorted_branches) && (sorted_branches[root_branch] = [])
+			sorted_branches[root_branch].push({
+				root_branch, root_operation, branch, branch_id
+			})
+		}
+		for (let root_branch in sorted_branches)
+			sorted_branches[root_branch].sort((a, b) => {
+				if (a.root_operation < b.root_operation) return 1
+				if (a.root_operation > b.root_operation) return -1
+				return 0
+			})
+		function fill_render_sequence(root_branch) {
+			const sequence = sorted_branches[root_branch]
+			for (let i = 0; i < sequence.length; ++i) {
+				const element = sequence[i]
+				render_sequence.push(element)
+				if (element.branch_id in sorted_branches)
+					fill_render_sequence(element.branch_id)
+			}
+		}
+		fill_render_sequence(first_history_branch_id)
+		for (let i = 0; i < render_sequence.length; ++i) {
+			const { branch, branch_id } = render_sequence[i]
+			const last_operation_id = branch.length ? branch[branch.length - 1] : null
+			present_operation_ids[last_operation_id] = true
+			present_operations_in_branches[branch_id] = last_operation_id		
+		}
+		// set initial history focus on startup
+		// TODO: handle here restoring of saved history_focus
+		history_focus.branch_id = first_history_branch_id
+		history_focus.operation_id = present_operations_in_branches[first_history_branch_id]
+		history_focus.is_present = true
+
+		console.log('render_sequence', render_sequence)
+	} else if (error) {
+		console.log(error)
+	}
+}
 function add_operation(history_branch_id, desc) {
 	const table_name = optree_id_to_name(history_branch_id)
 	const { id, command, target, parameter } = desc
@@ -216,8 +314,9 @@ async function check_max_memory(is_buffer) {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
-	createAllWindows()
 	connect_db()
+	init_history()
+	createAllWindows()
 
 	ipcMain.handle('invoke-handle-message', async (event, arg, arg2, arg3) => {
 		if (!db) {
@@ -361,32 +460,7 @@ app.whenReady().then(() => {
 			}
 			return { line }
 		} else if (arg === 'event-db-get-history-branches') {
-			let branch_names
-			try {
-				branch_names = db.prepare(`
-					SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'optree_%';
-				`).all()
-				if (branch_names.length === 0)
-					return {
-						error: {
-							code: `history have no branches`,
-							message: `can't get history because it has no branches`,
-							stack: 'not available',
-						}
-					}
-			} catch (error) {
-				const { code, message, stack } = error
-				return { error: { code, message, stack } }
-			}
-			const branches = {}
-			for (let i = 0; i < branch_names.length; ++i) {
-				const { name } = branch_names[i]
-				const id = name.split('optree_')[1]
-				branches[id] = db.prepare(
-					`SELECT * FROM '${name}'`
-				).all()
-			}
-			return { branches }
+			return get_history_branches()
 		} else if (arg === 'event-db-add-history-branch') {
 			const root_branch_id = arg2 || uuid_nil
 			const root_operation_id = arg3 || uuid_nil
