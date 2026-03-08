@@ -513,6 +513,37 @@ app.whenReady().then(() => {
 				}}
 			else
 				return {error: {message: 'space_id is not valid uuid v7'}}
+		} else if (arg === 'event-set-operation-in-focus') {
+			const branch_id = arg2
+			const operation_id = arg3
+			if (!(branch_id in present_operations_in_branches))
+				return {error: {message: `branch ${branch_id} not found`}}
+
+			const { exists, error } = is_row_exist(
+				optree_id_to_name(branch_id), operation_id
+			)
+			if (error)
+				return { error }
+			if (!exists)
+				return {
+					error: {
+						code: `root operation ${
+								operation_id
+							} not found in branch ${
+								branch_id
+							}`,
+						message: `can't add branch for not existing operation ${
+								operation_id
+							} from branch ${
+								branch_id
+							}`,
+						stack: 'not available'
+					}
+				}
+			history_focus.branch_id = branch_id
+			history_focus.operation_id = operation_id
+			history_focus.is_present = present_operations_in_branches[branch_id].id === operation_id
+			return {history_focus}
 		}
 		return { uknown_command: true }
 	})

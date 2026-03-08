@@ -8,12 +8,38 @@ function optree_name_to_id(name) {
 	return name.split('optree_')[1]
 }
 window.addEventListener('DOMContentLoaded', () => {
+	function highlight_focus(new_last_operation_id, new_is_focus_on_present) {
+		const svg = document.getElementById('svg-history');
+		const hixel_focus_node = document.getElementById(new_last_operation_id)
+		if (hixel_focus_node) {
+			const prior_id = svg.dataset.last_operation_id
+			const hixel_prior_node = prior_id ? document.getElementById(prior_id) : null
+			hixel_prior_node && hixel_prior_node.setAttribute('fill', '#1C2333')
+			svg.dataset.last_operation_id = new_last_operation_id
+			const selection_color = new_is_focus_on_present ? '#FFB266' : '#F2AAEC'
+			hixel_focus_node.setAttribute('fill', selection_color)
+		}
+	}
 	function handle_show_history(render_sequence) {
 		const svg = document.getElementById('svg-history');
 		const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
 		const hixel_links = svg.getElementsByClassName('hixel-links')[0]
 		function set_operation_in_focus(node) {
-			alert(`not implemented yet, node id ${node.id}`)
+			const history_branch_in_focus = node.dataset.history_branch_id
+			const operation_in_focus = node.id
+			ipcRenderer
+				.invoke(
+					'invoke-handle-message', 'event-set-operation-in-focus',
+					history_branch_in_focus, operation_in_focus
+				)
+				.then((reply) => {
+					const { history_focus, error } = reply
+					if (history_focus) {
+						highlight_focus(history_focus.operation_id, history_focus.is_present)
+					} else if (error) {
+						alert(JSON.stringify(error))
+					}
+				})
 		}
 		hixel_bodies.innerHTML = ''
 		hixel_links.innerHTML = ''
@@ -112,14 +138,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			const new_focused_branch_id = arg2
 			const new_last_operation_id = arg3
 			const new_is_focus_on_present = arg4
-			//const svg = document.getElementById('svg-history');
-			// TODO: reset selection of prior focus node
-			const hixel_focus_node = document.getElementById(new_last_operation_id)
-			if (hixel_focus_node) {
-				const selection_color = new_is_focus_on_present ? '#FFB266' : '#F2AAEC'
-				hixel_focus_node.setAttribute('fill', selection_color)
-
-			}
+			highlight_focus(new_last_operation_id, new_is_focus_on_present)
 		}
 	})
 	ipcRenderer.send(
