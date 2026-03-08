@@ -8,14 +8,15 @@ function optree_name_to_id(name) {
 	return name.split('optree_')[1]
 }
 window.addEventListener('DOMContentLoaded', () => {
-	function highlight_focus(new_last_operation_id, new_is_focus_on_present) {
+	function highlight_focus(new_focus_branch_id, new_last_operation_id, new_is_focus_on_present) {
 		const svg = document.getElementById('svg-history');
 		const hixel_focus_node = document.getElementById(new_last_operation_id)
 		if (hixel_focus_node) {
-			const prior_id = svg.dataset.last_operation_id
+			const prior_id = svg.dataset.operation_id
 			const hixel_prior_node = prior_id ? document.getElementById(prior_id) : null
 			hixel_prior_node && hixel_prior_node.setAttribute('fill', '#1C2333')
-			svg.dataset.last_operation_id = new_last_operation_id
+			svg.dataset.branch_id = new_focus_branch_id
+			svg.dataset.operation_id = new_last_operation_id
 			const selection_color = new_is_focus_on_present ? '#FFB266' : '#F2AAEC'
 			hixel_focus_node.setAttribute('fill', selection_color)
 		}
@@ -35,7 +36,8 @@ window.addEventListener('DOMContentLoaded', () => {
 				.then((reply) => {
 					const { history_focus, error } = reply
 					if (history_focus) {
-						highlight_focus(history_focus.operation_id, history_focus.is_present)
+						const {branch_id, operation_id, is_present} = history_focus
+						highlight_focus(branch_id, operation_id, is_present)
 					} else if (error) {
 						alert(JSON.stringify(error))
 					}
@@ -122,7 +124,23 @@ window.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 	document.getElementById('button-add-history-branch').addEventListener('click', () => {
-		alert('add-history-branch not implemented yet')
+		const svg = document.getElementById('svg-history')
+		const result = document.getElementById('result-add-history-branch')
+		const root_branch_id = svg.dataset.branch_id
+		const root_operation_id = svg.dataset.operation_id
+		ipcRenderer
+			.invoke(
+				'invoke-handle-message', 'event-db-add-history-branch',
+				root_branch_id, root_operation_id
+			)
+			.then((reply) => {
+				if (reply.id) {
+					result.textContent = optree_id_to_name(reply.id)
+					// TODO: update history view
+				} else {
+					result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+				}
+			})
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
 		if (
@@ -138,7 +156,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			const new_focused_branch_id = arg2
 			const new_last_operation_id = arg3
 			const new_is_focus_on_present = arg4
-			highlight_focus(new_last_operation_id, new_is_focus_on_present)
+			highlight_focus(new_focused_branch_id, new_last_operation_id, new_is_focus_on_present)
 		}
 	})
 	ipcRenderer.send(
