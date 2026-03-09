@@ -243,6 +243,48 @@ function init_history_focus() {
 		history_focus.is_present = true
 	}
 }
+function get_history_line(top_branch, top_operation) {
+	let root_branch = top_branch
+	let root_operation = top_operation
+	const line = []
+	const branch_sequence = []
+	while (true) {
+		try {
+			const operations = db.prepare(
+				`SELECT * FROM '${optree_id_to_name(root_branch)}'`
+			).all()
+			const first = operations[0]
+			if (first.command !== '019cb3d8-82be-7c3f-b40f-a2534c42314a') { // create branch
+				return {
+					error: {
+						code: 'first operation command in history branch must be "create branch"',
+						message: 'can\'t get history line because first operation command is not "create branch"',
+						stack: 'not available'
+					}
+				}
+			}
+			branch_sequence.push({ root_branch, root_operation, operations })
+			root_branch = first.target
+			root_operation = first.parameter
+			if (root_branch === uuid_nil && root_operation === uuid_nil)
+				break
+		} catch (error) {
+			const { code, message, stack } = error
+			return { error: { code, message, stack } }
+		}
+	}
+	branch_sequence.reverse()
+	for (let i = 0; i < branch_sequence.length; ++i) {
+		const { root_operation, operations } = branch_sequence[i]
+		for (let j = 0; j < operations.length; ++j) {
+			const operation = operations[j]
+			line.push(operation)
+			if (operation.id === root_operation)
+				break
+		}
+	}
+	return { line }	
+}
 function add_operation(history_branch_id, desc) {
 	const table_name = optree_id_to_name(history_branch_id)
 	const { id, command, target, parameter } = desc
@@ -450,46 +492,9 @@ app.whenReady().then(() => {
 			}
 			return result
 		} else if (arg === 'event-db-get-history-line') {
-			let root_branch = arg2
-			let root_operation = arg3
-			const line = []
-			const branch_sequence = []
-			while (true) {
-				try {
-					const operations = db.prepare(
-						`SELECT * FROM '${optree_id_to_name(root_branch)}'`
-					).all()
-					const first = operations[0]
-					if (first.command !== '019cb3d8-82be-7c3f-b40f-a2534c42314a') { // create branch
-						return {
-							error: {
-								code: 'first operation command in history branch must be "create branch"',
-								message: 'can\'t get history line because first operation command is not "create branch"',
-								stack: 'not available'
-							}
-						}
-					}
-					branch_sequence.push({ root_branch, root_operation, operations })
-					root_branch = first.target
-					root_operation = first.parameter
-					if (root_branch === uuid_nil && root_operation === uuid_nil)
-						break
-				} catch (error) {
-					const { code, message, stack } = error
-					return { error: { code, message, stack } }
-				}
-			}
-			branch_sequence.reverse()
-			for (let i = 0; i < branch_sequence.length; ++i) {
-				const { root_operation, operations } = branch_sequence[i]
-				for (let j = 0; j < operations.length; ++j) {
-					const operation = operations[j]
-					line.push(operation)
-					if (operation.id === root_operation)
-						break
-				}
-			}
-			return { line }
+			const top_branch = arg2
+			const top_operation = arg3
+			return get_history_line(top_branch, top_operation)
 		} else if (arg === 'event-db-get-history-branches') {
 			return get_history_branches()
 		} else if (arg === 'event-db-add-history-branch') {
@@ -539,12 +544,15 @@ app.whenReady().then(() => {
 				}
 			}
 		} else if (arg === 'event-get-space-desc') {
-			const space_id = arg2, focus_branch_id = null, focus_operation_id = null
-			if (uuid_validate(space_id) && uuid_version(space_id))
-				return {desc: {
-					focus_branch_id, focus_operation_id, space_id,
-					message: 'not implemented'
-				}}
+			const space_id = arg2
+			if (uuid_validate(space_id) && uuid_version(space_id)) {
+				const {branch_id, operation_id} = history_focus
+				const history_line = get_history_line(branch_id, operation_id)
+				if (history_line.line)
+					return { desc: { space_id, history_focus, history_line: history_line.line } }
+				else
+					return { error: history_line.error }
+			}
 			else
 				return {error: {message: 'space_id is not valid uuid v7'}}
 		} else if (arg === 'event-set-operation-in-focus') {
