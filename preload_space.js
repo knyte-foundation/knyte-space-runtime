@@ -90,8 +90,10 @@ function show_space() {
 }
 window.addEventListener('DOMContentLoaded', () => {
 	show_space()
-	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
+	ipcRenderer.on('asynchronous-reply', (event, arg) => {
 		if (arg === 'event-set-operation-in-focus') {
+			show_space()
+		} else if (arg === 'event-add-operation') {
 			show_space()
 		}
 	})

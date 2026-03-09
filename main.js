@@ -594,8 +594,7 @@ app.whenReady().then(() => {
 			)
 			for (let space_window_id in registered_ipc_spaces) {
 				registered_ipc_spaces[space_window_id].send(
-					'asynchronous-reply', 'event-set-operation-in-focus',
-					branch_id, operation_id, is_present
+					'asynchronous-reply', 'event-set-operation-in-focus'
 				)
 			}
 			return {history_focus}
@@ -637,6 +636,11 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-operation',
 				patch_desc, history_focus
 			)
+			for (let space_window_id in registered_ipc_spaces) {
+				registered_ipc_spaces[space_window_id].send(
+					'asynchronous-reply', 'event-add-operation'
+				)
+			}
 		} else if (arg === 'event-add-history-branch') {
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
