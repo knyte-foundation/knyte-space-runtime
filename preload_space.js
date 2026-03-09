@@ -51,10 +51,27 @@ window.addEventListener('DOMContentLoaded', () => {
 							.invoke('invoke-handle-message', 'event-db-find-content-by-id', content)
 							.then((reply) => {
 								if (reply.content) {
-									placeholder.textContent = reply.content
+									try {
+										const space_desc = JSON.parse(reply.content)
+										const is_array = Array.isArray(space_desc)
+										if (is_array)
+											placeholder.textContent = reply.content
+										else {
+											placeholder.style.color = 'red'
+											placeholder.textContent = `content is not array\n\n${
+												reply.content
+											}`
+										}
+									} catch (error) {
+										placeholder.style.color = 'red'
+										placeholder.textContent = `content is not valid JSON\n\n${
+											reply.content
+										}`
+									}
 								} else {
 									placeholder.style.color = 'red'
-									placeholder.textContent = reply.not_found ? 'not found'
+									placeholder.textContent = reply.not_found
+										? 'content text not found'
 										: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 								}
 							})
