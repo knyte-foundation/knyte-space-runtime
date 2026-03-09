@@ -252,7 +252,7 @@ function add_operation(history_branch_id, desc) {
 				table_name
 			}' (id, command, target, parameter) VALUES (?, ?, ?, ?)
 		`).run(id, command, target, parameter)
-		return { id }
+		return { id, command, target, parameter }
 	} catch (error) {
 		const { code, message, stack } = error
 		return { error: { code, message, stack } }
@@ -613,10 +613,11 @@ app.whenReady().then(() => {
 			registered_ipc_renders[render_name] = event.sender
 			handle_all_windows_registered()
 		} else if (arg === 'event-add-operation') {
+			const patch_desc = arg2
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-operation',
-				history_render_sequence, history_focus
+				patch_desc, history_render_sequence, history_focus
 			)
 		} else if (arg === 'event-add-history-branch') {
 			const ipc_history = registered_ipc_renders['history']

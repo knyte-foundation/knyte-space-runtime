@@ -76,8 +76,12 @@ window.addEventListener('DOMContentLoaded', () => {
 				.then((reply) => {
 					if (reply.id) {
 						result.textContent = reply.id
+						const patch_desc = {
+							parent_branch_id: focused_branch_id, parent_operation_id: last_operation_id,
+							new_operation: reply
+						}
 						ipcRenderer.send(
-							'asynchronous-message', 'event-add-operation'
+							'asynchronous-message', 'event-add-operation', patch_desc
 						)
 					} else {
 						result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
