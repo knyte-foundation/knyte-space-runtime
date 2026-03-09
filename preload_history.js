@@ -21,37 +21,39 @@ window.addEventListener('DOMContentLoaded', () => {
 			hixel_focus_node.setAttribute('fill', selection_color)
 		}
 	}
+	function set_operation_in_focus(node) {
+		const history_branch_in_focus = node.dataset.history_branch_id
+		const operation_in_focus = node.id
+		ipcRenderer
+			.invoke(
+				'invoke-handle-message', 'event-set-operation-in-focus',
+				history_branch_in_focus, operation_in_focus
+			)
+			.then((reply) => {
+				const { history_focus, error } = reply
+				if (history_focus) {
+					const {branch_id, operation_id, is_present} = history_focus
+					highlight_focus(branch_id, operation_id, is_present)
+				} else if (error) {
+					alert(JSON.stringify(error))
+				}
+			})
+	}
 	function handle_show_history(render_sequence) {
 		const svg = document.getElementById('svg-history');
 		const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
 		const hixel_links = svg.getElementsByClassName('hixel-links')[0]
-		function set_operation_in_focus(node) {
-			const history_branch_in_focus = node.dataset.history_branch_id
-			const operation_in_focus = node.id
-			ipcRenderer
-				.invoke(
-					'invoke-handle-message', 'event-set-operation-in-focus',
-					history_branch_in_focus, operation_in_focus
-				)
-				.then((reply) => {
-					const { history_focus, error } = reply
-					if (history_focus) {
-						const {branch_id, operation_id, is_present} = history_focus
-						highlight_focus(branch_id, operation_id, is_present)
-					} else if (error) {
-						alert(JSON.stringify(error))
-					}
-				})
-		}
 		hixel_bodies.innerHTML = ''
 		hixel_links.innerHTML = ''
 		let cx = 32, cy = 32, r = 16, stroke_width = 4, cy_prior, node
 		for (let i = 0; i < render_sequence.length; ++i) {
 			const { root_operation, branch, branch_id } = render_sequence[i]
-			const root_hixel = root_operation === uuid_nil ? undefined : document.getElementById(root_operation)
+			const root_hixel = root_operation === uuid_nil
+				? undefined
+				: document.getElementById(root_operation)
 			const node_stroke_color = root_hixel !== null ? '#9DA2A6' : 'red'
 			// in 2 lines of code above
-				// root_hixel = null means it's not found, but required, warning situation, use red color
+				// root_hixel = null means it's not found, but required, use warning (red) color
 				// and root_hixel = undefined means it's not required, use normal color
 			const root_x = root_hixel ? parseFloat(root_hixel.getAttribute('cx')) : 0
 			const root_y = root_hixel ? parseFloat(root_hixel.getAttribute('cy')) : 0
@@ -123,6 +125,49 @@ window.addEventListener('DOMContentLoaded', () => {
 			cx += 80
 		}
 	}
+	function handle_patch_history(desc) {
+		const {parent_branch_id, parent_operation_id, new_operation} = desc
+		const svg = document.getElementById('svg-history');
+		const hixel_bodies = svg.getElementsByClassName('hixel-bodies')[0]
+		const hixel_links = svg.getElementsByClassName('hixel-links')[0]
+		const hixel_parent_node = document.getElementById(parent_operation_id)
+		if (hixel_parent_node) {
+			const parent_x = parseFloat(hixel_parent_node.getAttribute('cx'))
+			const parent_y = parseFloat(hixel_parent_node.getAttribute('cy'))
+			let cx = parent_x, cy = parent_y + 80,
+				r = 16, stroke_width = 4,
+				node_stroke_color = '#9DA2A6'
+			const node = document.createElementNS(
+				'http://www.w3.org/2000/svg', 'circle'
+			);
+			node.id = new_operation.id
+			node.dataset.history_branch_id = parent_branch_id
+			node.classList.add('hixel-selectable')
+			node.setAttribute('cx', cx)
+			node.setAttribute('cy', cy)
+			node.setAttribute('r', r)
+			node.setAttribute('stroke-width', stroke_width)
+			node.setAttribute('stroke', node_stroke_color)
+			node.setAttribute('fill', '#1C2333')
+			node.addEventListener('click', (event) => {
+				set_operation_in_focus(event.target)
+			})
+			hixel_bodies.append(node)
+			const link = document.createElementNS(
+				'http://www.w3.org/2000/svg', 'line'
+			);
+			const cy_prior = parent_y
+			link.setAttribute('x1', cx)
+			link.setAttribute('y1', cy_prior + r + stroke_width + 1)
+			link.setAttribute('x2', cx)
+			link.setAttribute('y2', cy - r - 5 * stroke_width)
+			link.setAttribute('stroke-width', stroke_width)
+			link.setAttribute('stroke', '#9DA2A6')
+			link.setAttribute('marker-start', 'url(#marker_trace_start)')
+			link.setAttribute('marker-end', 'url(#marker_trace_end)')
+			hixel_links.append(link)
+		}
+	}
 	document.getElementById('button-add-history-branch').addEventListener('click', () => {
 		const svg = document.getElementById('svg-history')
 		const result = document.getElementById('result-add-history-branch')
@@ -149,10 +194,11 @@ window.addEventListener('DOMContentLoaded', () => {
 			const patch_desc = arg2
 			console.log('patch_desc', patch_desc)
 			// TODO: optimize history view update
-			const render_sequence = arg3
+			//const render_sequence = arg3
 			const history_focus = arg4
 			const {branch_id, operation_id, is_present} = history_focus
-			handle_show_history(render_sequence)
+			//handle_show_history(render_sequence)
+			handle_patch_history(patch_desc)
 			highlight_focus(branch_id, operation_id, is_present)
 		} else if (arg === 'event-add-history-branch') {
 			const render_sequence = arg2
