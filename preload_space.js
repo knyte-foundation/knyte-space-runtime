@@ -54,7 +54,7 @@ window.addEventListener('DOMContentLoaded', () => {
 									placeholder.textContent = reply.content
 								} else {
 									placeholder.style.color = 'red'
-									placeholder.value = reply.not_found ? 'not found'
+									placeholder.textContent = reply.not_found ? 'not found'
 										: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 								}
 							})
