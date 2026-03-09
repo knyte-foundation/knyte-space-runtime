@@ -14,12 +14,45 @@ window.addEventListener('DOMContentLoaded', () => {
 	ipcRenderer
 		.invoke('invoke-handle-message', 'event-get-space-desc', space_id)
 		.then((reply) => {
-			const {desc, error} = reply
 			const placeholder = document.getElementById('placeholder')
-			placeholder.style.color = error ? 'red' : ''
-			placeholder.textContent = JSON.stringify(
-				desc || error, null, '\t'
-			)
+			placeholder.style.color = ''
+			const {desc, error} = reply
+			if (desc) {
+				if (!desc.history_focus.is_present)
+					document.title = `${document.title} [read-only]`
+				const line = desc.history_line
+				const knytes = {};
+				for (let i = 0; i < line.length; ++i) {
+					const { id, command, target, parameter } = line[i]
+					if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
+						// create knyte
+						!knytes[target] && (knytes[target] = {})
+					} else if (command === '0188dd27-0d1f-7d9f-8d58-b928173ace6f') {
+						// remove knyte
+						knytes[target] && (delete knytes[target])
+					} else if (command === '0188dd27-0f25-7763-8a72-fcdb42a3432f') {
+						// set knyte initial
+						knytes[target] && (knytes[target].initial = parameter)
+					} else if (command === '0188dd27-1114-777d-879a-d1b8bd08f08d') {
+						// set knyte terminal
+						knytes[target] && (knytes[target].terminal = parameter)
+					} else if (command === '0188dd27-12f5-732d-b53d-6e9519f5ac29') {
+						// set knyte content
+						knytes[target] && (knytes[target].content = parameter)
+					}
+				}
+				if (desc.space_id in knytes) {
+					const space_knyte = knytes[desc.space_id]
+					placeholder.textContent = JSON.stringify(space_knyte, null, '\t')
+					// TODO: show text content of space_knyte here
+				} else {
+					placeholder.style.color = 'red'
+					placeholder.textContent = `space ${desc.space_id} not found in knytes`
+				}
+			} else if (error) {
+				placeholder.style.color = 'red'
+				placeholder.textContent = JSON.stringify(error, null, '\t')
+			}
 		})
 })
 console.log(`preload_space.js ${space_number} ${space_id} ready`)
