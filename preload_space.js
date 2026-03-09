@@ -9,8 +9,8 @@ for (let i = 0; i < process.argv.length; ++i) {
 	else if (arg.indexOf(arg2) > -1)
 		space_id = arg.split(arg2)[1]
 }
-window.addEventListener('DOMContentLoaded', () => {
-	const window_id = `space ${space_number}`
+const window_id = `space ${space_number}`
+function show_space() {
 	document.title = `${window_id} ${space_id}`
 	ipcRenderer
 		.invoke('invoke-handle-message', 'event-get-space-desc', space_id)
@@ -46,7 +46,8 @@ window.addEventListener('DOMContentLoaded', () => {
 					const space_knyte = knytes[desc.space_id]
 					const {content} = space_knyte
 					if (!content) {
-						placeholder.textContent = ''
+						placeholder.style.color = 'red'
+						placeholder.textContent = 'content not defined'
 					} else {
 						ipcRenderer
 							.invoke('invoke-handle-message', 'event-db-find-content-by-id', content)
@@ -86,15 +87,12 @@ window.addEventListener('DOMContentLoaded', () => {
 				placeholder.textContent = JSON.stringify(error, null, '\t')
 			}
 		})
+}
+window.addEventListener('DOMContentLoaded', () => {
+	show_space()
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
 		if (arg === 'event-set-operation-in-focus') {
-			const new_focused_branch_id = arg2
-			const new_last_operation_id = arg3
-			const new_is_focus_on_present = arg4
-			console.log(
-				'event-set-operation-in-focus',
-				{new_focused_branch_id, new_last_operation_id, new_is_focus_on_present}
-			)
+			show_space()
 		}
 	})
 	ipcRenderer.send('asynchronous-message', 'event-register-ipc-space', window_id)
