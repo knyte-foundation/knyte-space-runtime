@@ -43,8 +43,22 @@ window.addEventListener('DOMContentLoaded', () => {
 				}
 				if (desc.space_id in knytes) {
 					const space_knyte = knytes[desc.space_id]
-					placeholder.textContent = JSON.stringify(space_knyte, null, '\t')
-					// TODO: show text content of space_knyte here
+					const {content} = space_knyte
+					if (!content) {
+						placeholder.textContent = ''
+					} else {
+						ipcRenderer
+							.invoke('invoke-handle-message', 'event-db-find-content-by-id', content)
+							.then((reply) => {
+								if (reply.content) {
+									placeholder.textContent = reply.content
+								} else {
+									placeholder.style.color = 'red'
+									placeholder.value = reply.not_found ? 'not found'
+										: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+								}
+							})
+					}
 				} else {
 					placeholder.style.color = 'red'
 					placeholder.textContent = `space ${desc.space_id} not found in knytes`
