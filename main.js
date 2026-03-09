@@ -592,6 +592,12 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-set-operation-in-focus',
 				branch_id, operation_id, is_present
 			)
+			for (let space_window_id in registered_ipc_spaces) {
+				registered_ipc_spaces[space_window_id].send(
+					'asynchronous-reply', 'event-set-operation-in-focus',
+					branch_id, operation_id, is_present
+				)
+			}
 			return {history_focus}
 		}
 		return { uknown_command: true }

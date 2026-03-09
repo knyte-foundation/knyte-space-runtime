@@ -85,7 +85,18 @@ window.addEventListener('DOMContentLoaded', () => {
 				placeholder.style.color = 'red'
 				placeholder.textContent = JSON.stringify(error, null, '\t')
 			}
-		})	
+		})
+	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
+		if (arg === 'event-set-operation-in-focus') {
+			const new_focused_branch_id = arg2
+			const new_last_operation_id = arg3
+			const new_is_focus_on_present = arg4
+			console.log(
+				'event-set-operation-in-focus',
+				{new_focused_branch_id, new_last_operation_id, new_is_focus_on_present}
+			)
+		}
+	})
 	ipcRenderer.send('asynchronous-message', 'event-register-ipc-space', window_id)
 })
 console.log(`preload_space.js ${space_number} ${space_id} ready`)
