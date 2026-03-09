@@ -7,7 +7,7 @@ const first_history_branch_id = uuid_nil
 const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
-let db, space_window_number = 0, registered_ipc_renders = {}
+let db, space_window_number = 0, registered_ipc_renders = {}, registered_ipc_spaces = {}
 let present_operation_ids = {} // operation_id -> true
 let present_operations_in_branches = {} // history_branch_id -> operation_id
 let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
@@ -32,6 +32,7 @@ function create_space_window(space_id) {
 	space_window.loadFile('index_space.html')
 	const window_id = `space ${space_number}`
 	space_window.on('closed', () => {
+		delete registered_ipc_spaces[window_id]
 		console.log(`${window_id} window closed`)
 	})
 }
@@ -620,6 +621,9 @@ app.whenReady().then(() => {
 			const render_name = arg2
 			registered_ipc_renders[render_name] = event.sender
 			handle_all_windows_registered()
+		} else if (arg === 'event-register-ipc-space') {
+			const window_id = arg2
+			registered_ipc_spaces[window_id] = event.sender
 		} else if (arg === 'event-add-operation') {
 			const patch_desc = arg2
 			const ipc_history = registered_ipc_renders['history']
@@ -651,6 +655,7 @@ app.whenReady().then(() => {
 		if (BrowserWindow.getAllWindows().length === 0) {
 			space_window_number = 0
 			registered_ipc_renders = {}
+			registered_ipc_spaces = {}
 			createAllWindows()
 		}
 	})

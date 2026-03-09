@@ -10,7 +10,8 @@ for (let i = 0; i < process.argv.length; ++i) {
 		space_id = arg.split(arg2)[1]
 }
 window.addEventListener('DOMContentLoaded', () => {
-	document.title = `${document.title} ${space_number} ${space_id}`
+	const window_id = `space ${space_number}`
+	document.title = `${window_id} ${space_id}`
 	ipcRenderer
 		.invoke('invoke-handle-message', 'event-get-space-desc', space_id)
 		.then((reply) => {
@@ -84,6 +85,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				placeholder.style.color = 'red'
 				placeholder.textContent = JSON.stringify(error, null, '\t')
 			}
-		})
+		})	
+	ipcRenderer.send('asynchronous-message', 'event-register-ipc-space', window_id)
 })
 console.log(`preload_space.js ${space_number} ${space_id} ready`)
