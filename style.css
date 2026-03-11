@@ -29,7 +29,7 @@ textarea {
 #svg-space {
 	background-color: #1C2333;
 	width: 100%;
-	height: calc(100vh - (32px + 32px) - 6px);
+	height: calc(100vh - 6px);
 }
 
 .hixel-selectable:hover {

@@ -81,6 +81,7 @@ function show_space() {
 	ipcRenderer
 		.invoke('invoke-handle-message', 'event-get-space-desc', space_id)
 		.then((reply) => {
+			document.body.style.margin = ''
 			const error_report = document.getElementById('pre-space-error-report')
 			error_report.style.color = ''
 			error_report.style.display = ''
@@ -149,6 +150,7 @@ function show_space() {
 										: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 								}
 								if (need_render) {
+									document.body.style.margin = 0
 									error_report.style.display = 'none'
 									render_result.style.display = ''
 									render_space(space_id, knytes, space_desc)
