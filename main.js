@@ -729,7 +729,15 @@ app.whenReady().then(() => {
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-history-branch',
 				history_render_sequence, history_focus
-			)			
+			)
+
+			// redraw all spaces
+			// TODO: do bulk patch instead of full redraw, update only affected spaces
+			for (let space_window_id in registered_ipc_spaces) {
+				registered_ipc_spaces[space_window_id].send(
+					'asynchronous-reply', 'event-set-operation-in-focus'
+				)
+			}
 		}
 	})
 
