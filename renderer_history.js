@@ -1,25 +1,25 @@
 const steering_gear = {
 	init: (target_element, x, y, zoom) => {
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const ghosts_element =
-			target_element.getElementsByClassName("ghosts")[0];
+			target_element.getElementsByClassName('ghosts')[0];
 		steering_element.setAttribute(
-			"transform",
+			'transform',
 			`matrix(${zoom}, 0, 0, ${zoom}, ${x}, ${y})`,
 		);
-		ghosts_element.setAttribute("transform", `scale(${zoom})`);
+		ghosts_element.setAttribute('transform', `scale(${zoom})`);
 	},
 	set_ctm: (steering_element, ghosts_element, matrix) => {
 		const { a, b, c, d, e, f } = matrix;
 		const zoom = a;
 		const s = `matrix(${a}, ${b}, ${c}, ${d}, ${e}, ${f})`;
-		steering_element.setAttribute("transform", s);
-		ghosts_element.setAttribute("transform", `scale(${zoom})`);
+		steering_element.setAttribute('transform', s);
+		ghosts_element.setAttribute('transform', `scale(${zoom})`);
 	},
 	screen_to_space_position: (target_element, screen_position) => {
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const p = target_element.createSVGPoint();
 		p.x = screen_position.x;
 		p.y = screen_position.y;
@@ -28,7 +28,7 @@ const steering_gear = {
 	},
 	space_to_screen_position: (target_element, space_position) => {
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const p = target_element.createSVGPoint();
 		p.x = space_position.x;
 		p.y = space_position.y;
@@ -37,9 +37,9 @@ const steering_gear = {
 	},
 	pan: (target_element, delta) => {
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const ghosts_element =
-			target_element.getElementsByClassName("ghosts")[0];
+			target_element.getElementsByClassName('ghosts')[0];
 		const ctm = steering_element.getCTM().inverse();
 		const offset = { x: delta.x * ctm.a, y: delta.y * ctm.a };
 		const new_ctm = ctm.inverse().translate(offset.x, offset.y);
@@ -47,9 +47,9 @@ const steering_gear = {
 	},
 	set_offset: (target_element, offset) => {
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const ghosts_element =
-			target_element.getElementsByClassName("ghosts")[0];
+			target_element.getElementsByClassName('ghosts')[0];
 		const ctm = steering_element.getCTM();
 		ctm.e = offset.x;
 		ctm.f = offset.y;
@@ -75,9 +75,9 @@ const steering_gear = {
 	zoom: (target_element, position, delta) => {
 		const zoom_scale = 0.5;
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const ghosts_element =
-			target_element.getElementsByClassName("ghosts")[0];
+			target_element.getElementsByClassName('ghosts')[0];
 		const z = Math.pow(1.0 + zoom_scale, delta);
 		const ctm = steering_gear.compute_scale_matrix_in_screen_position(
 			target_element,
@@ -89,9 +89,9 @@ const steering_gear = {
 	},
 	reset_zoom: (target_element, position) => {
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const ghosts_element =
-			target_element.getElementsByClassName("ghosts")[0];
+			target_element.getElementsByClassName('ghosts')[0];
 		const inverse_z = 1.0 / steering_element.getCTM().a;
 		const ctm = steering_gear.compute_scale_matrix_in_screen_position(
 			target_element,
@@ -103,7 +103,7 @@ const steering_gear = {
 	},
 	get_transform: (target_element) => {
 		const steering_element =
-			target_element.getElementsByClassName("steering")[0];
+			target_element.getElementsByClassName('steering')[0];
 		const matrix = steering_element.getCTM();
 		return { x: matrix.e, y: matrix.f, zoom: matrix.a };
 	}
