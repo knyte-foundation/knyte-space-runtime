@@ -81,8 +81,12 @@ function show_space() {
 	ipcRenderer
 		.invoke('invoke-handle-message', 'event-get-space-desc', space_id)
 		.then((reply) => {
-			const placeholder = document.getElementById('placeholder')
-			placeholder.style.color = ''
+			const error_report = document.getElementById('pre-space-error-report')
+			error_report.style.color = ''
+			error_report.style.display = ''
+			error_report.textContent = ''
+			const render_result = document.getElementById('div-space-result')
+			render_result.style.display = 'none'
 			const {desc, error} = reply
 			if (desc) {
 				if (!desc.history_focus.is_present)
@@ -112,8 +116,8 @@ function show_space() {
 					const space_knyte = knytes[desc.space_id]
 					const {content} = space_knyte
 					if (!content) {
-						placeholder.style.color = 'red'
-						placeholder.textContent = 'content not defined'
+						error_report.style.color = 'red'
+						error_report.textContent = 'content not defined'
 					} else {
 						ipcRenderer
 							.invoke('invoke-handle-message', 'event-db-find-content-by-id', content)
@@ -124,37 +128,40 @@ function show_space() {
 										space_desc = JSON.parse(reply.content)
 										const is_array = Array.isArray(space_desc)
 										if (is_array) {
-											placeholder.textContent = reply.content
 											need_render = true
 										}
 										else {
-											placeholder.style.color = 'red'
-											placeholder.textContent = `content is not array\n\n${
+											error_report.style.color = 'red'
+											error_report.textContent = `content is not array\n\n${
 												reply.content
 											}`
 										}
 									} catch (error) {
-										placeholder.style.color = 'red'
-										placeholder.textContent = `content is not valid JSON\n\n${
+										error_report.style.color = 'red'
+										error_report.textContent = `content is not valid JSON\n\n${
 											reply.content
 										}`
 									}
 								} else {
-									placeholder.style.color = 'red'
-									placeholder.textContent = reply.not_found
+									error_report.style.color = 'red'
+									error_report.textContent = reply.not_found
 										? 'content text not found'
 										: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 								}
-								need_render && render_space(space_id, knytes, space_desc)
+								if (need_render) {
+									error_report.style.display = 'none'
+									render_result.style.display = ''
+									render_space(space_id, knytes, space_desc)
+								}
 							})
 					}
 				} else {
-					placeholder.style.color = 'red'
-					placeholder.textContent = `space ${desc.space_id} not found in knytes`
+					error_report.style.color = 'red'
+					error_report.textContent = `space ${desc.space_id} not found in knytes`
 				}
 			} else if (error) {
-				placeholder.style.color = 'red'
-				placeholder.textContent = JSON.stringify(error, null, '\t')
+				error_report.style.color = 'red'
+				error_report.textContent = JSON.stringify(error, null, '\t')
 			}
 		})
 }
