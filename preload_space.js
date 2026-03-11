@@ -10,6 +10,75 @@ for (let i = 0; i < process.argv.length; ++i) {
 		space_id = arg.split(arg2)[1]
 }
 const window_id = `space ${space_number}`
+// TODO: avoid code duplication between render_knoxel_body and render_knoxel_broken
+function render_knoxel_body(knoxel) {
+	const {knoxel_id, knyte_id, x, y} = knoxel
+	const body = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'g'
+	);
+	body.id = knoxel_id
+	body.dataset.knyte_id = knyte_id
+	body.classList.add('space_knoxel')
+	body.setAttribute('transform', `translate(${x}, ${y})`)
+	const default_size = 32, stroke_width = 4,
+		stroke_color = '#9DA2A6', fill_color = '#1C2333'
+	const center = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'g'
+	);
+	center.setAttribute('transform', `translate(${-0.5*default_size}, ${-0.5*default_size})`)
+	const shape = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'rect'
+	);
+	shape.setAttribute('width', default_size)
+	shape.setAttribute('height', default_size)
+	shape.setAttribute('stroke-width', stroke_width)
+	shape.setAttribute('stroke', stroke_color)
+	shape.setAttribute('fill', fill_color)
+	center.append(shape)
+	body.append(center)
+	return body
+}
+function render_knoxel_broken(knoxel) {
+	const {knoxel_id, knyte_id, x, y} = knoxel
+	const body = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'g'
+	);
+	body.id = knoxel_id
+	body.dataset.knyte_id = knyte_id
+	body.classList.add('space_knoxel')
+	body.setAttribute('transform', `translate(${x}, ${y})`)
+	const default_size = 32, stroke_width = 4,
+		stroke_color = '#9DA2A6', fill_color = '#1C2333'
+	const center = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'g'
+	);
+	center.setAttribute('transform', `translate(${-0.5*default_size}, ${-0.5*default_size})`)
+	const shape = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'circle'
+	);
+	shape.setAttribute('cx', 0)
+	shape.setAttribute('cy', 0)
+	shape.setAttribute('r', 0.5*default_size)
+	shape.setAttribute('stroke-width', stroke_width)
+	shape.setAttribute('stroke', stroke_color)
+	shape.setAttribute('fill', fill_color)
+	center.append(shape)
+	body.append(center)
+	return body
+}
+function render_space(root_space_id, knytes, space_desc) {
+	const svg = document.getElementById('svg-space')
+	svg.dataset.knyte_id = root_space_id
+	const knoxel_bodies = svg.getElementsByClassName('knoxel-bodies')[0]
+	knoxel_bodies.innerHTML = ''
+	for (let i = 0; i < space_desc.length; ++i) {
+		const knoxel = space_desc[i]
+		const body = knoxel.knyte_id in knytes
+			? render_knoxel_body(knoxel)
+			: render_knoxel_broken(knoxel)
+		knoxel_bodies.append(body)
+	}
+}
 function show_space() {
 	document.title = `${window_id} ${space_id}`
 	ipcRenderer
@@ -52,12 +121,15 @@ function show_space() {
 						ipcRenderer
 							.invoke('invoke-handle-message', 'event-db-find-content-by-id', content)
 							.then((reply) => {
+								let space_desc, need_render
 								if (reply.content) {
 									try {
-										const space_desc = JSON.parse(reply.content)
+										space_desc = JSON.parse(reply.content)
 										const is_array = Array.isArray(space_desc)
-										if (is_array)
+										if (is_array) {
 											placeholder.textContent = reply.content
+											need_render = true
+										}
 										else {
 											placeholder.style.color = 'red'
 											placeholder.textContent = `content is not array\n\n${
@@ -76,6 +148,7 @@ function show_space() {
 										? 'content text not found'
 										: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 								}
+								need_render && render_space(space_id, knytes, space_desc)
 							})
 					}
 				} else {
