@@ -328,6 +328,32 @@ function create_history_branch(
 		return { error: { code, message, stack } }
 	}
 }
+function db_get_content_text_by_id(id) {
+	return db.prepare(
+		'SELECT content FROM contents WHERE id = ?'
+	).get(id)
+}
+function db_get_content_id_by_text(content) {
+	return db.prepare(
+		'SELECT id FROM contents WHERE content = ?'
+	).get(content)
+}
+function db_append_content(content) {
+	function append_row(sql, id, value) {
+		try {
+			db.prepare(sql).run(id, value)
+			return { id }
+		} catch (error) {
+			const { code, message, stack } = error
+			return { error: { code, message, stack } }
+		}
+	}
+	const id = uuidv7()
+	return append_row(
+		'INSERT INTO contents (id, content) VALUES (?, ?)',
+		id, content
+	)
+}
 
 async function check_max_memory(is_buffer) {
 	function sleep(ms) {
@@ -382,27 +408,12 @@ app.whenReady().then(() => {
 			create_space_window(space_id)
 			return { result: `space ${space_id} added` }
 		} else if (arg === 'event-db-append-content') {
-			function append_content(sql, id, content) {
-				try {
-					db.prepare(sql).run(id, content)
-					return { id }
-				} catch (error) {
-					const { code, message, stack } = error
-					return { error: { code, message, stack } }
-				}
-			}
-			const id = uuidv7()
 			const content = arg2
-			return append_content(
-				'INSERT INTO contents (id, content) VALUES (?, ?)',
-				id, content
-			)
+			return db_append_content(content)
 		} else if (arg === 'event-db-find-content-by-text') {
 			const content = arg2
 			try {
-				const result = db.prepare(
-					'SELECT id FROM contents WHERE content = ?'
-				).get(content)
+				const result = db_get_content_id_by_text(content)
 				return result ? { id: result.id } : { not_found: true }
 			} catch (error) {
 				const { code, message, stack } = error
@@ -411,9 +422,7 @@ app.whenReady().then(() => {
 		} else if (arg === 'event-db-find-content-by-id') {
 			const id = arg2
 			try {
-				const result = db.prepare(
-					'SELECT content FROM contents WHERE id = ?'
-				).get(id)
+				const result = db_get_content_text_by_id(id)
 				return result ? { content: result.content } : { not_found: true }
 			} catch (error) {
 				const { code, message, stack } = error
@@ -649,7 +658,78 @@ app.whenReady().then(() => {
 			)
 		} else if (arg === 'event-create-knyte-and-knoxel') {
 			console.log('event-create-knyte-and-knoxel', arg2)
-			// TODO: implement
+			function add_operation_2(desc) {
+				const { command, target, parameter } = desc
+				if (!history_focus.is_present)
+					return {
+						error: {
+							code: 'db is in read-only mode',
+							message: `can't add new operation to history because operation in focus ${
+								history_focus.operation_id
+								} !== operation in present`,
+							stack: 'not available',
+						}
+					}
+				const id = uuidv7()
+				const result = add_operation(history_focus.branch_id, { id, command, target, parameter })
+				if (!result.error) {
+					// patch history
+					const operation = {id, command, target, parameter}
+					delete present_operation_ids[history_focus.operation_id]
+					present_operation_ids[id] = true
+					present_operations_in_branches[history_focus.branch_id] = operation
+					let branch_to_append
+					for (let i = 0; i < history_render_sequence.length; ++i)
+						if (history_render_sequence[i].branch_id === history_focus.branch_id) {
+							branch_to_append = history_render_sequence[i].branch
+							break
+						}
+					branch_to_append && branch_to_append.push(operation)
+
+					// update actual focus
+					history_focus.operation_id = id
+					history_focus.is_present = true;
+				}
+			}
+			function add_knoxel_to_space(space_content_id, knoxel_desc) {
+				const space_desc_text = db_get_content_text_by_id(space_content_id).content
+				const space_desc = JSON.parse(space_desc_text)
+				space_desc.push(knoxel_desc)
+				const new_space_desc_text = JSON.stringify(space_desc, null, '\t')
+				let content = db_get_content_id_by_text(new_space_desc_text)
+				if (!content)
+					content = db_append_content(new_space_desc_text)
+				return content.id
+			}
+
+			const {root_space_id, root_space_content_id, x, y} = arg2
+			const knyte_id = uuidv7()
+			add_operation_2({
+				command: '0188dd27-0a2a-746a-976b-b705e8b16a1d', // create knyte
+				target: knyte_id, parameter: null
+			})
+			const knoxel_id = uuidv7()
+			const new_space_content_id = add_knoxel_to_space(root_space_content_id, { knoxel_id, knyte_id, x, y })
+			add_operation_2({
+				command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
+				target: root_space_id, parameter: new_space_content_id
+			})
+
+			// update graph focus
+			const {branch_id, operation_id, is_present} = history_focus
+			const ipc_graph = registered_ipc_renders['graph']
+			ipc_graph && ipc_graph.send(
+				'asynchronous-reply', 'event-set-operation-in-focus',
+				branch_id, operation_id, is_present
+			)
+
+			// redraw history
+			// TODO: do bulk patch instead of full redraw
+			const ipc_history = registered_ipc_renders['history']
+			ipc_history && ipc_history.send(
+				'asynchronous-reply', 'event-add-history-branch',
+				history_render_sequence, history_focus
+			)			
 		}
 	})
 

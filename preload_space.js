@@ -1,5 +1,5 @@
 const { ipcRenderer } = require('electron/renderer')
-let space_number = 0, space_id
+let space_number = 0, space_id, knytes = {}
 const arg1 = `--window-caption-number=`
 const arg2 = `--space_knyte-id=`
 for (let i = 0; i < process.argv.length; ++i) {
@@ -93,7 +93,7 @@ function show_space() {
 				if (!desc.history_focus.is_present)
 					document.title = `${document.title} [read-only]`
 				const line = desc.history_line
-				const knytes = {};
+				knytes = {};
 				for (let i = 0; i < line.length; ++i) {
 					const { id, command, target, parameter } = line[i]
 					if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
@@ -200,7 +200,10 @@ function handle_click_space(event) {
 			y: localY,
 		})
 		*/
-		const desc = { root_space_id: space_id, x: localX, y: localY }
+		const desc = {
+			root_space_id: space_id,
+			root_space_content_id: knytes[space_id].content,
+			x: localX, y: localY }
 	    if (shiftKey)
 			alert('not implemented yet')
 		else
