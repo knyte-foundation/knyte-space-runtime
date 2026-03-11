@@ -10,7 +10,31 @@ for (let i = 0; i < process.argv.length; ++i) {
 		space_id = arg.split(arg2)[1]
 }
 const window_id = `space ${space_number}`
-// TODO: avoid code duplication between render_knoxel_body and render_knoxel_broken
+function create_shape_rect(desc) {
+	const {default_size, stroke_width, stroke_color, fill_color} = desc
+	const shape = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'rect'
+	);
+	shape.setAttribute('width', default_size)
+	shape.setAttribute('height', default_size)
+	shape.setAttribute('stroke-width', stroke_width)
+	shape.setAttribute('stroke', stroke_color)
+	shape.setAttribute('fill', fill_color)
+	return shape
+}
+function create_shape_circle(desc) {
+	const {default_size, stroke_width, stroke_color, fill_color} = desc
+	const shape = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'circle'
+	);
+	shape.setAttribute('cx', 0)
+	shape.setAttribute('cy', 0)
+	shape.setAttribute('r', 0.5*default_size)
+	shape.setAttribute('stroke-width', stroke_width)
+	shape.setAttribute('stroke', stroke_color)
+	shape.setAttribute('fill', fill_color)
+	return shape
+}
 function render_knoxel_body(knoxel) {
 	const {knoxel_id, knyte_id, x, y} = knoxel
 	const body = document.createElementNS(
@@ -26,14 +50,9 @@ function render_knoxel_body(knoxel) {
 		'http://www.w3.org/2000/svg', 'g'
 	);
 	center.setAttribute('transform', `translate(${-0.5*default_size}, ${-0.5*default_size})`)
-	const shape = document.createElementNS(
-		'http://www.w3.org/2000/svg', 'rect'
-	);
-	shape.setAttribute('width', default_size)
-	shape.setAttribute('height', default_size)
-	shape.setAttribute('stroke-width', stroke_width)
-	shape.setAttribute('stroke', stroke_color)
-	shape.setAttribute('fill', fill_color)
+	const shape = create_shape_rect({
+		default_size, stroke_width, stroke_color, fill_color
+	})
 	center.append(shape)
 	body.append(center)
 	return body
@@ -53,15 +72,9 @@ function render_knoxel_broken(knoxel) {
 		'http://www.w3.org/2000/svg', 'g'
 	);
 	center.setAttribute('transform', `translate(${-0.5*default_size}, ${-0.5*default_size})`)
-	const shape = document.createElementNS(
-		'http://www.w3.org/2000/svg', 'circle'
-	);
-	shape.setAttribute('cx', 0)
-	shape.setAttribute('cy', 0)
-	shape.setAttribute('r', 0.5*default_size)
-	shape.setAttribute('stroke-width', stroke_width)
-	shape.setAttribute('stroke', stroke_color)
-	shape.setAttribute('fill', fill_color)
+	const shape = create_shape_circle({
+		default_size, stroke_width, stroke_color, fill_color
+	})
 	center.append(shape)
 	body.append(center)
 	return body
