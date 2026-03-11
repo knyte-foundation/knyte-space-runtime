@@ -35,7 +35,7 @@ function create_shape_circle(desc) {
 	shape.setAttribute('fill', fill_color)
 	return shape
 }
-function render_knoxel_body(knoxel) {
+function render_knoxel_body(knoxel, create_shape) {
 	const {knoxel_id, knyte_id, x, y} = knoxel
 	const body = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
@@ -50,34 +50,18 @@ function render_knoxel_body(knoxel) {
 		'http://www.w3.org/2000/svg', 'g'
 	);
 	center.setAttribute('transform', `translate(${-0.5*default_size}, ${-0.5*default_size})`)
-	const shape = create_shape_rect({
+	const shape = create_shape({
 		default_size, stroke_width, stroke_color, fill_color
 	})
 	center.append(shape)
 	body.append(center)
-	return body
+	return body	
 }
-function render_knoxel_broken(knoxel) {
-	const {knoxel_id, knyte_id, x, y} = knoxel
-	const body = document.createElementNS(
-		'http://www.w3.org/2000/svg', 'g'
-	);
-	body.id = knoxel_id
-	body.dataset.knyte_id = knyte_id
-	body.classList.add('space_knoxel')
-	body.setAttribute('transform', `translate(${x}, ${y})`)
-	const default_size = 32, stroke_width = 4,
-		stroke_color = '#9DA2A6', fill_color = '#1C2333'
-	const center = document.createElementNS(
-		'http://www.w3.org/2000/svg', 'g'
-	);
-	center.setAttribute('transform', `translate(${-0.5*default_size}, ${-0.5*default_size})`)
-	const shape = create_shape_circle({
-		default_size, stroke_width, stroke_color, fill_color
-	})
-	center.append(shape)
-	body.append(center)
-	return body
+function render_knoxel_body_solid(knoxel) {
+	return render_knoxel_body(knoxel, create_shape_rect)
+}
+function render_knoxel_body_broken(knoxel) {
+	return render_knoxel_body(knoxel, create_shape_circle)
 }
 function render_space(root_space_id, knytes, space_desc) {
 	const svg = document.getElementById('svg-space')
@@ -87,8 +71,8 @@ function render_space(root_space_id, knytes, space_desc) {
 	for (let i = 0; i < space_desc.length; ++i) {
 		const knoxel = space_desc[i]
 		const body = knoxel.knyte_id in knytes
-			? render_knoxel_body(knoxel)
-			: render_knoxel_broken(knoxel)
+			? render_knoxel_body_solid(knoxel)
+			: render_knoxel_body_broken(knoxel)
 		knoxel_bodies.append(body)
 	}
 }
