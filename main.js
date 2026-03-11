@@ -647,6 +647,9 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-history-branch',
 				history_render_sequence, history_focus
 			)
+		} else if (arg === 'event-create-knyte-and-knoxel') {
+			console.log('event-create-knyte-and-knoxel', arg2)
+			// TODO: implement
 		}
 	})
 

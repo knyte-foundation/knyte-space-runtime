@@ -167,6 +167,46 @@ function show_space() {
 			}
 		})
 }
+function convert_client_to_local(currentTarget, clientX, clientY) {
+	const rect = currentTarget.getBoundingClientRect();
+	return {
+		localX: clientX - rect.left,
+		localY: clientY - rect.top,
+	};
+}
+function handle_click_space(event) {
+    const {
+        currentTarget,
+        clientX,
+        clientY,
+        altKey,
+        ctrlKey,
+        shiftKey,
+        metaKey,
+    } = event
+
+    if (!altKey && (shiftKey ^ (metaKey || ctrlKey))) {
+	    event.stopPropagation()
+    	event.preventDefault()
+		const { localX, localY } = convert_client_to_local(
+			currentTarget,
+			clientX,
+			clientY,
+		)
+		/*
+		// TODO: uncomment when navifation will be ready
+		const { x, y } = steering_gear.screen_to_space_position(space_root, {
+			x: localX,
+			y: localY,
+		})
+		*/
+		const desc = { root_space_id: space_id, x: localX, y: localY }
+	    if (shiftKey)
+			alert('not implemented yet')
+		else
+			ipcRenderer.send('asynchronous-message', 'event-create-knyte-and-knoxel', desc)
+	}
+}
 window.addEventListener('DOMContentLoaded', () => {
 	show_space()
 	ipcRenderer.on('asynchronous-reply', (event, arg) => {
@@ -177,5 +217,8 @@ window.addEventListener('DOMContentLoaded', () => {
 		}
 	})
 	ipcRenderer.send('asynchronous-message', 'event-register-ipc-space', window_id)
+	document.getElementById('svg-space').addEventListener(
+		'click', handle_click_space, { passive: false }
+	)
 })
 console.log(`preload_space.js ${space_number} ${space_id} ready`)
