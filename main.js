@@ -301,6 +301,82 @@ function add_operation(history_branch_id, desc) {
 		return { error: { code, message, stack } }
 	}
 }
+function add_operation_2(desc) {
+	const { command, target, parameter } = desc
+	if (!history_focus.is_present)
+		return {
+			error: {
+				code: 'db is in read-only mode',
+				message: `can't add new operation to history because operation in focus ${
+					history_focus.operation_id
+					} !== operation in present`,
+				stack: 'not available',
+			}
+		}
+	const id = uuidv7()
+	const result = add_operation(history_focus.branch_id, { id, command, target, parameter })
+	if (!result.error) {
+		// patch history
+		const operation = {id, command, target, parameter}
+		delete present_operation_ids[history_focus.operation_id]
+		present_operation_ids[id] = true
+		present_operations_in_branches[history_focus.branch_id] = operation
+		let branch_to_append
+		for (let i = 0; i < history_render_sequence.length; ++i)
+			if (history_render_sequence[i].branch_id === history_focus.branch_id) {
+				branch_to_append = history_render_sequence[i].branch
+				break
+			}
+		branch_to_append && branch_to_append.push(operation)
+
+		// update actual focus
+		history_focus.operation_id = id
+		history_focus.is_present = true;
+	}
+}
+function add_knoxel_to_space(space_content_id, knoxel_desc) {
+	const space_desc_text = db_get_content_text_by_id(space_content_id).content
+	const space_desc = JSON.parse(space_desc_text)
+	space_desc.push(knoxel_desc)
+	const new_space_desc_text = JSON.stringify(space_desc, null, '\t')
+	let content = db_get_content_id_by_text(new_space_desc_text)
+	if (!content)
+		content = db_append_content(new_space_desc_text)
+	return content.id
+}
+function add_knoxel_to_space_2(desc) {
+	const {root_space_id, root_space_content_id, knyte_id, x, y} = desc
+	const knoxel_id = uuidv7()
+	const new_space_content_id = add_knoxel_to_space(root_space_content_id, { knoxel_id, knyte_id, x, y })
+	add_operation_2({
+		command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
+		target: root_space_id, parameter: new_space_content_id
+	})
+
+	// update graph focus
+	const {branch_id, operation_id, is_present} = history_focus
+	const ipc_graph = registered_ipc_renders['graph']
+	ipc_graph && ipc_graph.send(
+		'asynchronous-reply', 'event-set-operation-in-focus',
+		branch_id, operation_id, is_present
+	)
+
+	// redraw history
+	// TODO: do bulk patch instead of full redraw
+	const ipc_history = registered_ipc_renders['history']
+	ipc_history && ipc_history.send(
+		'asynchronous-reply', 'event-add-history-branch',
+		history_render_sequence, history_focus
+	)
+
+	// redraw all spaces
+	// TODO: do bulk patch instead of full redraw, update only affected spaces
+	for (let space_window_id in registered_ipc_spaces) {
+		registered_ipc_spaces[space_window_id].send(
+			'asynchronous-reply', 'event-set-operation-in-focus'
+		)
+	}
+}
 function create_history_branch(
 	history_branch_id, root_branch_id, root_operation_id
 ) {
@@ -656,86 +732,23 @@ app.whenReady().then(() => {
 				history_render_sequence, history_focus
 			)
 		} else if (arg === 'event-create-knyte-and-knoxel') {
-			function add_operation_2(desc) {
-				const { command, target, parameter } = desc
-				if (!history_focus.is_present)
-					return {
-						error: {
-							code: 'db is in read-only mode',
-							message: `can't add new operation to history because operation in focus ${
-								history_focus.operation_id
-								} !== operation in present`,
-							stack: 'not available',
-						}
-					}
-				const id = uuidv7()
-				const result = add_operation(history_focus.branch_id, { id, command, target, parameter })
-				if (!result.error) {
-					// patch history
-					const operation = {id, command, target, parameter}
-					delete present_operation_ids[history_focus.operation_id]
-					present_operation_ids[id] = true
-					present_operations_in_branches[history_focus.branch_id] = operation
-					let branch_to_append
-					for (let i = 0; i < history_render_sequence.length; ++i)
-						if (history_render_sequence[i].branch_id === history_focus.branch_id) {
-							branch_to_append = history_render_sequence[i].branch
-							break
-						}
-					branch_to_append && branch_to_append.push(operation)
-
-					// update actual focus
-					history_focus.operation_id = id
-					history_focus.is_present = true;
-				}
-			}
-			function add_knoxel_to_space(space_content_id, knoxel_desc) {
-				const space_desc_text = db_get_content_text_by_id(space_content_id).content
-				const space_desc = JSON.parse(space_desc_text)
-				space_desc.push(knoxel_desc)
-				const new_space_desc_text = JSON.stringify(space_desc, null, '\t')
-				let content = db_get_content_id_by_text(new_space_desc_text)
-				if (!content)
-					content = db_append_content(new_space_desc_text)
-				return content.id
-			}
-
 			const {root_space_id, root_space_content_id, x, y} = arg2
+			// TODO: check are root_space_id, root_space_content_id correct uuids
 			const knyte_id = uuidv7()
 			add_operation_2({
 				command: '0188dd27-0a2a-746a-976b-b705e8b16a1d', // create knyte
 				target: knyte_id, parameter: null
 			})
-			const knoxel_id = uuidv7()
-			const new_space_content_id = add_knoxel_to_space(root_space_content_id, { knoxel_id, knyte_id, x, y })
-			add_operation_2({
-				command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
-				target: root_space_id, parameter: new_space_content_id
+			add_knoxel_to_space_2({
+				root_space_id, root_space_content_id, knyte_id, x, y
 			})
-
-			// update graph focus
-			const {branch_id, operation_id, is_present} = history_focus
-			const ipc_graph = registered_ipc_renders['graph']
-			ipc_graph && ipc_graph.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
-				branch_id, operation_id, is_present
-			)
-
-			// redraw history
-			// TODO: do bulk patch instead of full redraw
-			const ipc_history = registered_ipc_renders['history']
-			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-add-history-branch',
-				history_render_sequence, history_focus
-			)
-
-			// redraw all spaces
-			// TODO: do bulk patch instead of full redraw, update only affected spaces
-			for (let space_window_id in registered_ipc_spaces) {
-				registered_ipc_spaces[space_window_id].send(
-					'asynchronous-reply', 'event-set-operation-in-focus'
-				)
-			}
+		} else if (arg === 'event-create-knoxel-for-knyte') {
+			const {root_space_id, root_space_content_id, knyte_id, x, y} = arg2
+			// TODO: check if (knyte_id in knytes) - it must exist at this moment
+			// TODO: check are root_space_id, root_space_content_id, knyte_id correct uuids
+			add_knoxel_to_space_2({
+				root_space_id, root_space_content_id, knyte_id, x, y
+			})
 		}
 	})
 

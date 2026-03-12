@@ -204,10 +204,38 @@ function handle_click_space(event) {
 			root_space_id: space_id,
 			root_space_content_id: knytes[space_id].content,
 			x: localX, y: localY }
-	    if (shiftKey)
-			alert('not implemented yet')
-		else
+	    if (shiftKey) {
+			const dialog = document.getElementById('prompt-knyte-id-dialog')
+			const input = document.getElementById('prompt-knyte-id-input')
+			const button_ok = document.getElementById('prompt-knyte-id-ok')
+			const button_cancel = document.getElementById('prompt-knyte-id-cancel')
+			dialog.showModal()
+			input.focus()
+			dialog.onclose = () => {
+				input.value = ''
+    			if (!dialog.returnValue)
+					return
+				desc.knyte_id = dialog.returnValue
+				ipcRenderer.send('asynchronous-message', 'event-create-knoxel-for-knyte', desc)
+			}
+			button_ok.onclick = () => {
+				dialog.close(input.value)
+			}
+			button_cancel.onclick = () => {
+				dialog.close('')
+			}
+			input.onkeydown = (event) => {
+				if (event.code === 'Enter') {
+					event.preventDefault()
+					dialog.close(input.value)
+				} else if (event.code === 'Escape') {
+					event.preventDefault()
+					dialog.close('')
+				}
+			}
+		} else {
 			ipcRenderer.send('asynchronous-message', 'event-create-knyte-and-knoxel', desc)
+		}
 	}
 }
 window.addEventListener('DOMContentLoaded', () => {
