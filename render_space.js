@@ -115,6 +115,14 @@ function convert_client_to_local(currentTarget, clientX, clientY) {
 		localY: clientY - rect.top,
 	}
 }
+function get_data_thru_parents(element, data_name) {
+	if (!element)
+		return { data: null, element: null }
+	const data = element.dataset[data_name]
+	if (!data)
+		return get_data_thru_parents(element.parentElement, data_name)
+	return { data, element }
+}
 
 function space_on_wheel(event) {
 	// ctrlKey + wheel means touch pad scale gesture
@@ -203,16 +211,16 @@ document.addEventListener('keydown', (event) => {
 	const focused_element = document.elementFromPoint(clientX, clientY)
 	if (code === 'KeyI' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		event.preventDefault()
-		alert('not implemented yet')
-		/*
-		if (focused_element && focused_element.id) {
-			const result = document.getElementById('result-operation-id-text')
-			result.value = focused_element.id
-			document.getElementById('result-operation-id-dialog').showModal()
-			result.focus()
-			result.select()
+		if (focused_element) {
+			const { data: id } = get_data_thru_parents(focused_element, "knyte_id")
+			if (id) {
+				const result = document.getElementById('result-operation-id-text')
+				result.value = id
+				document.getElementById('result-operation-id-dialog').showModal()
+				result.focus()
+				result.select()
+			}
 		}
-		*/
 	} else if (code === 'KeyO' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		steering_gear.init(root, 0, 0, 1)
 	} else if (code === 'Digit1' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
