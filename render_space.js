@@ -214,9 +214,9 @@ document.addEventListener('keydown', (event) => {
 		if (focused_element) {
 			const { data: id } = get_data_thru_parents(focused_element, "knyte_id")
 			if (id) {
-				const result = document.getElementById('result-operation-id-text')
+				const result = document.getElementById('result-knyte-id-text')
 				result.value = id
-				document.getElementById('result-operation-id-dialog').showModal()
+				document.getElementById('result-knyte-id-dialog').showModal()
 				result.focus()
 				result.select()
 			}
