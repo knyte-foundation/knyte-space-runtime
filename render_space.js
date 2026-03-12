@@ -228,5 +228,63 @@ document.addEventListener('keydown', (event) => {
 		steering_gear.reset_zoom(root, mousemove_position);
 	}
 })
+function handle_click_space(event) {
+    const {
+        currentTarget,
+        clientX,
+        clientY,
+        altKey,
+        ctrlKey,
+        shiftKey,
+        metaKey,
+    } = event
 
+    if (!altKey && (shiftKey ^ (metaKey || ctrlKey))) {
+	    event.stopPropagation()
+    	event.preventDefault()
+		const { localX, localY } = convert_client_to_local(
+			currentTarget,
+			clientX,
+			clientY,
+		)
+		const { x, y } = steering_gear.screen_to_space_position(root, {
+			x: localX,
+			y: localY,
+		})
+	    if (shiftKey) {
+			const dialog = document.getElementById('prompt-knyte-id-dialog')
+			const input = document.getElementById('prompt-knyte-id-input')
+			const button_ok = document.getElementById('prompt-knyte-id-ok')
+			const button_cancel = document.getElementById('prompt-knyte-id-cancel')
+			dialog.showModal()
+			input.focus()
+			dialog.onclose = () => {
+				input.value = ''
+    			if (!dialog.returnValue)
+					return
+				window.core_api.create_knoxel_for_knyte({ knyte_id: dialog.returnValue, x, y })
+			}
+			button_ok.onclick = () => {
+				dialog.close(input.value)
+			}
+			button_cancel.onclick = () => {
+				dialog.close('')
+			}
+			input.onkeydown = (event) => {
+				if (event.code === 'Enter') {
+					event.preventDefault()
+					dialog.close(input.value)
+				} else if (event.code === 'Escape') {
+					event.preventDefault()
+					dialog.close('')
+				}
+			}
+		} else {
+			window.core_api.create_knyte_and_knoxel({ x, y })
+		}
+	}
+}
+document.getElementById('svg-space').addEventListener(
+	'click', handle_click_space, { passive: false }
+)
 console.log('render_space.js ready')

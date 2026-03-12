@@ -1,4 +1,5 @@
 const { ipcRenderer } = require('electron/renderer')
+const { contextBridge } = require('electron')
 let space_number = 0, space_id, knytes = {}
 const arg1 = `--window-caption-number=`
 const arg2 = `--space_knyte-id=`
@@ -174,70 +175,18 @@ function show_space() {
 			}
 		})
 }
-function handle_click_space(event) {
-    const {
-        currentTarget,
-        clientX,
-        clientY,
-        altKey,
-        ctrlKey,
-        shiftKey,
-        metaKey,
-    } = event
-
-    if (!altKey && (shiftKey ^ (metaKey || ctrlKey))) {
-	    event.stopPropagation()
-    	event.preventDefault()
-		const { localX, localY } = convert_client_to_local(
-			currentTarget,
-			clientX,
-			clientY,
-		)
-		/*
-		// TODO: uncomment when navifation will be ready
-		const { x, y } = steering_gear.screen_to_space_position(space_root, {
-			x: localX,
-			y: localY,
-		})
-		*/
-		const desc = {
-			root_space_id: space_id,
-			root_space_content_id: knytes[space_id].content,
-			x: localX, y: localY }
-	    if (shiftKey) {
-			const dialog = document.getElementById('prompt-knyte-id-dialog')
-			const input = document.getElementById('prompt-knyte-id-input')
-			const button_ok = document.getElementById('prompt-knyte-id-ok')
-			const button_cancel = document.getElementById('prompt-knyte-id-cancel')
-			dialog.showModal()
-			input.focus()
-			dialog.onclose = () => {
-				input.value = ''
-    			if (!dialog.returnValue)
-					return
-				desc.knyte_id = dialog.returnValue
-				ipcRenderer.send('asynchronous-message', 'event-create-knoxel-for-knyte', desc)
-			}
-			button_ok.onclick = () => {
-				dialog.close(input.value)
-			}
-			button_cancel.onclick = () => {
-				dialog.close('')
-			}
-			input.onkeydown = (event) => {
-				if (event.code === 'Enter') {
-					event.preventDefault()
-					dialog.close(input.value)
-				} else if (event.code === 'Escape') {
-					event.preventDefault()
-					dialog.close('')
-				}
-			}
-		} else {
-			ipcRenderer.send('asynchronous-message', 'event-create-knyte-and-knoxel', desc)
-		}
+contextBridge.exposeInMainWorld('core_api', {
+	create_knoxel_for_knyte: (desc) => {
+		desc.root_space_id = space_id
+		desc.root_space_content_id = knytes[space_id].content
+		ipcRenderer.send('asynchronous-message', 'event-create-knoxel-for-knyte', desc)
+	},
+	create_knyte_and_knoxel: (desc) => {
+		desc.root_space_id = space_id
+		desc.root_space_content_id = knytes[space_id].content
+		ipcRenderer.send('asynchronous-message', 'event-create-knyte-and-knoxel', desc)
 	}
-}
+})
 window.addEventListener('DOMContentLoaded', () => {
 	show_space()
 	ipcRenderer.on('asynchronous-reply', (event, arg) => {
@@ -248,8 +197,5 @@ window.addEventListener('DOMContentLoaded', () => {
 		}
 	})
 	ipcRenderer.send('asynchronous-message', 'event-register-ipc-space', window_id)
-	document.getElementById('svg-space').addEventListener(
-		'click', handle_click_space, { passive: false }
-	)
 })
 console.log(`preload_space.js ${space_number} ${space_id} ready`)
