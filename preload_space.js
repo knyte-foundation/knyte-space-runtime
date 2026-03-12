@@ -10,6 +10,13 @@ for (let i = 0; i < process.argv.length; ++i) {
 		space_id = arg.split(arg2)[1]
 }
 const window_id = `space ${space_number}`
+function convert_client_to_local(currentTarget, clientX, clientY) {
+	const rect = currentTarget.getBoundingClientRect()
+	return {
+		localX: clientX - rect.left,
+		localY: clientY - rect.top,
+	}
+}
 function create_shape_rect(desc) {
 	const {default_size, stroke_width, stroke_color, fill_color} = desc
 	const shape = document.createElementNS(
@@ -166,13 +173,6 @@ function show_space() {
 				error_report.textContent = JSON.stringify(error, null, '\t')
 			}
 		})
-}
-function convert_client_to_local(currentTarget, clientX, clientY) {
-	const rect = currentTarget.getBoundingClientRect();
-	return {
-		localX: clientX - rect.left,
-		localY: clientY - rect.top,
-	};
 }
 function handle_click_space(event) {
     const {

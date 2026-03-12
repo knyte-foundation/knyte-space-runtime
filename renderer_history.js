@@ -108,6 +108,13 @@ const steering_gear = {
 		return { x: matrix.e, y: matrix.f, zoom: matrix.a };
 	}
 };
+function convert_client_to_local(currentTarget, clientX, clientY) {
+	const rect = currentTarget.getBoundingClientRect()
+	return {
+		localX: clientX - rect.left,
+		localY: clientY - rect.top,
+	}
+}
 
 function space_on_wheel(event) {
 	// ctrlKey + wheel means touch pad scale gesture
@@ -140,13 +147,6 @@ function space_on_wheel(event) {
 	event.preventDefault();
 }
 let previous = {};
-function convert_client_to_local(currentTarget, clientX, clientY) {
-	const rect = currentTarget.getBoundingClientRect();
-	return {
-		localX: clientX - rect.left,
-		localY: clientY - rect.top,
-	};
-}
 function space_on_mousemove(event) {
 	const { currentTarget, buttons, clientX, clientY } = event;
 	const { localX, localY } = convert_client_to_local(
