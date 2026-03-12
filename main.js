@@ -456,7 +456,6 @@ app.whenReady().then(() => {
 				const result = db.prepare(
 					`SELECT id FROM '${optree_id_to_name(history_branch_in_focus)}' ORDER BY id DESC LIMIT 1;`
 				).get()
-				console.log('operation_in_present', result)
 				operation_in_present = result.id
 			} catch (error) {
 				const { code, message, stack } = error
@@ -657,7 +656,6 @@ app.whenReady().then(() => {
 				history_render_sequence, history_focus
 			)
 		} else if (arg === 'event-create-knyte-and-knoxel') {
-			console.log('event-create-knyte-and-knoxel', arg2)
 			function add_operation_2(desc) {
 				const { command, target, parameter } = desc
 				if (!history_focus.is_present)
