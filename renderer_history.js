@@ -171,11 +171,6 @@ function space_on_mousemove(event) {
 	previous.clientX = clientX;
 	previous.clientY = clientY;
 }
-function get_svg_parent(element) {
-	if (!element) return null;
-	else if (element.tagName === "svg" && element.dataset.knyte_id) return element;
-	return get_svg_parent(element.parentElement);
-}
 
 const root = document.getElementById('svg-history')
 root.addEventListener("wheel", space_on_wheel, { passive: false });
