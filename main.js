@@ -288,6 +288,25 @@ function get_history_line(top_branch, top_operation) {
 	}
 	return { line }	
 }
+function apply_operation_to_knytes(operation) {
+	const { id, command, target, parameter } = operation
+	if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
+		// create knyte
+		!knytes[target] && (knytes[target] = {})
+	} else if (command === '0188dd27-0d1f-7d9f-8d58-b928173ace6f') {
+		// remove knyte
+		knytes[target] && (delete knytes[target])
+	} else if (command === '0188dd27-0f25-7763-8a72-fcdb42a3432f') {
+		// set knyte initial
+		knytes[target] && (knytes[target].initial = parameter)
+	} else if (command === '0188dd27-1114-777d-879a-d1b8bd08f08d') {
+		// set knyte terminal
+		knytes[target] && (knytes[target].terminal = parameter)
+	} else if (command === '0188dd27-12f5-732d-b53d-6e9519f5ac29') {
+		// set knyte content
+		knytes[target] && (knytes[target].content = parameter)
+	}
+}
 function get_actual_knytes(top_branch, top_operation) {
 	if (
 		knytes_focus.branch_id === top_branch &&
@@ -298,28 +317,12 @@ function get_actual_knytes(top_branch, top_operation) {
 	if (!history_line.line)
 		return { error: history_line.error }
 	const { line } = history_line
-	knytes_focus.branch_id = top_branch
-	knytes_focus.operation_id = top_operation
 	knytes = {};
 	for (let i = 0; i < line.length; ++i) {
-		const { id, command, target, parameter } = line[i]
-		if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
-			// create knyte
-			!knytes[target] && (knytes[target] = {})
-		} else if (command === '0188dd27-0d1f-7d9f-8d58-b928173ace6f') {
-			// remove knyte
-			knytes[target] && (delete knytes[target])
-		} else if (command === '0188dd27-0f25-7763-8a72-fcdb42a3432f') {
-			// set knyte initial
-			knytes[target] && (knytes[target].initial = parameter)
-		} else if (command === '0188dd27-1114-777d-879a-d1b8bd08f08d') {
-			// set knyte terminal
-			knytes[target] && (knytes[target].terminal = parameter)
-		} else if (command === '0188dd27-12f5-732d-b53d-6e9519f5ac29') {
-			// set knyte content
-			knytes[target] && (knytes[target].content = parameter)
-		}
+		apply_operation_to_knytes(line[i])
 	}
+	knytes_focus.branch_id = top_branch
+	knytes_focus.operation_id = top_operation
 	return { knytes }
 }
 function db_append_operation(history_branch_id, desc) {
@@ -368,6 +371,10 @@ function add_operation(desc) {
 		// update actual focus
 		history_focus.operation_id = id
 		history_focus.is_present = true;
+
+		// patch knytes
+		apply_operation_to_knytes(operation)
+		knytes_focus.operation_id = id
 	}
 	return result
 }
