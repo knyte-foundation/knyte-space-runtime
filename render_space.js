@@ -259,7 +259,7 @@ function handle_click_space(event) {
 					return
 				window.core_api.create_knoxel_for_knyte({
 					knyte_id: dialog.returnValue, x, y
-				}).then((reply) => console.log(reply))
+				}).then((reply) => reply.error && alert(reply.error.message))
 			}
 			button_ok.onclick = () => {
 				dialog.close(input.value)
@@ -279,7 +279,7 @@ function handle_click_space(event) {
 		} else {
 			window.core_api.create_knyte_and_knoxel({
 				x, y
-			}).then((reply) => console.log(reply))
+			}).then((reply) => reply.error && alert(reply.error.message))
 		}
 	}
 }

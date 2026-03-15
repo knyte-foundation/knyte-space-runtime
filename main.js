@@ -684,7 +684,28 @@ app.whenReady().then(() => {
 			return {history_focus}
 		} else if (arg === 'event-create-knyte-and-knoxel') {
 			const {root_space_id, root_space_content_id, x, y} = arg2
-			// TODO: check are root_space_id, root_space_content_id correct uuids
+			if (!uuid_validate(root_space_id))
+				return { error: {
+					code: `root_space_id "${
+						root_space_id
+					}" is not valid uuid v7`,
+					message: `can't create knyte because root_space_id "${
+						root_space_id
+					}" is not valid uuid v7`,
+					stack: 'not available'
+				} }
+			// TODO: check if root_space_id in knytes
+			// TODO: get root_space_content_id directly from knytes
+			if (!uuid_validate(root_space_content_id))
+				return { error: {
+					code: `root_space_content_id "${
+						root_space_content_id
+					}" is not valid uuid v7`,
+					message: `can't create knyte because root_space_content_id "${
+						root_space_content_id
+					}" is not valid uuid v7`,
+					stack: 'not available'
+				} }
 			const knyte_id = uuidv7()
 			try {
 				add_operation({
@@ -700,8 +721,39 @@ app.whenReady().then(() => {
 			return {success: true}
 		} else if (arg === 'event-create-knoxel-for-knyte') {
 			const {root_space_id, root_space_content_id, knyte_id, x, y} = arg2
-			// TODO: check if (knyte_id in knytes) - it must exist at this moment
-			// TODO: check are root_space_id, root_space_content_id, knyte_id correct uuids
+			if (!uuid_validate(root_space_id))
+				return { error: {
+					code: `root_space_id "${
+						root_space_id
+					}" is not valid uuid v7`,
+					message: `can't create knyte because root_space_id "${
+						root_space_id
+					}" is not valid uuid v7`,
+					stack: 'not available'
+				} }
+			// TODO: check if root_space_id in knytes
+			// TODO: get root_space_content_id directly from knytes
+			if (!uuid_validate(root_space_content_id))
+				return { error: {
+					code: `root_space_content_id "${
+						root_space_content_id
+					}" is not valid uuid v7`,
+					message: `can't create knyte because root_space_content_id "${
+						root_space_content_id
+					}" is not valid uuid v7`,
+					stack: 'not available'
+				} }
+			if (!uuid_validate(knyte_id))
+				return { error: {
+					code: `knyte_id "${
+						knyte_id
+					}" is not valid uuid v7`,
+					message: `can't create knyte because knyte_id "${
+						knyte_id
+					}" is not valid uuid v7`,
+					stack: 'not available'
+				} }
+			// TODO: check if knyte_id in knytes
 			try {
 				add_knoxel_to_space({
 					root_space_id, root_space_content_id, knyte_id, x, y
