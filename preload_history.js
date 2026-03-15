@@ -204,7 +204,6 @@ window.addEventListener('DOMContentLoaded', () => {
 			highlight_focus(branch_id, operation_id, is_present)
 		} else if (arg === 'event-show-history-on-start') {
 			const render_sequence = arg2
-			console.log('render_sequence', render_sequence)
 			handle_show_history(render_sequence)
 		} else if (arg === 'event-set-operation-in-focus') {
 			const new_focused_branch_id = arg2
