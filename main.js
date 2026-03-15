@@ -369,6 +369,7 @@ function add_operation(desc) {
 		history_focus.operation_id = id
 		history_focus.is_present = true;
 	}
+	return result
 }
 function append_knoxel_to_space_desc(space_content_id, knoxel_desc) {
 	const space_desc_text = db_get_content_text_by_id(space_content_id).content
@@ -544,50 +545,8 @@ app.whenReady().then(() => {
 			return db.prepare('SELECT * FROM contents').all()
 		} else if (arg === 'event-db-add-operation') {
 			const { command, target, parameter } = arg2
-			const history_branch_in_focus = history_focus.branch_id
-			const operation_in_focus = history_focus.operation_id
-			let operation_in_present;
-			try {
-				const result = db.prepare(
-					`SELECT id FROM '${optree_id_to_name(history_branch_in_focus)}' ORDER BY id DESC LIMIT 1;`
-				).get()
-				operation_in_present = result.id
-			} catch (error) {
-				const { code, message, stack } = error
-				return { error: { code, message, stack } }
-			}
-			if (operation_in_focus !== operation_in_present)
-				return {
-					error: {
-						code: 'db is in read-only mode',
-						message: `can't add new operation to history because operation in focus ${
-								operation_in_focus
-							} !== operation in present ${
-								operation_in_present
-							}`,
-						stack: 'not available',
-					}
-				}
-			const id = uuidv7()
-			const result = db_append_operation(history_branch_in_focus, { id, command, target, parameter })
+			const result = add_operation({ command, target, parameter })
 			if (!result.error) {
-				// patch history
-				const operation = {id, command, target, parameter}
-				delete present_operation_ids[history_focus.operation_id]
-				present_operation_ids[id] = true
-				present_operations_in_branches[history_branch_in_focus] = operation
-				let branch_to_append
-				for (let i = 0; i < history_render_sequence.length; ++i)
-					if (history_render_sequence[i].branch_id === history_branch_in_focus) {
-						branch_to_append = history_render_sequence[i].branch
-						break
-					}
-				branch_to_append && branch_to_append.push(operation)
-
-				// update actual focus
-				history_focus.operation_id = id
-				history_focus.is_present = true;
-
 				// update graph focus
 				const {branch_id, operation_id, is_present} = history_focus
 				const ipc_graph = registered_ipc_renders['graph']
