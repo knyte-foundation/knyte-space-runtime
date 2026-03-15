@@ -97,35 +97,15 @@ window.addEventListener('DOMContentLoaded', () => {
 		setTimeout(() => {
 			ipcRenderer
 				.invoke(
-					'invoke-handle-message', 'event-db-get-history-line',
+					'invoke-handle-message', 'event-get-knytes',
 					focused_branch_id, last_operation_id
 				)
 				.then((reply) => {
-					if (!reply.line) {
+					if (!reply.knytes) {
 						result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 						return
 					}
-					const knytes = {};
-					for (let i = 0; i < reply.line.length; ++i) {
-						const { id, command, target, parameter } = reply.line[i]
-						if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
-							// create knyte
-							!knytes[target] && (knytes[target] = {})
-						} else if (command === '0188dd27-0d1f-7d9f-8d58-b928173ace6f') {
-							// remove knyte
-							knytes[target] && (delete knytes[target])
-						} else if (command === '0188dd27-0f25-7763-8a72-fcdb42a3432f') {
-							// set knyte initial
-							knytes[target] && (knytes[target].initial = parameter)
-						} else if (command === '0188dd27-1114-777d-879a-d1b8bd08f08d') {
-							// set knyte terminal
-							knytes[target] && (knytes[target].terminal = parameter)
-						} else if (command === '0188dd27-12f5-732d-b53d-6e9519f5ac29') {
-							// set knyte content
-							knytes[target] && (knytes[target].content = parameter)
-						}
-					}
-					result.textContent = JSON.stringify(knytes, null, '\t')
+					result.textContent = JSON.stringify(reply.knytes, null, '\t')
 				})
 		}, 100)
 	}

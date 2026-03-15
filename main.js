@@ -12,6 +12,8 @@ let present_operation_ids = {} // operation_id -> true
 let present_operations_in_branches = {} // history_branch_id -> operation_id
 let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
 const history_focus = {branch_id: null, operation_id: null, is_present: false}
+let knytes = {} // knyte_id -> {id, initial, terminal, content}
+const knytes_focus = {branch_id: null, operation_id: null}
 
 function create_space_window(space_id) {
 	const space_number = ++space_window_number
@@ -285,6 +287,35 @@ function get_history_line(top_branch, top_operation) {
 		}
 	}
 	return { line }	
+}
+function build_knytes(top_branch, top_operation, history_line) {
+	if (
+		knytes_focus.branch_id === top_branch &&
+		knytes_focus.operation_id === top_operation
+	)
+		return
+	knytes_focus.branch_id = top_branch
+	knytes_focus.operation_id = top_operation
+	knytes = {};
+	for (let i = 0; i < history_line.length; ++i) {
+		const { id, command, target, parameter } = history_line[i]
+		if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
+			// create knyte
+			!knytes[target] && (knytes[target] = {})
+		} else if (command === '0188dd27-0d1f-7d9f-8d58-b928173ace6f') {
+			// remove knyte
+			knytes[target] && (delete knytes[target])
+		} else if (command === '0188dd27-0f25-7763-8a72-fcdb42a3432f') {
+			// set knyte initial
+			knytes[target] && (knytes[target].initial = parameter)
+		} else if (command === '0188dd27-1114-777d-879a-d1b8bd08f08d') {
+			// set knyte terminal
+			knytes[target] && (knytes[target].terminal = parameter)
+		} else if (command === '0188dd27-12f5-732d-b53d-6e9519f5ac29') {
+			// set knyte content
+			knytes[target] && (knytes[target].content = parameter)
+		}
+	}
 }
 function db_append_operation(history_branch_id, desc) {
 	const table_name = optree_id_to_name(history_branch_id)
@@ -576,10 +607,17 @@ app.whenReady().then(() => {
 				)
 			}
 			return result
-		} else if (arg === 'event-db-get-history-line') {
+		} else if (arg === 'event-get-knytes') {
 			const top_branch = arg2
 			const top_operation = arg3
-			return get_history_line(top_branch, top_operation)
+			// TODO: optimize - cache history_line as well
+			const history_line = get_history_line(top_branch, top_operation)
+			if (history_line.line) {
+				build_knytes(top_branch, top_operation, history_line.line)
+				return { knytes }
+			} else {
+				return { error: history_line.error }
+			}
 		} else if (arg === 'event-db-get-history-branches') {
 			return get_history_branches()
 		} else if (arg === 'event-db-add-history-branch') {
@@ -632,11 +670,14 @@ app.whenReady().then(() => {
 			const space_id = arg2
 			if (uuid_validate(space_id) && uuid_version(space_id)) {
 				const {branch_id, operation_id} = history_focus
+				// TODO: optimize - cache history_line as well
 				const history_line = get_history_line(branch_id, operation_id)
-				if (history_line.line)
-					return { desc: { space_id, history_focus, history_line: history_line.line } }
-				else
+				if (history_line.line) {
+					build_knytes(branch_id, operation_id, history_line.line)
+					return { desc: { space_id, history_focus, knytes } }
+				} else {
 					return { error: history_line.error }
+				}
 			}
 			else
 				return {error: {message: 'space_id is not valid uuid v7'}}

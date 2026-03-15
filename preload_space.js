@@ -100,27 +100,7 @@ function show_space() {
 			if (desc) {
 				if (!desc.history_focus.is_present)
 					document.title = `${document.title} [read-only]`
-				const line = desc.history_line
-				knytes = {};
-				for (let i = 0; i < line.length; ++i) {
-					const { id, command, target, parameter } = line[i]
-					if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
-						// create knyte
-						!knytes[target] && (knytes[target] = {})
-					} else if (command === '0188dd27-0d1f-7d9f-8d58-b928173ace6f') {
-						// remove knyte
-						knytes[target] && (delete knytes[target])
-					} else if (command === '0188dd27-0f25-7763-8a72-fcdb42a3432f') {
-						// set knyte initial
-						knytes[target] && (knytes[target].initial = parameter)
-					} else if (command === '0188dd27-1114-777d-879a-d1b8bd08f08d') {
-						// set knyte terminal
-						knytes[target] && (knytes[target].terminal = parameter)
-					} else if (command === '0188dd27-12f5-732d-b53d-6e9519f5ac29') {
-						// set knyte content
-						knytes[target] && (knytes[target].content = parameter)
-					}
-				}
+				const knytes = desc.knytes
 				if (desc.space_id in knytes) {
 					const space_knyte = knytes[desc.space_id]
 					const {content} = space_knyte
