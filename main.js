@@ -288,17 +288,21 @@ function get_history_line(top_branch, top_operation) {
 	}
 	return { line }	
 }
-function build_knytes(top_branch, top_operation, history_line) {
+function get_actual_knytes(top_branch, top_operation) {
 	if (
 		knytes_focus.branch_id === top_branch &&
 		knytes_focus.operation_id === top_operation
 	)
-		return
+		return { knytes }
+	const history_line = get_history_line(top_branch, top_operation)
+	if (!history_line.line)
+		return { error: history_line.error }
+	const { line } = history_line
 	knytes_focus.branch_id = top_branch
 	knytes_focus.operation_id = top_operation
 	knytes = {};
-	for (let i = 0; i < history_line.length; ++i) {
-		const { id, command, target, parameter } = history_line[i]
+	for (let i = 0; i < line.length; ++i) {
+		const { id, command, target, parameter } = line[i]
 		if (command === '0188dd27-0a2a-746a-976b-b705e8b16a1d') {
 			// create knyte
 			!knytes[target] && (knytes[target] = {})
@@ -316,6 +320,7 @@ function build_knytes(top_branch, top_operation, history_line) {
 			knytes[target] && (knytes[target].content = parameter)
 		}
 	}
+	return { knytes }
 }
 function db_append_operation(history_branch_id, desc) {
 	const table_name = optree_id_to_name(history_branch_id)
@@ -572,8 +577,10 @@ app.whenReady().then(() => {
 				return {
 					error: {
 						code: 'db is in read-only mode',
-						message: `can't add new operation to history because operation in focus ${operation_in_focus
-							} !== operation in present ${operation_in_present
+						message: `can't add new operation to history because operation in focus ${
+								operation_in_focus
+							} !== operation in present ${
+								operation_in_present
 							}`,
 						stack: 'not available',
 					}
@@ -610,14 +617,8 @@ app.whenReady().then(() => {
 		} else if (arg === 'event-get-knytes') {
 			const top_branch = arg2
 			const top_operation = arg3
-			// TODO: optimize - cache history_line as well
-			const history_line = get_history_line(top_branch, top_operation)
-			if (history_line.line) {
-				build_knytes(top_branch, top_operation, history_line.line)
-				return { knytes }
-			} else {
-				return { error: history_line.error }
-			}
+			const { knytes, error } = get_actual_knytes(top_branch, top_operation)
+			return knytes ? { knytes } : { error }
 		} else if (arg === 'event-db-get-history-branches') {
 			return get_history_branches()
 		} else if (arg === 'event-db-add-history-branch') {
@@ -670,14 +671,11 @@ app.whenReady().then(() => {
 			const space_id = arg2
 			if (uuid_validate(space_id) && uuid_version(space_id)) {
 				const {branch_id, operation_id} = history_focus
-				// TODO: optimize - cache history_line as well
-				const history_line = get_history_line(branch_id, operation_id)
-				if (history_line.line) {
-					build_knytes(branch_id, operation_id, history_line.line)
+				const { knytes, error } = get_actual_knytes(branch_id, operation_id)
+				if (knytes)
 					return { desc: { space_id, history_focus, knytes } }
-				} else {
-					return { error: history_line.error }
-				}
+				else
+					return { error }
 			}
 			else
 				return {error: {message: 'space_id is not valid uuid v7'}}
@@ -795,10 +793,8 @@ app.whenReady().then(() => {
 					stack: 'not available'
 				} }
 			const {branch_id, operation_id} = history_focus
-			// TODO: optimize - cache history_line as well
-			const history_line = get_history_line(branch_id, operation_id)
-			if (history_line.line) {
-				build_knytes(branch_id, operation_id, history_line.line)
+			const { knytes, error } = get_actual_knytes(branch_id, operation_id)
+			if (knytes) {
 				if (!(knyte_id in knytes))
 					return { error: {
 						code: `knyte_id "${
@@ -809,9 +805,8 @@ app.whenReady().then(() => {
 						}" not found in knytes`,
 						stack: 'not available'
 					} }
-			} else {
-				return { error: history_line.error }
-			}
+			} else
+				return { error }
 			try {
 				add_knoxel_to_space({
 					root_space_id, root_space_content_id, knyte_id, x, y
