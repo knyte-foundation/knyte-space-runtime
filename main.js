@@ -767,7 +767,7 @@ app.whenReady().then(() => {
 					code: `root_space_id "${
 						root_space_id
 					}" is not valid uuid v7`,
-					message: `can't create knyte because root_space_id "${
+					message: `can't create knoxel because root_space_id "${
 						root_space_id
 					}" is not valid uuid v7`,
 					stack: 'not available'
@@ -779,7 +779,7 @@ app.whenReady().then(() => {
 					code: `root_space_content_id "${
 						root_space_content_id
 					}" is not valid uuid v7`,
-					message: `can't create knyte because root_space_content_id "${
+					message: `can't create knoxel because root_space_content_id "${
 						root_space_content_id
 					}" is not valid uuid v7`,
 					stack: 'not available'
@@ -789,12 +789,29 @@ app.whenReady().then(() => {
 					code: `knyte_id "${
 						knyte_id
 					}" is not valid uuid v7`,
-					message: `can't create knyte because knyte_id "${
+					message: `can't create knoxel because knyte_id "${
 						knyte_id
 					}" is not valid uuid v7`,
 					stack: 'not available'
 				} }
-			// TODO: check if knyte_id in knytes
+			const {branch_id, operation_id} = history_focus
+			// TODO: optimize - cache history_line as well
+			const history_line = get_history_line(branch_id, operation_id)
+			if (history_line.line) {
+				build_knytes(branch_id, operation_id, history_line.line)
+				if (!(knyte_id in knytes))
+					return { error: {
+						code: `knyte_id "${
+							knyte_id
+						}" not found in knytes`,
+						message: `can't create knoxel because knyte_id "${
+							knyte_id
+						}" not found in knytes`,
+						stack: 'not available'
+					} }
+			} else {
+				return { error: history_line.error }
+			}
 			try {
 				add_knoxel_to_space({
 					root_space_id, root_space_content_id, knyte_id, x, y
