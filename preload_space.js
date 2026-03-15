@@ -43,7 +43,7 @@ function create_shape_circle(desc) {
 	shape.setAttribute('fill', fill_color)
 	return shape
 }
-function render_knoxel_body(knoxel, create_shape) {
+function render_knoxel_body(knoxel, create_shape, centering) {
 	const {knoxel_id, knyte_id, x, y} = knoxel
 	const body = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
@@ -57,7 +57,10 @@ function render_knoxel_body(knoxel, create_shape) {
 	const center = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
 	);
-	center.setAttribute('transform', `translate(${-0.5*default_size}, ${-0.5*default_size})`)
+	center.setAttribute('transform', centering
+		? `translate(${-0.5*default_size}, ${-0.5*default_size})`
+		: `translate(0, 0)`
+	)
 	const shape = create_shape({
 		default_size, stroke_width, stroke_color, fill_color
 	})
@@ -66,10 +69,10 @@ function render_knoxel_body(knoxel, create_shape) {
 	return body	
 }
 function render_knoxel_body_solid(knoxel) {
-	return render_knoxel_body(knoxel, create_shape_rect)
+	return render_knoxel_body(knoxel, create_shape_rect, true)
 }
 function render_knoxel_body_broken(knoxel) {
-	return render_knoxel_body(knoxel, create_shape_circle)
+	return render_knoxel_body(knoxel, create_shape_circle, false)
 }
 function render_space(root_space_id, knytes, space_desc) {
 	const svg = document.getElementById('svg-space')
