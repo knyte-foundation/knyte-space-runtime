@@ -100,7 +100,7 @@ function show_space() {
 			if (desc) {
 				if (!desc.history_focus.is_present)
 					document.title = `${document.title} [read-only]`
-				const knytes = desc.knytes
+				knytes = desc.knytes
 				if (desc.space_id in knytes) {
 					const space_knyte = knytes[desc.space_id]
 					const {content} = space_knyte
