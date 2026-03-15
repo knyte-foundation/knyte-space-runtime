@@ -682,6 +682,34 @@ app.whenReady().then(() => {
 				)
 			}
 			return {history_focus}
+		} else if (arg === 'event-create-knyte-and-knoxel') {
+			const {root_space_id, root_space_content_id, x, y} = arg2
+			// TODO: check are root_space_id, root_space_content_id correct uuids
+			const knyte_id = uuidv7()
+			try {
+				add_operation({
+					command: '0188dd27-0a2a-746a-976b-b705e8b16a1d', // create knyte
+					target: knyte_id, parameter: null
+				})
+				add_knoxel_to_space({
+					root_space_id, root_space_content_id, knyte_id, x, y
+				})
+			} catch (error) {
+				return { error }
+			}
+			return {success: true}
+		} else if (arg === 'event-create-knoxel-for-knyte') {
+			const {root_space_id, root_space_content_id, knyte_id, x, y} = arg2
+			// TODO: check if (knyte_id in knytes) - it must exist at this moment
+			// TODO: check are root_space_id, root_space_content_id, knyte_id correct uuids
+			try {
+				add_knoxel_to_space({
+					root_space_id, root_space_content_id, knyte_id, x, y
+				})
+			} catch (error) {
+				return { error }
+			}
+			return {success: true}
 		}
 		return { uknown_command: true }
 	})
@@ -731,24 +759,6 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-history-branch',
 				history_render_sequence, history_focus
 			)
-		} else if (arg === 'event-create-knyte-and-knoxel') {
-			const {root_space_id, root_space_content_id, x, y} = arg2
-			// TODO: check are root_space_id, root_space_content_id correct uuids
-			const knyte_id = uuidv7()
-			add_operation({
-				command: '0188dd27-0a2a-746a-976b-b705e8b16a1d', // create knyte
-				target: knyte_id, parameter: null
-			})
-			add_knoxel_to_space({
-				root_space_id, root_space_content_id, knyte_id, x, y
-			})
-		} else if (arg === 'event-create-knoxel-for-knyte') {
-			const {root_space_id, root_space_content_id, knyte_id, x, y} = arg2
-			// TODO: check if (knyte_id in knytes) - it must exist at this moment
-			// TODO: check are root_space_id, root_space_content_id, knyte_id correct uuids
-			add_knoxel_to_space({
-				root_space_id, root_space_content_id, knyte_id, x, y
-			})
 		}
 	})
 

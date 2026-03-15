@@ -257,7 +257,9 @@ function handle_click_space(event) {
 				input.value = ''
     			if (!dialog.returnValue)
 					return
-				window.core_api.create_knoxel_for_knyte({ knyte_id: dialog.returnValue, x, y })
+				window.core_api.create_knoxel_for_knyte({
+					knyte_id: dialog.returnValue, x, y
+				}).then((reply) => console.log(reply))
 			}
 			button_ok.onclick = () => {
 				dialog.close(input.value)
@@ -275,7 +277,9 @@ function handle_click_space(event) {
 				}
 			}
 		} else {
-			window.core_api.create_knyte_and_knoxel({ x, y })
+			window.core_api.create_knyte_and_knoxel({
+				x, y
+			}).then((reply) => console.log(reply))
 		}
 	}
 }
