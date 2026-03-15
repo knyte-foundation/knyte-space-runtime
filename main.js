@@ -543,26 +543,9 @@ app.whenReady().then(() => {
 		} else if (arg === 'event-db-show-contents') {
 			return db.prepare('SELECT * FROM contents').all()
 		} else if (arg === 'event-db-add-operation') {
-			const {
-				command, target, parameter,
-				history_branch_in_focus, operation_in_focus
-			} = arg2
-			if (!history_branch_in_focus)
-				return {
-					error: {
-						code: 'history branch not specified',
-						message: `can't add new operation to history because branch not specified`,
-						stack: 'not available',
-					}
-				}
-			if (!operation_in_focus)
-				return {
-					error: {
-						code: 'operation in focus not specified',
-						message: `can't add new operation to history because operation in focus not specified`,
-						stack: 'not available',
-					}
-				}
+			const { command, target, parameter } = arg2
+			const history_branch_in_focus = history_focus.branch_id
+			const operation_in_focus = history_focus.operation_id
 			let operation_in_present;
 			try {
 				const result = db.prepare(

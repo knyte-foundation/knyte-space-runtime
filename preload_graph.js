@@ -59,16 +59,16 @@ window.addEventListener('DOMContentLoaded', () => {
 	})
 	document.getElementById('button-add-operation').addEventListener('click', () => {
 		const result = document.getElementById('result-add-operation')
+		result.textContent = 'loading...'
 
+		// TODO: fix this HACK of getting history_focus from UI
 		const focused_branch_id = document.getElementById('input-focused-branch-id').value
 		const last_operation_id = document.getElementById('input-last-operation-id').value
-		result.textContent = 'loading...'
+
 		const desc = {
 			command: document.getElementById('select-operation-command').value,
 			target: document.getElementById('input-operation-target').value,
 			parameter: document.getElementById('input-operation-parameter').value,
-			history_branch_in_focus: focused_branch_id || null,
-			operation_in_focus: last_operation_id || null,
 		}
 		setTimeout(() => {
 			ipcRenderer
@@ -76,6 +76,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				.then((reply) => {
 					if (reply.id) {
 						result.textContent = reply.id
+						// TODO: move this patching to main
 						const patch_desc = {
 							parent_branch_id: focused_branch_id, parent_operation_id: last_operation_id,
 							new_operation: reply
