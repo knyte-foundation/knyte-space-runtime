@@ -564,6 +564,34 @@ app.whenReady().then(() => {
 					'asynchronous-reply', 'event-set-operation-in-focus',
 					branch_id, operation_id, is_present
 				)
+
+				// redraw history
+				// TODO: patch instead of full redraw
+				const ipc_history = registered_ipc_renders['history']
+				ipc_history && ipc_history.send(
+					'asynchronous-reply', 'event-add-history-branch',
+					history_render_sequence, history_focus
+				)
+				/*
+				// patch history view
+				const patch_desc = {
+					parent_branch_id: branch_id, parent_operation_id: operation_id,
+					new_operation: result
+				}
+				const ipc_history = registered_ipc_renders['history']
+				ipc_history && ipc_history.send(
+					'asynchronous-reply', 'event-add-operation',
+					patch_desc, history_focus
+				)
+				*/
+				
+				// update spaces
+				// TODO: patch spaces
+				for (let space_window_id in registered_ipc_spaces) {
+					registered_ipc_spaces[space_window_id].send(
+						'asynchronous-reply', 'event-add-operation'
+					)
+				}
 			}
 			return result
 		} else if (arg === 'event-get-knytes') {
@@ -798,18 +826,6 @@ app.whenReady().then(() => {
 		} else if (arg === 'event-register-ipc-space') {
 			const window_id = arg2
 			registered_ipc_spaces[window_id] = event.sender
-		} else if (arg === 'event-add-operation') {
-			const patch_desc = arg2
-			const ipc_history = registered_ipc_renders['history']
-			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-add-operation',
-				patch_desc, history_focus
-			)
-			for (let space_window_id in registered_ipc_spaces) {
-				registered_ipc_spaces[space_window_id].send(
-					'asynchronous-reply', 'event-add-operation'
-				)
-			}
 		} else if (arg === 'event-add-history-branch') {
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
