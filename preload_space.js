@@ -66,7 +66,7 @@ function render_knoxel_body(knoxel, create_shape, centering) {
 	})
 	center.append(shape)
 	body.append(center)
-	return body	
+	return body
 }
 function render_knoxel_body_solid(knoxel) {
 	return render_knoxel_body(knoxel, create_shape_rect, true)

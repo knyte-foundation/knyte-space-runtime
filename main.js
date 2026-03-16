@@ -286,7 +286,7 @@ function get_history_line(top_branch, top_operation) {
 				break
 		}
 	}
-	return { line }	
+	return { line }
 }
 function apply_operation_to_knytes(operation) {
 	const { id, command, target, parameter } = operation
