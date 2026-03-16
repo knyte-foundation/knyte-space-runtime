@@ -392,10 +392,12 @@ function add_knoxel_to_space(desc) {
 	const {root_space_id, root_space_content_id, knyte_id, x, y} = desc
 	const knoxel_id = uuidv7()
 	const new_space_content_id = append_knoxel_to_space_desc(root_space_content_id, { knoxel_id, knyte_id, x, y })
-	add_operation({
+	const result = add_operation({
 		command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
 		target: root_space_id, parameter: new_space_content_id
 	})
+	if (result.error)
+		return result
 
 	// update graph focus
 	const {branch_id, operation_id, is_present} = history_focus
@@ -420,6 +422,7 @@ function add_knoxel_to_space(desc) {
 			'asynchronous-reply', 'event-set-operation-in-focus'
 		)
 	}
+	return { success: true }
 }
 function create_history_branch(
 	history_branch_id, root_branch_id, root_operation_id
@@ -695,17 +698,17 @@ app.whenReady().then(() => {
 					stack: 'not available'
 				} }
 			const knyte_id = uuidv7()
-			try {
-				add_operation({
-					command: '0188dd27-0a2a-746a-976b-b705e8b16a1d', // create knyte
-					target: knyte_id, parameter: null
-				})
-				add_knoxel_to_space({
-					root_space_id, root_space_content_id, knyte_id, x, y
-				})
-			} catch (error) {
-				return { error }
-			}
+			const result1 = add_operation({
+				command: '0188dd27-0a2a-746a-976b-b705e8b16a1d', // create knyte
+				target: knyte_id, parameter: null
+			})
+			if (result1.error)
+				return result1
+			const result2 = add_knoxel_to_space({
+				root_space_id, root_space_content_id, knyte_id, x, y
+			})
+			if (result2.error)
+				return result2
 			return {success: true}
 		} else if (arg === 'event-create-knoxel-for-knyte') {
 			const {root_space_id, root_space_content_id, knyte_id, x, y} = arg2
