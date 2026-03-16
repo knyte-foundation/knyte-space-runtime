@@ -546,7 +546,7 @@ app.whenReady().then(() => {
 				const ipc_history = registered_ipc_renders['history']
 				ipc_history && ipc_history.send(
 					'asynchronous-reply', 'event-add-operation',
-					patch_desc, history_focus
+					[patch_desc], history_focus
 				)
 				// update spaces
 				// TODO: patch spaces
@@ -789,11 +789,11 @@ app.whenReady().then(() => {
 				branch_id, operation_id, is_present
 			)
 			// patch history view
-			patch_desc.new_operation = result			
+			patch_desc.new_operation = result
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-operation',
-				patch_desc, history_focus
+				[patch_desc], history_focus
 			)
 			// redraw all spaces
 			// TODO: bulk patch instead of full redraw, update only affected spaces
