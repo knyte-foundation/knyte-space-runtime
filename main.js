@@ -689,17 +689,27 @@ app.whenReady().then(() => {
 					stack: 'not available'
 				} }
 			const knyte_id = uuidv7()
+			const patch_desc1 = {
+				parent_branch_id: history_focus.branch_id,
+				parent_operation_id: history_focus.operation_id
+			}
 			const result1 = add_operation({
 				command: '0188dd27-0a2a-746a-976b-b705e8b16a1d', // create knyte
 				target: knyte_id, parameter: null
 			})
 			if (result1.error)
 				return result1
+			patch_desc1.new_operation = result1
+			const patch_desc2 = {
+				parent_branch_id: history_focus.branch_id,
+				parent_operation_id: history_focus.operation_id
+			}
 			const result2 = add_knoxel_to_space({
 				root_space_id, root_space_content_id, knyte_id, x, y
 			})
 			if (result2.error)
 				return result2
+			patch_desc2.new_operation = result2
 			// update graph focus
 			const {branch_id, operation_id, is_present} = history_focus
 			const ipc_graph = registered_ipc_renders['graph']
@@ -707,12 +717,11 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-set-operation-in-focus',
 				branch_id, operation_id, is_present
 			)
-			// redraw history
-			// TODO: bulk patch instead of full redraw
+			// bulk patch history view
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-add-history-branch',
-				history_render_sequence, history_focus
+				'asynchronous-reply', 'event-add-operation',
+				[patch_desc1, patch_desc2], history_focus
 			)
 			// redraw all spaces
 			// TODO: bulk patch instead of full redraw, update only affected spaces
