@@ -528,6 +528,10 @@ app.whenReady().then(() => {
 			return db.prepare('SELECT * FROM contents').all()
 		} else if (arg === 'event-db-add-operation') {
 			const { command, target, parameter } = arg2
+			const patch_desc = {
+				parent_branch_id: history_focus.branch_id,
+				parent_operation_id: history_focus.operation_id
+			}
 			const result = add_operation({ command, target, parameter })
 			if (!result.error) {
 				// update graph focus
@@ -537,27 +541,13 @@ app.whenReady().then(() => {
 					'asynchronous-reply', 'event-set-operation-in-focus',
 					branch_id, operation_id, is_present
 				)
-
-				// redraw history
-				// TODO: patch instead of full redraw
-				const ipc_history = registered_ipc_renders['history']
-				ipc_history && ipc_history.send(
-					'asynchronous-reply', 'event-add-history-branch',
-					history_render_sequence, history_focus
-				)
-				/*
 				// patch history view
-				const patch_desc = {
-					parent_branch_id: branch_id, parent_operation_id: operation_id,
-					new_operation: result
-				}
+				patch_desc.new_operation = result
 				const ipc_history = registered_ipc_renders['history']
 				ipc_history && ipc_history.send(
 					'asynchronous-reply', 'event-add-operation',
 					patch_desc, history_focus
 				)
-				*/
-				
 				// update spaces
 				// TODO: patch spaces
 				for (let space_window_id in registered_ipc_spaces) {

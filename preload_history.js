@@ -124,6 +124,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			}
 			cx += 80
 		}
+		console.log('complete redraw history')
 	}
 	function handle_patch_history(desc) {
 		const {parent_branch_id, parent_operation_id, new_operation} = desc
