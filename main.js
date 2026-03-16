@@ -392,37 +392,10 @@ function add_knoxel_to_space(desc) {
 	const {root_space_id, root_space_content_id, knyte_id, x, y} = desc
 	const knoxel_id = uuidv7()
 	const new_space_content_id = append_knoxel_to_space_desc(root_space_content_id, { knoxel_id, knyte_id, x, y })
-	const result = add_operation({
+	return add_operation({
 		command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
 		target: root_space_id, parameter: new_space_content_id
 	})
-	if (result.error)
-		return result
-
-	// update graph focus
-	const {branch_id, operation_id, is_present} = history_focus
-	const ipc_graph = registered_ipc_renders['graph']
-	ipc_graph && ipc_graph.send(
-		'asynchronous-reply', 'event-set-operation-in-focus',
-		branch_id, operation_id, is_present
-	)
-
-	// redraw history
-	// TODO: do bulk patch instead of full redraw
-	const ipc_history = registered_ipc_renders['history']
-	ipc_history && ipc_history.send(
-		'asynchronous-reply', 'event-add-history-branch',
-		history_render_sequence, history_focus
-	)
-
-	// redraw all spaces
-	// TODO: do bulk patch instead of full redraw, update only affected spaces
-	for (let space_window_id in registered_ipc_spaces) {
-		registered_ipc_spaces[space_window_id].send(
-			'asynchronous-reply', 'event-set-operation-in-focus'
-		)
-	}
-	return { success: true }
 }
 function create_history_branch(
 	history_branch_id, root_branch_id, root_operation_id
@@ -737,6 +710,27 @@ app.whenReady().then(() => {
 			})
 			if (result2.error)
 				return result2
+			// update graph focus
+			const {branch_id, operation_id, is_present} = history_focus
+			const ipc_graph = registered_ipc_renders['graph']
+			ipc_graph && ipc_graph.send(
+				'asynchronous-reply', 'event-set-operation-in-focus',
+				branch_id, operation_id, is_present
+			)
+			// redraw history
+			// TODO: bulk patch instead of full redraw
+			const ipc_history = registered_ipc_renders['history']
+			ipc_history && ipc_history.send(
+				'asynchronous-reply', 'event-add-history-branch',
+				history_render_sequence, history_focus
+			)
+			// redraw all spaces
+			// TODO: bulk patch instead of full redraw, update only affected spaces
+			for (let space_window_id in registered_ipc_spaces) {
+				registered_ipc_spaces[space_window_id].send(
+					'asynchronous-reply', 'event-set-operation-in-focus'
+				)
+			}
 			return {success: true}
 		} else if (arg === 'event-create-knoxel-for-knyte') {
 			const {root_space_id, root_space_content_id, knyte_id, x, y} = arg2
@@ -772,8 +766,9 @@ app.whenReady().then(() => {
 					}" is not valid uuid v7`,
 					stack: 'not available'
 				} }
-			const {branch_id, operation_id} = history_focus
-			const { knytes, error } = get_actual_knytes(branch_id, operation_id)
+			const { knytes, error } = get_actual_knytes(
+				history_focus.branch_id, history_focus.operation_id
+			)
 			if (knytes) {
 				if (!(knyte_id in knytes))
 					return { error: {
@@ -787,12 +782,31 @@ app.whenReady().then(() => {
 					} }
 			} else
 				return { error }
-			try {
-				add_knoxel_to_space({
-					root_space_id, root_space_content_id, knyte_id, x, y
-				})
-			} catch (error) {
-				return { error }
+			const result = add_knoxel_to_space({
+				root_space_id, root_space_content_id, knyte_id, x, y
+			})
+			if (result.error)
+				return result
+			// update graph focus
+			const {branch_id, operation_id, is_present} = history_focus
+			const ipc_graph = registered_ipc_renders['graph']
+			ipc_graph && ipc_graph.send(
+				'asynchronous-reply', 'event-set-operation-in-focus',
+				branch_id, operation_id, is_present
+			)
+			// redraw history
+			// TODO: bulk patch instead of full redraw
+			const ipc_history = registered_ipc_renders['history']
+			ipc_history && ipc_history.send(
+				'asynchronous-reply', 'event-add-history-branch',
+				history_render_sequence, history_focus
+			)
+			// redraw all spaces
+			// TODO: bulk patch instead of full redraw, update only affected spaces
+			for (let space_window_id in registered_ipc_spaces) {
+				registered_ipc_spaces[space_window_id].send(
+					'asynchronous-reply', 'event-set-operation-in-focus'
+				)
 			}
 			return {success: true}
 		}
