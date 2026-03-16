@@ -772,6 +772,10 @@ app.whenReady().then(() => {
 					} }
 			} else
 				return { error }
+			const patch_desc = {
+				parent_branch_id: history_focus.branch_id,
+				parent_operation_id: history_focus.operation_id
+			}
 			const result = add_knoxel_to_space({
 				root_space_id, root_space_content_id, knyte_id, x, y
 			})
@@ -784,12 +788,12 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-set-operation-in-focus',
 				branch_id, operation_id, is_present
 			)
-			// redraw history
-			// TODO: bulk patch instead of full redraw
+			// patch history view
+			patch_desc.new_operation = result			
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-add-history-branch',
-				history_render_sequence, history_focus
+				'asynchronous-reply', 'event-add-operation',
+				patch_desc, history_focus
 			)
 			// redraw all spaces
 			// TODO: bulk patch instead of full redraw, update only affected spaces
