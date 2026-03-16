@@ -239,7 +239,7 @@ function build_history() {
 	}
 }
 function init_history_focus() {
-	// TODO: handle here restoring of saved history_focus
+	// TODO: handle here restoring of focused history branch
 	if (first_history_branch_id in present_operations_in_branches) {
 		history_focus.branch_id = first_history_branch_id
 		history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
