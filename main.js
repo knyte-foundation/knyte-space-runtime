@@ -549,7 +549,7 @@ app.whenReady().then(() => {
 					[patch_desc], history_focus
 				)
 				// update spaces
-				// TODO: patch spaces
+				// TODO: patch instead of full redraw, update only affected spaces
 				for (let space_window_id in registered_ipc_spaces) {
 					registered_ipc_spaces[space_window_id].send(
 						'asynchronous-reply', 'event-add-operation'
@@ -676,7 +676,21 @@ app.whenReady().then(() => {
 					}" is not valid uuid v7`,
 					stack: 'not available'
 				} }
-			// TODO: check if root_space_id in knytes
+			const { knytes, error } = get_actual_knytes(
+				history_focus.branch_id, history_focus.operation_id
+			)
+			if (!knytes)
+				return { error }
+			if (!(root_space_id in knytes))
+				return { error: {
+					code: `root_space_id "${
+						root_space_id
+					}" not found in knytes`,
+					message: `can't create knoxel because root_space_id "${
+						root_space_id
+					}" not found in knytes`,
+					stack: 'not available'
+				} }
 			// TODO: get root_space_content_id directly from knytes
 			if (!uuid_validate(root_space_content_id))
 				return { error: {
@@ -743,7 +757,21 @@ app.whenReady().then(() => {
 					}" is not valid uuid v7`,
 					stack: 'not available'
 				} }
-			// TODO: check if root_space_id in knytes
+			const { knytes, error } = get_actual_knytes(
+				history_focus.branch_id, history_focus.operation_id
+			)
+			if (!knytes)
+				return { error }
+			if (!(root_space_id in knytes))
+				return { error: {
+					code: `root_space_id "${
+						root_space_id
+					}" not found in knytes`,
+					message: `can't create knoxel because root_space_id "${
+						root_space_id
+					}" not found in knytes`,
+					stack: 'not available'
+				} }
 			// TODO: get root_space_content_id directly from knytes
 			if (!uuid_validate(root_space_content_id))
 				return { error: {
@@ -765,22 +793,16 @@ app.whenReady().then(() => {
 					}" is not valid uuid v7`,
 					stack: 'not available'
 				} }
-			const { knytes, error } = get_actual_knytes(
-				history_focus.branch_id, history_focus.operation_id
-			)
-			if (knytes) {
-				if (!(knyte_id in knytes))
-					return { error: {
-						code: `knyte_id "${
-							knyte_id
-						}" not found in knytes`,
-						message: `can't create knoxel because knyte_id "${
-							knyte_id
-						}" not found in knytes`,
-						stack: 'not available'
-					} }
-			} else
-				return { error }
+			if (!(knyte_id in knytes))
+				return { error: {
+					code: `knyte_id "${
+						knyte_id
+					}" not found in knytes`,
+					message: `can't create knoxel because knyte_id "${
+						knyte_id
+					}" not found in knytes`,
+					stack: 'not available'
+				} }
 			const patch_desc = {
 				parent_branch_id: history_focus.branch_id,
 				parent_operation_id: history_focus.operation_id
