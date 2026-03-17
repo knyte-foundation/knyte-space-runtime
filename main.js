@@ -665,7 +665,7 @@ app.whenReady().then(() => {
 			}
 			return {history_focus}
 		} else if (arg === 'event-create-knyte-and-knoxel') {
-			const {root_space_id, root_space_content_id, x, y} = arg2
+			const {root_space_id, x, y} = arg2
 			if (!uuid_validate(root_space_id))
 				return { error: {
 					code: `root_space_id "${
@@ -691,7 +691,7 @@ app.whenReady().then(() => {
 					}" not found in knytes`,
 					stack: 'not available'
 				} }
-			// TODO: get root_space_content_id directly from knytes
+			const root_space_content_id = knytes[root_space_id].content
 			if (!uuid_validate(root_space_content_id))
 				return { error: {
 					code: `root_space_content_id "${
@@ -746,7 +746,7 @@ app.whenReady().then(() => {
 			}
 			return {success: true}
 		} else if (arg === 'event-create-knoxel-for-knyte') {
-			const {root_space_id, root_space_content_id, knyte_id, x, y} = arg2
+			const {root_space_id, knyte_id, x, y} = arg2
 			if (!uuid_validate(root_space_id))
 				return { error: {
 					code: `root_space_id "${
@@ -772,7 +772,7 @@ app.whenReady().then(() => {
 					}" not found in knytes`,
 					stack: 'not available'
 				} }
-			// TODO: get root_space_content_id directly from knytes
+			const root_space_content_id = knytes[root_space_id].content
 			if (!uuid_validate(root_space_content_id))
 				return { error: {
 					code: `root_space_content_id "${

@@ -161,12 +161,10 @@ function show_space() {
 contextBridge.exposeInMainWorld('core_api', {
 	create_knoxel_for_knyte: (desc) => {
 		desc.root_space_id = space_id
-		desc.root_space_content_id = knytes[space_id].content
 		return ipcRenderer.invoke('invoke-handle-message', 'event-create-knoxel-for-knyte', desc)
 	},
 	create_knyte_and_knoxel: (desc) => {
 		desc.root_space_id = space_id
-		desc.root_space_content_id = knytes[space_id].content
 		return ipcRenderer.invoke('invoke-handle-message', 'event-create-knyte-and-knoxel', desc)
 	}
 })
