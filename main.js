@@ -391,7 +391,14 @@ function append_knoxel_to_space_desc(space_content_id, knoxel_desc) {
 function add_knoxel_to_space(desc) {
 	const {root_space_id, root_space_content_id, knyte_id, x, y} = desc
 	const knoxel_id = uuidv7()
-	const new_space_content_id = append_knoxel_to_space_desc(root_space_content_id, { knoxel_id, knyte_id, x, y })
+	let new_space_content_id
+	try {
+		new_space_content_id = append_knoxel_to_space_desc(
+			root_space_content_id, { knoxel_id, knyte_id, x, y }
+		)
+	} catch (error) {
+		return { error }
+	}
 	return add_operation({
 		command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
 		target: root_space_id, parameter: new_space_content_id
