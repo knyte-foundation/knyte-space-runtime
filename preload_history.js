@@ -167,6 +167,9 @@ window.addEventListener('DOMContentLoaded', () => {
 			link.setAttribute('marker-start', 'url(#marker_trace_start)')
 			link.setAttribute('marker-end', 'url(#marker_trace_end)')
 			hixel_links.append(link)
+			console.log('patch history')
+		} else {
+			console.warn('failed to patch history')
 		}
 	}
 	document.getElementById('button-add-history-branch').addEventListener('click', () => {
