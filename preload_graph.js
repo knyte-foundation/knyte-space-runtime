@@ -125,6 +125,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		document.getElementById('result-edit').textContent = 'not implemented yet'
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
+		// TODO: fix code duplication
 		if (arg === 'event-set-operation-in-focus') {
 			const new_focused_branch_id = arg2
 			const new_last_operation_id = arg3
@@ -138,6 +139,12 @@ window.addEventListener('DOMContentLoaded', () => {
 			console.log(`complete redraw knytes by ${arg}`)
 		} else if (arg === 'event-add-operation') {
 			const patch_descs = arg2
+			const {branch_id, operation_id, is_present} = arg3
+			document.getElementById('input-focused-branch-id').value = branch_id
+			document.getElementById('input-last-operation-id').value = operation_id
+			document.getElementById('caption-focused-branch-id').textContent = branch_id
+			document.getElementById('result-is-present').textContent = is_present
+				? 'present' : 'past'
 			handle_click_show_knytes()
 			console.log(`complete redraw knytes by ${arg}`, patch_descs)
 		}

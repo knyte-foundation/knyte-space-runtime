@@ -546,7 +546,7 @@ app.whenReady().then(() => {
 				const ipc_graph = registered_ipc_renders['graph']
 				ipc_graph && ipc_graph.send(
 					'asynchronous-reply', 'event-add-operation',
-					[patch_desc]
+					[patch_desc], history_focus
 				)
 				// patch history view
 				const ipc_history = registered_ipc_renders['history']
@@ -735,7 +735,7 @@ app.whenReady().then(() => {
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
 				'asynchronous-reply', 'event-add-operation',
-				[patch_desc1, patch_desc2]
+				[patch_desc1, patch_desc2], history_focus
 			)
 			// bulk patch history view
 			const ipc_history = registered_ipc_renders['history']
@@ -824,7 +824,7 @@ app.whenReady().then(() => {
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
 				'asynchronous-reply', 'event-add-operation',
-				[patch_desc]
+				[patch_desc], history_focus
 			)
 			// patch history view
 			const ipc_history = registered_ipc_renders['history']
