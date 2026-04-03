@@ -541,6 +541,7 @@ app.whenReady().then(() => {
 			}
 			const result = add_operation({ command, target, parameter })
 			if (!result.error) {
+				patch_desc.new_operation = result
 				// update graph knytes
 				const ipc_graph = registered_ipc_renders['graph']
 				ipc_graph && ipc_graph.send(
@@ -548,7 +549,6 @@ app.whenReady().then(() => {
 					[patch_desc]
 				)
 				// patch history view
-				patch_desc.new_operation = result
 				const ipc_history = registered_ipc_renders['history']
 				ipc_history && ipc_history.send(
 					'asynchronous-reply', 'event-add-operation',
@@ -819,6 +819,7 @@ app.whenReady().then(() => {
 			})
 			if (result.error)
 				return result
+			patch_desc.new_operation = result
 			// update graph knytes
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
@@ -826,7 +827,6 @@ app.whenReady().then(() => {
 				[patch_desc]
 			)
 			// patch history view
-			patch_desc.new_operation = result
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-operation',
