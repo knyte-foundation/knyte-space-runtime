@@ -114,7 +114,7 @@ function connect_db() {
 			db.prepare(`
 				CREATE TABLE IF NOT EXISTS ${table_name} (
 					id TEXT (${uuid_length}) NOT NULL PRIMARY KEY,
-					content TEXT UNIQUE NOT NULL CHECK(length(content) > 0)
+					content TEXT UNIQUE NOT NULL CHECK(LENGTH(content) > 0)
 				);
 			`).run()
 			console.log(`Table "${table_name}" created successfully.`)
@@ -413,9 +413,9 @@ function create_history_branch(
 		db.prepare(`
 			CREATE TABLE '${history_branch_name}' (
 				id TEXT (${uuid_length}) NOT NULL PRIMARY KEY,
-				command TEXT (${uuid_length}) NOT NULL,
-				target TEXT (${uuid_length}) NOT NULL,
-				parameter TEXT (${uuid_length})
+				command TEXT (${uuid_length}) NOT NULL CHECK(LENGTH(command) = ${uuid_length}),
+				target TEXT (${uuid_length}) NOT NULL CHECK(LENGTH(target) = ${uuid_length}),
+				parameter TEXT (${uuid_length}) CHECK(parameter IS NULL OR LENGTH(parameter) = ${uuid_length})
 			);
 		`).run()
 		const id = uuidv7()

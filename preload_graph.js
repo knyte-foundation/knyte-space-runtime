@@ -61,9 +61,9 @@ window.addEventListener('DOMContentLoaded', () => {
 		const result = document.getElementById('result-add-operation')
 		result.textContent = 'loading...'
 		const desc = {
-			command: document.getElementById('select-operation-command').value,
-			target: document.getElementById('input-operation-target').value,
-			parameter: document.getElementById('input-operation-parameter').value,
+			command: document.getElementById('select-operation-command').value || null,
+			target: document.getElementById('input-operation-target').value || null,
+			parameter: document.getElementById('input-operation-parameter').value || null,
 		}
 		setTimeout(() => {
 			ipcRenderer
