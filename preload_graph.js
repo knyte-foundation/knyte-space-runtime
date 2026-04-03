@@ -77,6 +77,15 @@ window.addEventListener('DOMContentLoaded', () => {
 				})
 		}, 100)
 	})
+	function render_knytes(result, knytes) {
+		result.innerHTML = ''
+		for (let id in knytes) {
+			const knyte = document.createElement('div')
+			knyte.textContent = `${id} ${JSON.stringify(knytes[id], null, '\t')}`
+			result.appendChild(knyte)
+		}
+		console.log('complete redraw knytes')
+	}
 	function handle_click_show_knytes() {
 		const result = document.getElementById('result-show-knytes')
 		const focused_branch_id = document.getElementById('input-focused-branch-id').value
@@ -93,7 +102,7 @@ window.addEventListener('DOMContentLoaded', () => {
 						result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 						return
 					}
-					result.textContent = JSON.stringify(reply.knytes, null, '\t')
+					render_knytes(result, reply.knytes)
 				})
 		}, 100)
 	}
