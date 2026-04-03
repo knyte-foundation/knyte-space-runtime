@@ -663,7 +663,7 @@ app.whenReady().then(() => {
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
 				'asynchronous-reply', 'event-set-operation-in-focus',
-				branch_id, operation_id, is_present
+				history_focus
 			)
 			for (let space_window_id in registered_ipc_spaces) {
 				registered_ipc_spaces[space_window_id].send(
@@ -852,14 +852,13 @@ app.whenReady().then(() => {
 			ipc_history.send(
 				'asynchronous-reply', 'event-show-history-on-start', history_render_sequence
 			)
-			const {branch_id, operation_id, is_present} = history_focus
 			ipc_history.send(
 				'asynchronous-reply', 'event-set-operation-in-focus',
-				branch_id, operation_id, is_present
+				history_focus
 			)
 			ipc_graph.send(
 				'asynchronous-reply', 'event-set-operation-in-focus',
-				branch_id, operation_id, is_present
+				history_focus
 			)
 		}
 	}

@@ -211,10 +211,9 @@ window.addEventListener('DOMContentLoaded', () => {
 			const render_sequence = arg2
 			handle_show_history(render_sequence)
 		} else if (arg === 'event-set-operation-in-focus') {
-			const new_focused_branch_id = arg2
-			const new_last_operation_id = arg3
-			const new_is_focus_on_present = arg4
-			highlight_focus(new_focused_branch_id, new_last_operation_id, new_is_focus_on_present)
+			const history_focus = arg2
+			const {branch_id, operation_id, is_present} = history_focus
+			highlight_focus(branch_id, operation_id, is_present)
 		}
 	})
 	ipcRenderer.send(
