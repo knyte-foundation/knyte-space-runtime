@@ -457,6 +457,14 @@ function db_append_content(content) {
 		id, content
 	)
 }
+function convert_history_patch_to_knytes_patch(history_patch) {
+	const knytes_patch = {}
+	for (let i = 0; i < history_patch.length; ++i) {
+		const {target} = history_patch[i].new_operation
+		knytes_patch[target] = knytes[target]
+	}
+	return knytes_patch
+}
 
 async function check_max_memory(is_buffer) {
 	function sleep(ms) {
@@ -542,24 +550,26 @@ app.whenReady().then(() => {
 			const result = add_operation({ command, target, parameter })
 			if (!result.error) {
 				patch_desc.new_operation = result
+				const history_patch = [patch_desc]
+				const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)
 				// update graph knytes
 				const ipc_graph = registered_ipc_renders['graph']
 				ipc_graph && ipc_graph.send(
 					'asynchronous-reply', 'event-add-operation',
-					[patch_desc], history_focus
+					knytes_patch, history_focus
 				)
 				// patch history view
 				const ipc_history = registered_ipc_renders['history']
 				ipc_history && ipc_history.send(
 					'asynchronous-reply', 'event-add-operation',
-					[patch_desc], history_focus
+					history_patch, history_focus
 				)
 				// update spaces
 				// TODO: update only affected spaces
 				for (let space_window_id in registered_ipc_spaces) {
 					registered_ipc_spaces[space_window_id].send(
 						'asynchronous-reply', 'event-add-operation',
-						[patch_desc]
+						history_patch
 					)
 				}
 			}
@@ -731,24 +741,26 @@ app.whenReady().then(() => {
 			if (result2.error)
 				return result2
 			patch_desc2.new_operation = result2
+			const history_patch = [patch_desc1, patch_desc2]
+			const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)
 			// update graph knytes
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
 				'asynchronous-reply', 'event-add-operation',
-				[patch_desc1, patch_desc2], history_focus
+				knytes_patch, history_focus
 			)
 			// bulk patch history view
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-operation',
-				[patch_desc1, patch_desc2], history_focus
+				history_patch, history_focus
 			)
 			// redraw all spaces
 			// TODO: update only affected spaces
 			for (let space_window_id in registered_ipc_spaces) {
 				registered_ipc_spaces[space_window_id].send(
 					'asynchronous-reply', 'event-add-operation',
-					[patch_desc1, patch_desc2]
+					history_patch
 				)
 			}
 			return {success: true}
@@ -820,24 +832,26 @@ app.whenReady().then(() => {
 			if (result.error)
 				return result
 			patch_desc.new_operation = result
+			const history_patch = [patch_desc]
+			const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)
 			// update graph knytes
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
 				'asynchronous-reply', 'event-add-operation',
-				[patch_desc], history_focus
+				knytes_patch, history_focus
 			)
 			// patch history view
 			const ipc_history = registered_ipc_renders['history']
 			ipc_history && ipc_history.send(
 				'asynchronous-reply', 'event-add-operation',
-				[patch_desc], history_focus
+				history_patch, history_focus
 			)
 			// redraw all spaces
 			// TODO: update only affected spaces
 			for (let space_window_id in registered_ipc_spaces) {
 				registered_ipc_spaces[space_window_id].send(
 					'asynchronous-reply', 'event-add-operation',
-					[patch_desc]
+					history_patch
 				)
 			}
 			return {success: true}
