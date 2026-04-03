@@ -81,8 +81,20 @@ window.addEventListener('DOMContentLoaded', () => {
 		result.innerHTML = ''
 		for (let id in knytes) {
 			const knyte = document.createElement('div')
+			knyte.id = id
 			knyte.textContent = `${id} ${JSON.stringify(knytes[id], null, '\t')}`
 			result.appendChild(knyte)
+		}
+	}
+	function patch_knytes(result, knytes_patch) {
+		for (let id in knytes_patch) {
+			let knyte = document.getElementById(id)
+			if (!knyte) {
+				knyte = document.createElement('div')
+				knyte.id = id
+				result.appendChild(knyte)
+			}
+			knyte.textContent = `${id} ${JSON.stringify(knytes_patch[id], null, '\t')}`
 		}
 	}
 	function handle_click_show_knytes() {
@@ -137,7 +149,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			handle_click_show_knytes()
 			console.log(`complete redraw knytes by ${arg}`)
 		} else if (arg === 'event-add-operation') {
-			const patch_descs = arg2
+			const knytes_patch = arg2
 			const history_focus = arg3
 			const {branch_id, operation_id, is_present} = history_focus
 			document.getElementById('input-focused-branch-id').value = branch_id
@@ -145,8 +157,9 @@ window.addEventListener('DOMContentLoaded', () => {
 			document.getElementById('caption-focused-branch-id').textContent = branch_id
 			document.getElementById('result-is-present').textContent = is_present
 				? 'present' : 'past'
-			handle_click_show_knytes()
-			console.log(`complete redraw knytes by ${arg}`, patch_descs)
+			const result = document.getElementById('result-show-knytes')
+			patch_knytes(result, knytes_patch)
+			console.log(`patch knytes by ${arg}`, knytes_patch)
 		}
 	})
 	ipcRenderer.send('asynchronous-message', 'event-register-ipc-render', 'graph')
