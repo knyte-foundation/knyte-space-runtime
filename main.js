@@ -556,10 +556,11 @@ app.whenReady().then(() => {
 					[patch_desc], history_focus
 				)
 				// update spaces
-				// TODO: patch instead of full redraw, update only affected spaces
+				// TODO: update only affected spaces
 				for (let space_window_id in registered_ipc_spaces) {
 					registered_ipc_spaces[space_window_id].send(
-						'asynchronous-reply', 'event-add-operation'
+						'asynchronous-reply', 'event-add-operation',
+						[patch_desc]
 					)
 				}
 			}
@@ -745,10 +746,11 @@ app.whenReady().then(() => {
 				[patch_desc1, patch_desc2], history_focus
 			)
 			// redraw all spaces
-			// TODO: bulk patch instead of full redraw, update only affected spaces
+			// TODO: update only affected spaces
 			for (let space_window_id in registered_ipc_spaces) {
 				registered_ipc_spaces[space_window_id].send(
-					'asynchronous-reply', 'event-set-operation-in-focus'
+					'asynchronous-reply', 'event-add-operation',
+					[patch_desc1, patch_desc2]
 				)
 			}
 			return {success: true}
@@ -834,10 +836,11 @@ app.whenReady().then(() => {
 				[patch_desc], history_focus
 			)
 			// redraw all spaces
-			// TODO: bulk patch instead of full redraw, update only affected spaces
+			// TODO: update only affected spaces
 			for (let space_window_id in registered_ipc_spaces) {
 				registered_ipc_spaces[space_window_id].send(
-					'asynchronous-reply', 'event-set-operation-in-focus'
+					'asynchronous-reply', 'event-add-operation',
+					[patch_desc]
 				)
 			}
 			return {success: true}
