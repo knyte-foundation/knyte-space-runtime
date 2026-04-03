@@ -84,7 +84,6 @@ window.addEventListener('DOMContentLoaded', () => {
 			knyte.textContent = `${id} ${JSON.stringify(knytes[id], null, '\t')}`
 			result.appendChild(knyte)
 		}
-		console.log('complete redraw knytes')
 	}
 	function handle_click_show_knytes() {
 		const result = document.getElementById('result-show-knytes')
@@ -136,6 +135,11 @@ window.addEventListener('DOMContentLoaded', () => {
 			document.getElementById('result-is-present').textContent = new_is_focus_on_present
 				? 'present' : 'past'
 			handle_click_show_knytes()
+			console.log(`complete redraw knytes by ${arg}`)
+		} else if (arg === 'event-add-operation') {
+			const patch_descs = arg2
+			handle_click_show_knytes()
+			console.log(`complete redraw knytes by ${arg}`, patch_descs)
 		}
 	})
 	ipcRenderer.send('asynchronous-message', 'event-register-ipc-render', 'graph')

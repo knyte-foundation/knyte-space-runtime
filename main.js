@@ -541,12 +541,11 @@ app.whenReady().then(() => {
 			}
 			const result = add_operation({ command, target, parameter })
 			if (!result.error) {
-				// update graph focus
-				const {branch_id, operation_id, is_present} = history_focus
+				// update graph knytes
 				const ipc_graph = registered_ipc_renders['graph']
 				ipc_graph && ipc_graph.send(
-					'asynchronous-reply', 'event-set-operation-in-focus',
-					branch_id, operation_id, is_present
+					'asynchronous-reply', 'event-add-operation',
+					[patch_desc]
 				)
 				// patch history view
 				patch_desc.new_operation = result
@@ -732,12 +731,11 @@ app.whenReady().then(() => {
 			if (result2.error)
 				return result2
 			patch_desc2.new_operation = result2
-			// update graph focus
-			const {branch_id, operation_id, is_present} = history_focus
+			// update graph knytes
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
-				branch_id, operation_id, is_present
+				'asynchronous-reply', 'event-add-operation',
+				[patch_desc1, patch_desc2]
 			)
 			// bulk patch history view
 			const ipc_history = registered_ipc_renders['history']
@@ -821,12 +819,11 @@ app.whenReady().then(() => {
 			})
 			if (result.error)
 				return result
-			// update graph focus
-			const {branch_id, operation_id, is_present} = history_focus
+			// update graph knytes
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
-				branch_id, operation_id, is_present
+				'asynchronous-reply', 'event-add-operation',
+				[patch_desc]
 			)
 			// patch history view
 			patch_desc.new_operation = result
