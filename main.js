@@ -667,6 +667,10 @@ app.whenReady().then(() => {
 						stack: 'not available'
 					}
 				}
+			const is_branch_changed = history_focus.branch_id !== branch_id
+			if (is_branch_changed) {
+				build_history()
+			}
 			const is_present = present_operations_in_branches[branch_id].id === operation_id
 			history_focus.branch_id = branch_id
 			history_focus.operation_id = operation_id
@@ -681,7 +685,11 @@ app.whenReady().then(() => {
 					'asynchronous-reply', 'event-set-operation-in-focus'
 				)
 			}
-			return {history_focus}
+			if (is_branch_changed) {
+				return { history_render_sequence, history_focus }
+			} else {
+				return { history_focus }
+			}
 		} else if (arg === 'event-create-knyte-and-knoxel') {
 			const {root_space_id, x, y} = arg2
 			if (!uuid_validate(root_space_id))
