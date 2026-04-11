@@ -171,14 +171,12 @@ contextBridge.exposeInMainWorld('core_api', {
 window.addEventListener('DOMContentLoaded', () => {
 	show_space()
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
-		// TODO: fix code duplication
-		if (arg === 'event-change-operation-in-focus') {
+		if (
+			arg === 'event-change-operation-in-focus' ||
+			arg === 'event-add-operation'
+		) {
 			show_space()
 			console.log(`complete redraw space by ${arg}`)
-		} else if (arg === 'event-add-operation') {
-			const patch_descs = arg2
-			show_space()
-			console.log(`complete redraw space by ${arg}`, patch_descs)
 		}
 	})
 	ipcRenderer.send('asynchronous-message', 'event-register-ipc-space', window_id)

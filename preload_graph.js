@@ -137,26 +137,23 @@ window.addEventListener('DOMContentLoaded', () => {
 		document.getElementById('result-edit').textContent = 'not implemented yet'
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
-		// TODO: fix code duplication
-		if (arg === 'event-change-operation-in-focus') {
-			const history_focus = arg2
+		function render_history_focus(history_focus) {
 			const {branch_id, operation_id, is_present} = history_focus
 			document.getElementById('input-focused-branch-id').value = branch_id
 			document.getElementById('input-last-operation-id').value = operation_id
 			document.getElementById('caption-focused-branch-id').textContent = branch_id
 			document.getElementById('result-is-present').textContent = is_present
 				? 'present' : 'past'
+		}
+		if (arg === 'event-change-operation-in-focus') {
+			const history_focus = arg2
+			render_history_focus(history_focus)
 			handle_click_show_knytes()
 			console.log(`complete redraw knytes by ${arg}`)
 		} else if (arg === 'event-add-operation') {
 			const knytes_patch = arg2
 			const history_focus = arg3
-			const {branch_id, operation_id, is_present} = history_focus
-			document.getElementById('input-focused-branch-id').value = branch_id
-			document.getElementById('input-last-operation-id').value = operation_id
-			document.getElementById('caption-focused-branch-id').textContent = branch_id
-			document.getElementById('result-is-present').textContent = is_present
-				? 'present' : 'past'
+			render_history_focus(history_focus)
 			const result = document.getElementById('result-show-knytes')
 			patch_knytes(result, knytes_patch)
 			console.log(`patch knytes by ${arg}`, knytes_patch)
