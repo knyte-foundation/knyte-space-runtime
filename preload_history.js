@@ -30,18 +30,8 @@ window.addEventListener('DOMContentLoaded', () => {
 				history_branch_in_focus, operation_in_focus
 			)
 			.then((reply) => {
-				const { history_render_sequence, history_focus, error } = reply
-				if (error) {
-					alert(JSON.stringify(error))
-				} else {
-					if (history_render_sequence) {
-						handle_show_history(history_render_sequence)
-					}
-					if (history_focus) {
-						const { branch_id, operation_id, is_present } = history_focus
-						highlight_focus(branch_id, operation_id, is_present)
-					}
-				}
+				const { error } = reply
+				error && alert(JSON.stringify(error))
 			})
 	}
 	function handle_show_history(render_sequence) {

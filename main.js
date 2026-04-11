@@ -645,7 +645,6 @@ app.whenReady().then(() => {
 			const operation_id = arg3
 			if (!(branch_id in present_operations_in_branches))
 				return {error: {message: `branch ${branch_id} not found`}}
-
 			const { exists, error } = is_row_exist(
 				optree_id_to_name(branch_id), operation_id
 			)
@@ -675,6 +674,15 @@ app.whenReady().then(() => {
 			history_focus.branch_id = branch_id
 			history_focus.operation_id = operation_id
 			history_focus.is_present = is_present
+			const ipc_history = registered_ipc_renders['history']
+			is_branch_changed && ipc_history && ipc_history.send(
+				'asynchronous-reply', 'event-show-history-on-start',
+				history_render_sequence
+			)
+			ipc_history && ipc_history.send(
+				'asynchronous-reply', 'event-set-operation-in-focus',
+				history_focus
+			)
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
 				'asynchronous-reply', 'event-set-operation-in-focus',
@@ -685,11 +693,7 @@ app.whenReady().then(() => {
 					'asynchronous-reply', 'event-set-operation-in-focus'
 				)
 			}
-			if (is_branch_changed) {
-				return { history_render_sequence, history_focus }
-			} else {
-				return { history_focus }
-			}
+			return {}
 		} else if (arg === 'event-create-knyte-and-knoxel') {
 			const {root_space_id, x, y} = arg2
 			if (!uuid_validate(root_space_id))
@@ -873,7 +877,8 @@ app.whenReady().then(() => {
 		const ipc_graph = registered_ipc_renders['graph']
 		if (ipc_history && ipc_graph) {
 			ipc_history.send(
-				'asynchronous-reply', 'event-show-history-on-start', history_render_sequence
+				'asynchronous-reply', 'event-show-history-on-start',
+				history_render_sequence
 			)
 			ipc_history.send(
 				'asynchronous-reply', 'event-set-operation-in-focus',
