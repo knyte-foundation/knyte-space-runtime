@@ -19,9 +19,10 @@ window.addEventListener('DOMContentLoaded', () => {
 		document.getElementById(version).innerText = process.versions[type]
 	}
 	ipcRenderer
-		.invoke('invoke-handle-message', 'event-system-db-path')
+		.invoke('invoke-handle-message', 'event-system-info')
 		.then((reply) => {
-			const { app_root_path, db_path } = reply
+			const { app_instance_id, app_root_path, db_path } = reply			
+			document.getElementById('app-instance-id').textContent = app_instance_id
 			document.getElementById('root-path').textContent = app_root_path
 			document.getElementById('db-path').textContent = db_path
 		})

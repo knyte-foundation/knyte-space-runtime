@@ -3,6 +3,7 @@ const { app, BrowserWindow, ipcMain } = require('electron/main')
 const {
 	v7: uuidv7, NIL: uuid_nil, validate: uuid_validate, version: uuid_version
 } = require('uuid')
+const app_instance_id = uuidv7()
 const first_history_branch_id = uuid_nil
 const path = require('node:path')
 const app_root_path = __dirname
@@ -507,8 +508,8 @@ app.whenReady().then(() => {
 			console.log('db not ready')
 			return
 		}
-		if (arg === 'event-system-db-path') {
-			return { app_root_path, db_path }
+		if (arg === 'event-system-info') {
+			return { app_instance_id, app_root_path, db_path }
 		} else if (arg === 'event-system-memtest') {
 			const max_engine_size = await check_max_memory(false)
 			const max_buffer_size = await check_max_memory(true)
