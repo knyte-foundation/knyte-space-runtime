@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		const operation_in_focus = node.id
 		ipcRenderer
 			.invoke(
-				'invoke-handle-message', 'event-set-operation-in-focus',
+				'invoke-handle-message', 'event-change-operation-in-focus',
 				history_branch_in_focus, operation_in_focus
 			)
 			.then((reply) => {

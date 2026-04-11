@@ -640,7 +640,7 @@ app.whenReady().then(() => {
 			}
 			else
 				return {error: {message: 'space_id is not valid uuid v7'}}
-		} else if (arg === 'event-set-operation-in-focus') {
+		} else if (arg === 'event-change-operation-in-focus') {
 			const branch_id = arg2
 			const operation_id = arg3
 			if (!(branch_id in present_operations_in_branches))
