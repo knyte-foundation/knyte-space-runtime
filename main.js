@@ -640,7 +640,7 @@ app.whenReady().then(() => {
 			}
 			else
 				return {error: {message: 'space_id is not valid uuid v7'}}
-		} else if (arg === 'event-change-operation-in-focus') {
+		} else if (arg === 'event-set-operation-in-focus') {
 			const branch_id = arg2
 			const operation_id = arg3
 			if (!(branch_id in present_operations_in_branches))
@@ -675,22 +675,24 @@ app.whenReady().then(() => {
 			history_focus.operation_id = operation_id
 			history_focus.is_present = is_present
 			const ipc_history = registered_ipc_renders['history']
-			is_branch_changed && ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-show-history-on-start',
-				history_render_sequence
-			)
-			ipc_history && ipc_history.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
-				history_focus
-			)
+			if (is_branch_changed)
+				ipc_history && ipc_history.send(
+					'asynchronous-reply', 'event-change-branch-and-operation-in-focus',
+					history_render_sequence, history_focus
+				)
+			else
+				ipc_history && ipc_history.send(
+					'asynchronous-reply', 'event-change-only-operation-in-focus',
+					history_focus
+				)
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
+				'asynchronous-reply', 'event-change-operation-in-focus',
 				history_focus
 			)
 			for (let space_window_id in registered_ipc_spaces) {
 				registered_ipc_spaces[space_window_id].send(
-					'asynchronous-reply', 'event-set-operation-in-focus'
+					'asynchronous-reply', 'event-change-operation-in-focus'
 				)
 			}
 			return {}
@@ -877,15 +879,11 @@ app.whenReady().then(() => {
 		const ipc_graph = registered_ipc_renders['graph']
 		if (ipc_history && ipc_graph) {
 			ipc_history.send(
-				'asynchronous-reply', 'event-show-history-on-start',
-				history_render_sequence
-			)
-			ipc_history.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
-				history_focus
+				'asynchronous-reply', 'event-init-history-view',
+				history_render_sequence, history_focus
 			)
 			ipc_graph.send(
-				'asynchronous-reply', 'event-set-operation-in-focus',
+				'asynchronous-reply', 'event-change-operation-in-focus',
 				history_focus
 			)
 		}

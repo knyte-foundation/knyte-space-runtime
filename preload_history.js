@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded', () => {
 		const operation_in_focus = node.id
 		ipcRenderer
 			.invoke(
-				'invoke-handle-message', 'event-change-operation-in-focus',
+				'invoke-handle-message', 'event-set-operation-in-focus',
 				history_branch_in_focus, operation_in_focus
 			)
 			.then((reply) => {
@@ -196,16 +196,17 @@ window.addEventListener('DOMContentLoaded', () => {
 			for (let i = 0; i < patch_descs.length; ++i)
 				handle_patch_history(patch_descs[i])
 			highlight_focus(branch_id, operation_id, is_present)
-		} else if (arg === 'event-add-history-branch') {
-			const render_sequence = arg2
+		} else if (
+			arg === 'event-init-history-view' ||
+			arg === 'event-add-history-branch' ||
+			arg === 'event-change-branch-and-operation-in-focus'
+		) {
+			const handle_render_sequence = arg2
 			const history_focus = arg3
 			const {branch_id, operation_id, is_present} = history_focus
-			handle_show_history(render_sequence)
+			handle_show_history(handle_render_sequence)
 			highlight_focus(branch_id, operation_id, is_present)
-		} else if (arg === 'event-show-history-on-start') {
-			const render_sequence = arg2
-			handle_show_history(render_sequence)
-		} else if (arg === 'event-set-operation-in-focus') {
+		} else if (arg === 'event-change-only-operation-in-focus') {
 			const history_focus = arg2
 			const {branch_id, operation_id, is_present} = history_focus
 			highlight_focus(branch_id, operation_id, is_present)

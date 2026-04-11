@@ -138,7 +138,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
 		// TODO: fix code duplication
-		if (arg === 'event-set-operation-in-focus') {
+		if (arg === 'event-change-operation-in-focus') {
 			const history_focus = arg2
 			const {branch_id, operation_id, is_present} = history_focus
 			document.getElementById('input-focused-branch-id').value = branch_id

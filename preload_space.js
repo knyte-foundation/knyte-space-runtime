@@ -171,7 +171,8 @@ contextBridge.exposeInMainWorld('core_api', {
 window.addEventListener('DOMContentLoaded', () => {
 	show_space()
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
-		if (arg === 'event-set-operation-in-focus') {
+		// TODO: fix code duplication
+		if (arg === 'event-change-operation-in-focus') {
 			show_space()
 			console.log(`complete redraw space by ${arg}`)
 		} else if (arg === 'event-add-operation') {
