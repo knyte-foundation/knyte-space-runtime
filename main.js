@@ -233,6 +233,7 @@ function init_history_focus() {
 		history_focus.branch_id = first_history_branch_id
 		history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
 		history_focus.is_present = true
+		multicast_discovery_request()
 	}
 }
 function get_history_line(top_branch, top_operation) {
@@ -492,11 +493,24 @@ async function check_max_memory(is_buffer) {
 	return Math.round((size - 10 * 1024 * 1024) / (1024 * 1024))
 }
 
+function multicast_discovery_request(callback) {
+	const payload = JSON.stringify({
+		event: 'udp-discovery-request',
+		app_instance_id,
+	})
+	udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
+		error ? console.error('UDP send error:', error)
+			: console.log(`UDP sent at ${Date.now()}:`, payload)
+		callback && callback()
+	})
+}
 udp_socket.on('message', (message, rinfo) => {
 	try {
 		const json = JSON.parse(message.toString())
 		const { event } = json
 		if (event === 'udp-discovery-request') {
+			if (!discovery_map)
+				return
 			discovery_map = {}
 			setTimeout(() => {
 				const payload = JSON.stringify({
@@ -538,6 +552,8 @@ udp_socket.on('message', (message, rinfo) => {
 				}, parseInt('100'))
 			}, parseInt('100'))
 		} else if (event === 'udp-discovery-answer') {
+			if (!discovery_map)
+				return
 			discovery_map[json.app_instance_id] = {history_focus: json.history_focus, rinfo}
 		} else {
 			console.error('UDP unknown event', event)
@@ -729,6 +745,7 @@ app.whenReady().then(() => {
 				build_history()
 			}
 			const is_present = present_operations_in_branches[branch_id].id === operation_id
+			const is_present_changed = history_focus.is_present !== is_present
 			history_focus.branch_id = branch_id
 			history_focus.operation_id = operation_id
 			history_focus.is_present = is_present
@@ -753,6 +770,8 @@ app.whenReady().then(() => {
 					'asynchronous-reply', 'event-change-operation-in-focus'
 				)
 			}
+			if (is_branch_changed || is_present_changed)
+				multicast_discovery_request()
 			return {}
 		} else if (arg === 'event-create-knyte-and-knoxel') {
 			const {root_space_id, x, y} = arg2
@@ -959,14 +978,7 @@ app.whenReady().then(() => {
 				history_render_sequence, history_focus
 			)
 		} else if (arg === 'event-multicast-discovery-request') {
-			const payload = JSON.stringify({
-				event: 'udp-discovery-request',
-				app_instance_id,
-			})
-			udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
-				error ? console.error('UDP send error:', error)
-					: console.log(`UDP sent at ${Date.now()}:`, payload)
-			})
+			multicast_discovery_request()
 		}
 	})
 
@@ -1000,6 +1012,9 @@ app.on('window-all-closed', function () {
 })
 
 app.on('will-quit', () => {
-	udp_socket && udp_socket.close()
 	db && db.close()
+	discovery_map = null // prevent udp events handling by this instance
+	multicast_discovery_request(() => {
+		udp_socket && udp_socket.close()
+	})
 })
