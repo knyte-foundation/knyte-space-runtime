@@ -503,11 +503,29 @@ udp_socket.on('message', (message, rinfo) => {
 			})
 		} else if (event === 'event-multicast-discovery-result') {
 			discovery_map = json.discovery_map
-			const discovery_result = discovery_map
+			const app_activity_states = {}
+			const active_branches = {}
+			for (let app_id in discovery_map) {
+				const {branch_id, is_present} = discovery_map[app_id].history_focus
+				if (is_present) {
+					if (!active_branches[branch_id])
+						active_branches[branch_id] = {}
+					active_branches[branch_id][app_id] = true
+				} else {
+					app_activity_states[app_id] = 'past'
+				}
+			}
+			for (let branch_id in active_branches) {
+				const apps = active_branches[branch_id]
+				const is_frozen = Object.keys(apps).length > 1
+				for (let app_id in apps) {
+					app_activity_states[app_id] = is_frozen ? 'frozen' : 'present'
+				}
+			}
 			const ipc_system = registered_ipc_renders['system']
 			ipc_system && ipc_system.send(
 				'asynchronous-reply', 'event-recieve-discovery-result',
-				JSON.stringify(discovery_result, null, '\t')
+				JSON.stringify(app_activity_states, null, '\t')
 			)
 		} else {
 			console.error('UDP unknown event', event)
