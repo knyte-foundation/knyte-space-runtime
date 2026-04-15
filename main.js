@@ -14,7 +14,7 @@ let db, space_window_number = 0, registered_ipc_renders = {}, registered_ipc_spa
 let present_operation_ids = {} // operation_id -> true
 let present_operations_in_branches = {} // history_branch_id -> operation_id
 let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
-const history_focus = {branch_id: null, operation_id: null, is_present: false}
+const history_focus = {branch_id: null, operation_id: null, is_present: false, is_frozen: false}
 let knytes = {} // knyte_id -> {id, initial, terminal, content}
 let discovery_map = {} // app_instance_id -> {history_focus, rinfo}
 const knytes_focus = {branch_id: null, operation_id: null}
@@ -341,6 +341,16 @@ function add_operation(desc) {
 				stack: 'not available',
 			}
 		}
+	if (history_focus.is_frozen)
+		return {
+			error: {
+				code: 'db is in read-only mode',
+				message: `can't add new operation to history because branch in focus ${
+					history_focus.branch_id
+					} is frozen`,
+				stack: 'not available',
+			}
+		}
 	const id = uuidv7()
 	const result = db_append_operation(history_focus.branch_id, { id, command, target, parameter })
 	if (!result.error) {
@@ -522,6 +532,7 @@ udp_socket.on('message', (message, rinfo) => {
 					app_activity_states[app_id] = is_frozen ? 'frozen' : 'present'
 				}
 			}
+			history_focus.is_frozen = app_activity_states[app_instance_id] === 'frozen'
 			const ipc_system = registered_ipc_renders['system']
 			ipc_system && ipc_system.send(
 				'asynchronous-reply', 'event-recieve-discovery-result',
