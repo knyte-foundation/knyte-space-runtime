@@ -65,10 +65,10 @@ window.addEventListener('DOMContentLoaded', () => {
 		)
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
-		if (arg === 'event-recieve-discovery-answer') {
-			const discovery_map = arg2
+		if (arg === 'event-recieve-discovery-result') {
+			const discovery_result = arg2
 			document.getElementById('result-broadcast').textContent =
-				`• Incoming: ${discovery_map}\n`
+				`• Incoming: ${discovery_result}\n`
 		}
 	})	
 	ipcRenderer.send(

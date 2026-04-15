@@ -503,10 +503,11 @@ udp_socket.on('message', (message, rinfo) => {
 			})
 		} else if (event === 'event-multicast-discovery-result') {
 			discovery_map = json.discovery_map
+			const discovery_result = discovery_map
 			const ipc_system = registered_ipc_renders['system']
 			ipc_system && ipc_system.send(
-				'asynchronous-reply', 'event-recieve-discovery-answer',
-				JSON.stringify(discovery_map, null, '\t')
+				'asynchronous-reply', 'event-recieve-discovery-result',
+				JSON.stringify(discovery_result, null, '\t')
 			)
 		} else {
 			console.error('UDP unknown event', event)
