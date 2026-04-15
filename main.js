@@ -481,11 +481,31 @@ async function check_max_memory(is_buffer) {
 	return Math.round((size - 10 * 1024 * 1024) / (1024 * 1024))
 }
 
-udp_socket.on('message', (msg, rinfo) => {
+udp_socket.on('message', (message, rinfo) => {
 	const ipc_system = registered_ipc_renders['system']
-	ipc_system && ipc_system.send('asynchronous-reply', 'event-recieve-message',
-		msg.toString(), rinfo.address
-	)
+	try {
+		const json = JSON.parse(message.toString())
+		const {event, reciever} = json
+		if (event === 'event-multicast-discovery-answer') {
+			reciever === app_instance_id && ipc_system && ipc_system.send(
+				'asynchronous-reply', 'event-recieve-discovery-answer',
+				message.toString(), rinfo.address
+			)
+		} else if (event === 'event-multicast-discovery-request') {
+			const payload = JSON.stringify({
+				event: 'event-multicast-discovery-answer',
+				app_instance_id,
+				history_focus,
+				reciever: json.app_instance_id
+			})
+			udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
+				error ? console.error('UDP send error:', error)
+					: console.log(`UDP sent at ${Date.now()}:`, payload)
+			})
+		}
+	} catch (error) {
+		console.error('UDP invalid message format', message.toString())
+	}
 })
 udp_socket.on('error', error => {
 	console.error('Socket error', error);
@@ -899,11 +919,10 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-history-branch',
 				history_render_sequence, history_focus
 			)
-		} else if (arg === 'event-multicast-discovery') {
+		} else if (arg === 'event-multicast-discovery-request') {
 			const payload = JSON.stringify({
-				event: 'event-multicast-discovery',
+				event: 'event-multicast-discovery-request',
 				app_instance_id,
-				history_focus,
 			})
 			udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
 				error ? console.error('UDP send error:', error)
