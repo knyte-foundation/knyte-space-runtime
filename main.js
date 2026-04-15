@@ -496,13 +496,13 @@ udp_socket.on('message', (message, rinfo) => {
 	try {
 		const json = JSON.parse(message.toString())
 		const { event, reciever } = json
-		if (event === 'event-multicast-discovery-answer') {
+		if (event === 'udp-discovery-answer') {
 			if (reciever === app_instance_id) {
 				discovery_map[json.app_instance_id] = {history_focus: json.history_focus, rinfo}
 			}
-		} else if (event === 'event-multicast-discovery-request') {
+		} else if (event === 'udp-discovery-request') {
 			const payload = JSON.stringify({
-				event: 'event-multicast-discovery-answer',
+				event: 'udp-discovery-answer',
 				app_instance_id,
 				history_focus,
 				reciever: json.app_instance_id
@@ -511,7 +511,7 @@ udp_socket.on('message', (message, rinfo) => {
 				error ? console.error('UDP send error:', error)
 					: console.log(`UDP sent at ${Date.now()}:`, payload)
 			})
-		} else if (event === 'event-multicast-discovery-result') {
+		} else if (event === 'udp-discovery-result') {
 			discovery_map = json.discovery_map
 			const app_activity_states = {}
 			const active_branches = {}
@@ -960,7 +960,7 @@ app.whenReady().then(() => {
 		} else if (arg === 'event-multicast-discovery-request') {
 			discovery_map = {}
 			const payload = JSON.stringify({
-				event: 'event-multicast-discovery-request',
+				event: 'udp-discovery-request',
 				app_instance_id,
 			})
 			udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
@@ -970,7 +970,7 @@ app.whenReady().then(() => {
 			setTimeout(() => {
 				console.log('discovery_map', discovery_map)
 				const payload = JSON.stringify({
-					event: 'event-multicast-discovery-result',
+					event: 'udp-discovery-result',
 					discovery_map,
 				})
 				udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
