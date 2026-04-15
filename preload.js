@@ -67,8 +67,8 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (arg === 'event-recieve-message') {
 			const msg = arg2
 			const rinfo_address = arg3
-			document.getElementById('result-broadcast').textContent =
-				`UDP got: "${msg}" from ${rinfo_address}`
+			document.getElementById('result-broadcast').textContent +=
+				`• Incoming from ${rinfo_address}: ${msg}\n`
 		}
 	})	
 	ipcRenderer.send(
