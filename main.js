@@ -8,6 +8,8 @@ const first_history_branch_id = uuid_nil
 const path = require('node:path')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
+const dgram = require('node:dgram')
+const udp_socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 let db, space_window_number = 0, registered_ipc_renders = {}, registered_ipc_spaces = {}
 let present_operation_ids = {} // operation_id -> true
 let present_operations_in_branches = {} // history_branch_id -> operation_id
@@ -122,21 +124,6 @@ function connect_db() {
 		} catch (error) {
 			console.error(`Error creating table "${table_name}"`, error)
 		}
-	}
-}
-function is_table_exist(name) {
-	try {
-		const result = db.prepare(`
-			SELECT name FROM sqlite_master WHERE type='table' AND name='${name}';
-		`).all()
-		return {
-			exists: result && result.length > 0
-				? result[0].name === name
-				: false
-		}
-	} catch (error) {
-		const { code, message, stack } = error
-		return { exists: false, error: { code, message, stack } }
 	}
 }
 function is_row_exist(name, id) {
@@ -493,6 +480,20 @@ async function check_max_memory(is_buffer) {
 	// Возвращаем последний успешно выделенный объём памяти в мб
 	return Math.round((size - 10 * 1024 * 1024) / (1024 * 1024))
 }
+
+udp_socket.on('message', (msg, rinfo) => {
+	const ipc_system = registered_ipc_renders['system']
+	ipc_system && ipc_system.send('asynchronous-reply', 'event-recieve-message',
+		msg.toString(), rinfo.address
+	)
+})
+udp_socket.on('error', error => {
+	console.error('Socket error', error);
+	app.quit()
+})
+udp_socket.bind(parseInt('8888'), () => {
+	console.log(`Run app ${app_instance_id}\nListen port 8888 on all interfaces`);
+})
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -869,9 +870,10 @@ app.whenReady().then(() => {
 	})
 
 	function handle_all_windows_registered() {
+		const ipc_system = registered_ipc_renders['system']
 		const ipc_history = registered_ipc_renders['history']
 		const ipc_graph = registered_ipc_renders['graph']
-		if (ipc_history && ipc_graph) {
+		if (ipc_system && ipc_history && ipc_graph) {
 			ipc_history.send(
 				'asynchronous-reply', 'event-init-history-view',
 				history_render_sequence, history_focus
@@ -897,6 +899,12 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-history-branch',
 				history_render_sequence, history_focus
 			)
+		} else if (arg === 'event-broadcast-message') {
+			const payload = `Hello from ${app_instance_id}`
+			udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
+				error ? console.error('UDP send error:', error)
+					: console.log(`[${new Date().toLocaleTimeString()}] UDP message sent: ${payload}`)
+			})
 		}
 	})
 
@@ -930,9 +938,6 @@ app.on('window-all-closed', function () {
 })
 
 app.on('will-quit', () => {
-	// Close the connection
+	udp_socket && udp_socket.close()
 	db && db.close()
 })
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.

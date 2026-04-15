@@ -58,4 +58,20 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('button-add-space').addEventListener('click', () => {
 		space_dialog.showModal()
 	})
+	document.getElementById('button-broadcast-hello').addEventListener('click', () => {
+		ipcRenderer.send(
+			'asynchronous-message', 'event-broadcast-message'
+		)
+	})
+	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3) => {
+		if (arg === 'event-recieve-message') {
+			const msg = arg2
+			const rinfo_address = arg3
+			document.getElementById('result-broadcast').textContent =
+				`UDP got: "${msg}" from ${rinfo_address}`
+		}
+	})	
+	ipcRenderer.send(
+		'asynchronous-message', 'event-register-ipc-render', 'system'
+	)
 })
