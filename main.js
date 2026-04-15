@@ -501,6 +501,15 @@ udp_socket.on('message', (message, rinfo) => {
 				error ? console.error('UDP send error:', error)
 					: console.log(`UDP sent at ${Date.now()}:`, payload)
 			})
+		} else if (event === 'event-multicast-discovery-result') {
+			discovery_map = json.discovery_map
+			const ipc_system = registered_ipc_renders['system']
+			ipc_system && ipc_system.send(
+				'asynchronous-reply', 'event-recieve-discovery-answer',
+				JSON.stringify(discovery_map, null, '\t')
+			)
+		} else {
+			console.error('UDP unknown event', event)
 		}
 	} catch (error) {
 		console.error('UDP invalid message format', message.toString())
@@ -930,11 +939,14 @@ app.whenReady().then(() => {
 			})
 			setTimeout(() => {
 				console.log('discovery_map', discovery_map)
-				const ipc_system = registered_ipc_renders['system']
-				ipc_system && ipc_system.send(
-					'asynchronous-reply', 'event-recieve-discovery-answer',
-					JSON.stringify(discovery_map, null, '\t')
-				)
+				const payload = JSON.stringify({
+					event: 'event-multicast-discovery-result',
+					discovery_map,
+				})
+				udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
+					error ? console.error('UDP send error:', error)
+						: console.log(`UDP sent at ${Date.now()}:`, payload)
+				})
 			}, parseInt('300'))
 		}
 	})
