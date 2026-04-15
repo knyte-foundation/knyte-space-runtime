@@ -59,16 +59,33 @@ window.addEventListener('DOMContentLoaded', () => {
 		space_dialog.showModal()
 	})
 	document.getElementById('button-multicast-discovery').addEventListener('click', () => {
-		document.getElementById('result-broadcast').textContent = 'loading...'
+		const tbody = document.getElementById('result-discovery')
+		tbody.innerHTML = ''
+		const tr = document.createElement('tr')
+		const td = document.createElement('td')
+		td.textContent = 'loading...'
+		tr.appendChild(td)
+		tbody.appendChild(tr)
 		ipcRenderer.send(
 			'asynchronous-message', 'event-multicast-discovery-request'
 		)
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
 		if (arg === 'event-recieve-discovery-result') {
-			const discovery_result = arg2
-			document.getElementById('result-broadcast').textContent =
-				`• Incoming: ${discovery_result}\n`
+			const discovery_result = JSON.parse(arg2)
+			const tbody = document.getElementById('result-discovery')
+			tbody.innerHTML = ''
+			for (let app_id in discovery_result) {
+				const tr = document.createElement('tr')
+				const td1 = document.createElement('td')
+				const td2 = document.createElement('td')
+				td1.textContent = app_id
+				td2.textContent = discovery_result[app_id]
+				td2.style = 'padding-left: 2em;'
+				tr.appendChild(td1)
+				tr.appendChild(td2)
+				tbody.appendChild(tr)
+			}
 		}
 	})	
 	ipcRenderer.send(

@@ -4,7 +4,10 @@
 <head>
 	<meta charset="UTF-8">
 	<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-	<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+	<meta
+		http-equiv="Content-Security-Policy"
+		content="default-src 'self'; script-src 'self'"
+	>
 	<link rel="stylesheet" href="node_modules/meslo/meslo.css">
 	<link rel="stylesheet" href="style.css">
 	<title>system</title>
@@ -37,7 +40,8 @@
 			DB userdata path "<span id="db-path"></span>"
 		</li>
 		<li>
-			Typical RAM limits: 4 GB for render process, 2 GB for ArrayBuffer
+			Typical RAM limits: 4 GB for render process,
+			2 GB for ArrayBuffer
 		</li>
 	</ul>
 	<p>
@@ -51,21 +55,32 @@
 		<span id="result-memtest-chromium"></span>
 	</p>
 	<p>
-		<button id="button-multicast-discovery">
-			multicast discovery
-		</button>
-		<pre id="result-broadcast"></pre>
+		Discovery
+		<div>
+			<button id="button-multicast-discovery">
+				refresh
+			</button>
+			<table>
+				<thead>
+					<tr>
+						<th>instance id</th>
+						<th>activity</th>
+					</tr>
+				</thead>
+				<tbody id="result-discovery">
+				</tbody>
+			</table>
+		</div>
 	</p>
 	<p>
 		Spaces
-	<div>
-		<button id="button-add-space">
-			add space
-		</button>
-	</div>
+		<div>
+			<button id="button-add-space">
+				add space
+			</button>
+		</div>
 	</p>
 
-	<!-- You can also require other files to run in this process -->
 	<script src="./renderer.js"></script>
 </body>
 
