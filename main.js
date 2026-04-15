@@ -495,49 +495,50 @@ async function check_max_memory(is_buffer) {
 udp_socket.on('message', (message, rinfo) => {
 	try {
 		const json = JSON.parse(message.toString())
-		const { event, reciever } = json
-		if (event === 'udp-discovery-answer') {
-			if (reciever === app_instance_id) {
-				discovery_map[json.app_instance_id] = {history_focus: json.history_focus, rinfo}
-			}
-		} else if (event === 'udp-discovery-request') {
-			const payload = JSON.stringify({
-				event: 'udp-discovery-answer',
-				app_instance_id,
-				history_focus,
-				reciever: json.app_instance_id
-			})
-			udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
-				error ? console.error('UDP send error:', error)
-					: console.log(`UDP sent at ${Date.now()}:`, payload)
-			})
-		} else if (event === 'udp-discovery-result') {
-			discovery_map = json.discovery_map
-			const app_activity_states = {}
-			const active_branches = {}
-			for (let app_id in discovery_map) {
-				const {branch_id, is_present} = discovery_map[app_id].history_focus
-				if (is_present) {
-					if (!active_branches[branch_id])
-						active_branches[branch_id] = {}
-					active_branches[branch_id][app_id] = true
-				} else {
-					app_activity_states[app_id] = 'past'
-				}
-			}
-			for (let branch_id in active_branches) {
-				const apps = active_branches[branch_id]
-				const is_frozen = Object.keys(apps).length > 1
-				for (let app_id in apps) {
-					app_activity_states[app_id] = is_frozen ? 'frozen' : 'present'
-				}
-			}
-			history_focus.is_frozen = app_activity_states[app_instance_id] === 'frozen'
-			const ipc_system = registered_ipc_renders['system']
-			ipc_system && ipc_system.send(
-				'asynchronous-reply', 'event-recieve-discovery-result',
-				JSON.stringify(app_activity_states, null, '\t')
-			)
+		const { event } = json
+		if (event === 'udp-discovery-request') {
+			discovery_map = {}
+			setTimeout(() => {
+				const payload = JSON.stringify({
+					event: 'udp-discovery-answer',
+					app_instance_id,
+					history_focus,
+				})
+				udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
+					error ? console.error('UDP send error:', error)
+						: console.log(`UDP sent at ${Date.now()}:`, payload)
+				})
+				setTimeout(() => {
+					console.log('discovery_map', discovery_map)
+					const app_activity_states = {}
+					const active_branches = {}
+					for (let app_id in discovery_map) {
+						const {branch_id, is_present} = discovery_map[app_id].history_focus
+						if (is_present) {
+							if (!active_branches[branch_id])
+								active_branches[branch_id] = {}
+							active_branches[branch_id][app_id] = true
+						} else {
+							app_activity_states[app_id] = 'past'
+						}
+					}
+					for (let branch_id in active_branches) {
+						const apps = active_branches[branch_id]
+						const is_frozen = Object.keys(apps).length > 1
+						for (let app_id in apps) {
+							app_activity_states[app_id] = is_frozen ? 'frozen' : 'present'
+						}
+					}
+					history_focus.is_frozen = app_activity_states[app_instance_id] === 'frozen'
+					const ipc_system = registered_ipc_renders['system']
+					ipc_system && ipc_system.send(
+						'asynchronous-reply', 'event-recieve-discovery-result',
+						JSON.stringify(app_activity_states, null, '\t')
+					)
+				}, parseInt('100'))
+			}, parseInt('100'))
+		} else if (event === 'udp-discovery-answer') {
+			discovery_map[json.app_instance_id] = {history_focus: json.history_focus, rinfo}
 		} else {
 			console.error('UDP unknown event', event)
 		}
@@ -958,7 +959,6 @@ app.whenReady().then(() => {
 				history_render_sequence, history_focus
 			)
 		} else if (arg === 'event-multicast-discovery-request') {
-			discovery_map = {}
 			const payload = JSON.stringify({
 				event: 'udp-discovery-request',
 				app_instance_id,
@@ -967,17 +967,6 @@ app.whenReady().then(() => {
 				error ? console.error('UDP send error:', error)
 					: console.log(`UDP sent at ${Date.now()}:`, payload)
 			})
-			setTimeout(() => {
-				console.log('discovery_map', discovery_map)
-				const payload = JSON.stringify({
-					event: 'udp-discovery-result',
-					discovery_map,
-				})
-				udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
-					error ? console.error('UDP send error:', error)
-						: console.log(`UDP sent at ${Date.now()}:`, payload)
-				})
-			}, parseInt('300'))
 		}
 	})
 
