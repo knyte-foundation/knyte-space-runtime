@@ -899,11 +899,15 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-add-history-branch',
 				history_render_sequence, history_focus
 			)
-		} else if (arg === 'event-broadcast-message') {
-			const payload = `Hello from ${app_instance_id}`
+		} else if (arg === 'event-multicast-discovery') {
+			const payload = JSON.stringify({
+				event: 'event-multicast-discovery',
+				app_instance_id,
+				history_focus,
+			})
 			udp_socket.send(payload, 0, payload.length, parseInt('8888'), '224.0.0.1', error => {
 				error ? console.error('UDP send error:', error)
-					: console.log(`[${new Date().toLocaleTimeString()}] UDP message sent: ${payload}`)
+					: console.log(`UDP sent at ${Date.now()}:`, payload)
 			})
 		}
 	})

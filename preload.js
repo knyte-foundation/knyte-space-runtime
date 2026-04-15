@@ -58,9 +58,9 @@ window.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('button-add-space').addEventListener('click', () => {
 		space_dialog.showModal()
 	})
-	document.getElementById('button-broadcast-hello').addEventListener('click', () => {
+	document.getElementById('button-multicast-discovery').addEventListener('click', () => {
 		ipcRenderer.send(
-			'asynchronous-message', 'event-broadcast-message'
+			'asynchronous-message', 'event-multicast-discovery'
 		)
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3) => {
