@@ -16,6 +16,7 @@ let present_operations_in_branches = {} // history_branch_id -> operation_id
 let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
 const history_focus = {branch_id: null, operation_id: null, is_present: false}
 let knytes = {} // knyte_id -> {id, initial, terminal, content}
+let discovery_map = {} // app_instance_id -> {history_focus, rinfo}
 const knytes_focus = {branch_id: null, operation_id: null}
 
 function create_space_window(space_id) {
@@ -482,15 +483,13 @@ async function check_max_memory(is_buffer) {
 }
 
 udp_socket.on('message', (message, rinfo) => {
-	const ipc_system = registered_ipc_renders['system']
 	try {
 		const json = JSON.parse(message.toString())
-		const {event, reciever} = json
+		const { event, reciever } = json
 		if (event === 'event-multicast-discovery-answer') {
-			reciever === app_instance_id && ipc_system && ipc_system.send(
-				'asynchronous-reply', 'event-recieve-discovery-answer',
-				message.toString(), rinfo.address
-			)
+			if (reciever === app_instance_id) {
+				discovery_map[json.app_instance_id] = {history_focus: json.history_focus, rinfo}
+			}
 		} else if (event === 'event-multicast-discovery-request') {
 			const payload = JSON.stringify({
 				event: 'event-multicast-discovery-answer',
@@ -920,6 +919,7 @@ app.whenReady().then(() => {
 				history_render_sequence, history_focus
 			)
 		} else if (arg === 'event-multicast-discovery-request') {
+			discovery_map = {}
 			const payload = JSON.stringify({
 				event: 'event-multicast-discovery-request',
 				app_instance_id,
@@ -928,6 +928,14 @@ app.whenReady().then(() => {
 				error ? console.error('UDP send error:', error)
 					: console.log(`UDP sent at ${Date.now()}:`, payload)
 			})
+			setTimeout(() => {
+				console.log('discovery_map', discovery_map)
+				const ipc_system = registered_ipc_renders['system']
+				ipc_system && ipc_system.send(
+					'asynchronous-reply', 'event-recieve-discovery-answer',
+					JSON.stringify(discovery_map, null, '\t')
+				)
+			}, parseInt('300'))
 		}
 	})
 

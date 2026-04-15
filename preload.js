@@ -59,17 +59,16 @@ window.addEventListener('DOMContentLoaded', () => {
 		space_dialog.showModal()
 	})
 	document.getElementById('button-multicast-discovery').addEventListener('click', () => {
-		document.getElementById('result-broadcast').textContent = ''
+		document.getElementById('result-broadcast').textContent = 'loading...'
 		ipcRenderer.send(
 			'asynchronous-message', 'event-multicast-discovery-request'
 		)
 	})
-	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3) => {
+	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
 		if (arg === 'event-recieve-discovery-answer') {
-			const msg = arg2
-			const rinfo_address = arg3
-			document.getElementById('result-broadcast').textContent +=
-				`• Incoming from ${rinfo_address}: ${msg}\n`
+			const discovery_map = arg2
+			document.getElementById('result-broadcast').textContent =
+				`• Incoming: ${discovery_map}\n`
 		}
 	})	
 	ipcRenderer.send(
