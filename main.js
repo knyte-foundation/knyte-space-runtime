@@ -548,6 +548,11 @@ udp_socket.on('message', (message, rinfo) => {
 						'asynchronous-reply', 'event-recieve-discovery-result',
 						JSON.stringify(app_activity_states, null, '\t')
 					)
+					const ipc_history = registered_ipc_renders['history']
+					ipc_history && ipc_history.send(
+						'asynchronous-reply', 'event-change-only-operation-in-focus',
+						history_focus
+					)
 				}, parseInt('100'))
 			}, parseInt('100'))
 		} else if (event === 'udp-discovery-answer') {

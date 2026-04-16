@@ -8,16 +8,18 @@ function optree_name_to_id(name) {
 	return name.split('optree_')[1]
 }
 window.addEventListener('DOMContentLoaded', () => {
-	function highlight_focus(new_focus_branch_id, new_last_operation_id, new_is_focus_on_present) {
-		const svg = document.getElementById('svg-history');
-		const hixel_focus_node = document.getElementById(new_last_operation_id)
+	function highlight_focus(history_focus) {
+		const {branch_id, operation_id, is_present, is_frozen} = history_focus
+		const svg = document.getElementById('svg-history')
+		const hixel_focus_node = document.getElementById(operation_id)
 		if (hixel_focus_node) {
 			const prior_id = svg.dataset.operation_id
 			const hixel_prior_node = prior_id ? document.getElementById(prior_id) : null
 			hixel_prior_node && hixel_prior_node.setAttribute('fill', '#1C2333')
-			svg.dataset.branch_id = new_focus_branch_id
-			svg.dataset.operation_id = new_last_operation_id
-			const selection_color = new_is_focus_on_present ? '#FFB266' : '#F2AAEC'
+			svg.dataset.branch_id = branch_id
+			svg.dataset.operation_id = operation_id
+			const selection_color = is_frozen ? '#8AD6F2' :
+				is_present ? '#FFB266' : '#F2AAEC'
 			hixel_focus_node.setAttribute('fill', selection_color)
 		}
 	}
@@ -192,10 +194,9 @@ window.addEventListener('DOMContentLoaded', () => {
 		if (arg === 'event-add-operation') {
 			const patch_descs = arg2
 			const history_focus = arg3
-			const {branch_id, operation_id, is_present} = history_focus
 			for (let i = 0; i < patch_descs.length; ++i)
 				handle_patch_history(patch_descs[i])
-			highlight_focus(branch_id, operation_id, is_present)
+			highlight_focus(history_focus)
 		} else if (
 			arg === 'event-init-history-view' ||
 			arg === 'event-add-history-branch' ||
@@ -203,13 +204,11 @@ window.addEventListener('DOMContentLoaded', () => {
 		) {
 			const handle_render_sequence = arg2
 			const history_focus = arg3
-			const {branch_id, operation_id, is_present} = history_focus
 			handle_show_history(handle_render_sequence)
-			highlight_focus(branch_id, operation_id, is_present)
+			highlight_focus(history_focus)
 		} else if (arg === 'event-change-only-operation-in-focus') {
 			const history_focus = arg2
-			const {branch_id, operation_id, is_present} = history_focus
-			highlight_focus(branch_id, operation_id, is_present)
+			highlight_focus(history_focus)
 		}
 	})
 	ipcRenderer.send(
