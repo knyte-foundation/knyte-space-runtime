@@ -658,6 +658,29 @@ app.whenReady().then(() => {
 			const top_operation = arg3
 			const { knytes, error } = get_actual_knytes(top_branch, top_operation)
 			return knytes ? { knytes } : { error }
+		} else if (arg === 'event-get-knyte-content') {
+			const knyte_id = arg2
+			const knyte = knytes[knyte_id]
+			if (!knyte)
+				return {
+					error: {
+						code: `knyte ${knyte_id} not found`,
+						message: `can't get knyte content because knyte not found`,
+						stack: 'not available',
+					}
+				}
+			if (!knyte.content)
+				return { content: '' }
+			const content = db_get_content_text_by_id(knyte.content)
+			if (!content)
+				return {
+					error: {
+						code: `content ${content} not found`,
+						message: `can't get knyte content because content not found`,
+						stack: 'not available',
+					}
+				}
+			return { content: content.content }
 		} else if (arg === 'event-db-get-history-branches') {
 			return get_history_branches()
 		} else if (arg === 'event-db-add-history-branch') {

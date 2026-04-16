@@ -131,7 +131,26 @@ window.addEventListener('DOMContentLoaded', () => {
 		document.getElementById('result-link').textContent = 'not implemented yet'
 	})
 	document.getElementById('button-edit-start').addEventListener('click', () => {
-		document.getElementById('input-edit-content').textContent = 'not implemented yet'
+		const input = document.getElementById('input-edit-target')
+		const result = document.getElementById('input-edit-content')
+		result.style.color = ''
+		result.value = 'loading...'
+		const knyte_id = input.value
+		setTimeout(() => {
+			ipcRenderer
+				.invoke(
+					'invoke-handle-message', 'event-get-knyte-content',
+					knyte_id
+				)
+				.then((reply) => {
+					if (reply.content === undefined) {
+						result.style.color = 'red'
+						result.value = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+						return
+					}
+					result.value = reply.content
+				})
+		}, 100)
 	})
 	document.getElementById('button-edit-submit').addEventListener('click', () => {
 		document.getElementById('result-edit').textContent = 'not implemented yet'
