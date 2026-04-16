@@ -9,7 +9,8 @@ window.addEventListener('DOMContentLoaded', () => {
 			ipcRenderer
 				.invoke('invoke-handle-message', 'event-db-append-content', input)
 				.then((reply) => {
-					result.textContent = reply.id || `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+					result.textContent = reply.id ||
+						`ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 				})
 		}, 100)
 	})
@@ -22,7 +23,8 @@ window.addEventListener('DOMContentLoaded', () => {
 				.invoke('invoke-handle-message', 'event-db-find-content-by-text', input)
 				.then((reply) => {
 					result.textContent = reply.id || (
-						reply.not_found ? 'not found' : `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+						reply.not_found ? 'not found' :
+							`ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 					)
 				})
 		}, 100)
@@ -72,7 +74,9 @@ window.addEventListener('DOMContentLoaded', () => {
 					if (reply.id) {
 						result.textContent = reply.id
 					} else {
-						result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+						result.textContent = `ERROR: ${
+							reply.error ? reply.error.message : 'unknown'
+						}`
 					}
 				})
 		}, 100)
@@ -110,7 +114,9 @@ window.addEventListener('DOMContentLoaded', () => {
 				)
 				.then((reply) => {
 					if (!reply.knytes) {
-						result.textContent = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+						result.textContent = `ERROR: ${
+							reply.error ? reply.error.message : 'unknown'
+						}`
 						return
 					}
 					render_knytes(result, reply.knytes)
@@ -145,7 +151,9 @@ window.addEventListener('DOMContentLoaded', () => {
 				.then((reply) => {
 					if (reply.content === undefined) {
 						result.style.color = 'red'
-						result.value = `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
+						result.value = `ERROR: ${
+							reply.error ? reply.error.message : 'unknown'
+						}`
 						return
 					}
 					result.value = reply.content
@@ -153,7 +161,28 @@ window.addEventListener('DOMContentLoaded', () => {
 		}, 100)
 	})
 	document.getElementById('button-edit-submit').addEventListener('click', () => {
-		document.getElementById('result-edit').textContent = 'not implemented yet'
+		const input1 = document.getElementById('input-edit-target')
+		const input2 = document.getElementById('input-edit-content')
+		const result = document.getElementById('result-edit')
+		result.textContent = 'loading...'
+		const knyte_id = input1.value
+		const content = input2.value
+		setTimeout(() => {
+			ipcRenderer
+				.invoke(
+					'invoke-handle-message', 'event-submit-knyte-content',
+					knyte_id, content
+				)
+				.then((reply) => {
+					if (reply.id === undefined) {
+						result.textContent = `ERROR: ${
+							reply.error ? reply.error.message : 'unknown'
+						}`
+						return
+					}
+					result.textContent = reply.id
+				})
+		}, 100)
 	})
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2, arg3, arg4) => {
 		function render_history_focus(history_focus) {

@@ -465,6 +465,39 @@ function convert_history_patch_to_knytes_patch(history_patch) {
 	return knytes_patch
 }
 
+function handle_add_operation(operation_desc) {
+	const { command, target, parameter } = operation_desc
+	const patch_desc = {
+		parent_branch_id: history_focus.branch_id,
+		parent_operation_id: history_focus.operation_id
+	}
+	const result = add_operation({ command, target, parameter })
+	if (!result.error) {
+		patch_desc.new_operation = result
+		const history_patch = [patch_desc]
+		const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)
+		// update graph knytes
+		const ipc_graph = registered_ipc_renders['graph']
+		ipc_graph && ipc_graph.send(
+			'asynchronous-reply', 'event-add-operation',
+			knytes_patch, history_focus
+		)
+		// patch history view
+		const ipc_history = registered_ipc_renders['history']
+		ipc_history && ipc_history.send(
+			'asynchronous-reply', 'event-add-operation',
+			history_patch, history_focus
+		)
+		// update spaces
+		for (let space_window_id in registered_ipc_spaces) {
+			registered_ipc_spaces[space_window_id].send(
+				'asynchronous-reply', 'event-add-operation'
+			)
+		}
+	}
+	return result
+}
+
 async function check_max_memory(is_buffer) {
 	function sleep(ms) {
 		return new Promise(resolve => setTimeout(resolve, ms))
@@ -623,36 +656,8 @@ app.whenReady().then(() => {
 		} else if (arg === 'event-db-show-contents') {
 			return db.prepare('SELECT * FROM contents').all()
 		} else if (arg === 'event-db-add-operation') {
-			const { command, target, parameter } = arg2
-			const patch_desc = {
-				parent_branch_id: history_focus.branch_id,
-				parent_operation_id: history_focus.operation_id
-			}
-			const result = add_operation({ command, target, parameter })
-			if (!result.error) {
-				patch_desc.new_operation = result
-				const history_patch = [patch_desc]
-				const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)
-				// update graph knytes
-				const ipc_graph = registered_ipc_renders['graph']
-				ipc_graph && ipc_graph.send(
-					'asynchronous-reply', 'event-add-operation',
-					knytes_patch, history_focus
-				)
-				// patch history view
-				const ipc_history = registered_ipc_renders['history']
-				ipc_history && ipc_history.send(
-					'asynchronous-reply', 'event-add-operation',
-					history_patch, history_focus
-				)
-				// update spaces
-				for (let space_window_id in registered_ipc_spaces) {
-					registered_ipc_spaces[space_window_id].send(
-						'asynchronous-reply', 'event-add-operation'
-					)
-				}
-			}
-			return result
+			const operation_desc = arg2
+			return handle_add_operation(operation_desc)
 		} else if (arg === 'event-get-knytes') {
 			const top_branch = arg2
 			const top_operation = arg3
@@ -681,6 +686,33 @@ app.whenReady().then(() => {
 					}
 				}
 			return { content: content.content }
+		} else if (arg === 'event-submit-knyte-content') {
+			const knyte_id = arg2
+			const content_text = arg3
+			const knyte = knytes[knyte_id]
+			if (!knyte)
+				return {
+					error: {
+						code: `knyte ${knyte_id} not found`,
+						message: `can't submit knyte content because knyte not found`,
+						stack: 'not available',
+					}
+				}
+			let content_id
+			try {
+				const content_desc = db_get_content_id_by_text(content_text) ||
+					db_append_content(content_text)
+				content_id = content_desc.id
+			} catch (error) {
+				const { code, message, stack } = error
+				return { error: { code, message, stack } }
+			}
+			const result = handle_add_operation({
+				command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
+				target: knyte_id,
+				parameter: content_id,
+			})
+			return result
 		} else if (arg === 'event-db-get-history-branches') {
 			return get_history_branches()
 		} else if (arg === 'event-db-add-history-branch') {
