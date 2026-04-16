@@ -233,7 +233,6 @@ function init_history_focus() {
 		history_focus.branch_id = first_history_branch_id
 		history_focus.operation_id = present_operations_in_branches[first_history_branch_id].id
 		history_focus.is_present = true
-		multicast_discovery_request()
 	}
 }
 function get_history_line(top_branch, top_operation) {
@@ -770,8 +769,10 @@ app.whenReady().then(() => {
 					'asynchronous-reply', 'event-change-operation-in-focus'
 				)
 			}
-			if (is_branch_changed || is_present_changed)
+			if (is_branch_changed || is_present_changed) {
+				// tell other instances this instance significantly updated its history_focus
 				multicast_discovery_request()
+			}
 			return {}
 		} else if (arg === 'event-create-knyte-and-knoxel') {
 			const {root_space_id, x, y} = arg2
@@ -960,6 +961,8 @@ app.whenReady().then(() => {
 				'asynchronous-reply', 'event-change-operation-in-focus',
 				history_focus
 			)
+			// tell other instances this instance joined them
+			multicast_discovery_request()
 		}
 	}
 
@@ -1014,6 +1017,7 @@ app.on('window-all-closed', function () {
 app.on('will-quit', () => {
 	db && db.close()
 	discovery_map = null // prevent udp events handling by this instance
+	// tell other instances this instance is closing and leaving them
 	multicast_discovery_request(() => {
 		udp_socket && udp_socket.close()
 	})
