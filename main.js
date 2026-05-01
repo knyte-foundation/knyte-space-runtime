@@ -16,6 +16,7 @@ let present_operations_in_branches = {} // history_branch_id -> operation_id
 let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
 const history_focus = {branch_id: null, operation_id: null, is_present: false, is_frozen: false}
 let knytes = {} // knyte_id -> {id, initial, terminal, content}
+let contents = {} // content_id -> content_text for all knyte_id from knytes
 let discovery_map = {} // app_instance_id -> {history_focus, rinfo}
 const knytes_focus = {branch_id: null, operation_id: null}
 
@@ -301,18 +302,28 @@ function get_actual_knytes(top_branch, top_operation) {
 		knytes_focus.branch_id === top_branch &&
 		knytes_focus.operation_id === top_operation
 	)
-		return { knytes }
+		return { knytes, contents }
 	const history_line = get_history_line(top_branch, top_operation)
 	if (!history_line.line)
 		return { error: history_line.error }
 	const { line } = history_line
-	knytes = {};
+	knytes = {}
+	contents = {}
+	const complete_contents = db_get_contents_map() // TODO: optimize it.
+		// implement contents caching to don't read all contents
+		// on every get_actual_knytes call
 	for (let i = 0; i < line.length; ++i) {
 		apply_operation_to_knytes(line[i])
 	}
+	for (let knyte_id in knytes) {
+		const { content } = knytes[knyte_id]
+		if (!content || !complete_contents[content])
+			continue
+		contents[content] = complete_contents[content]
+	}
 	knytes_focus.branch_id = top_branch
 	knytes_focus.operation_id = top_operation
-	return { knytes }
+	return { knytes, contents }
 }
 function db_append_operation(history_branch_id, desc) {
 	const table_name = optree_id_to_name(history_branch_id)
@@ -429,6 +440,17 @@ function create_history_branch(
 		const { code, message, stack } = error
 		return { error: { code, message, stack } }
 	}
+}
+function db_get_contents_list() {
+	return db.prepare('SELECT * FROM contents').all()
+}
+function db_get_contents_map() {
+	const map = {}, list = db_get_contents_list()
+	for (let i = 0; i < list.length; ++i) {
+		const { id, content } = list[i]
+		map[id] = content
+	}
+	return map
 }
 function db_get_content_text_by_id(id) {
 	return db.prepare(
@@ -654,7 +676,7 @@ app.whenReady().then(() => {
 				return { error: { code, message, stack } }
 			}
 		} else if (arg === 'event-db-show-contents') {
-			return db.prepare('SELECT * FROM contents').all()
+			return db_get_contents_list()
 		} else if (arg === 'event-db-add-operation') {
 			const operation_desc = arg2
 			return handle_add_operation(operation_desc)
@@ -765,9 +787,9 @@ app.whenReady().then(() => {
 			const space_id = arg2
 			if (uuid_validate(space_id) && uuid_version(space_id)) {
 				const {branch_id, operation_id} = history_focus
-				const { knytes, error } = get_actual_knytes(branch_id, operation_id)
+				const { knytes, contents, error } = get_actual_knytes(branch_id, operation_id)
 				if (knytes)
-					return { desc: { space_id, history_focus, knytes } }
+					return { desc: { space_id, history_focus, knytes, contents } }
 				else
 					return { error }
 			}

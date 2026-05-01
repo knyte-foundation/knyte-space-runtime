@@ -1,6 +1,6 @@
 const { ipcRenderer } = require('electron/renderer')
 const { contextBridge } = require('electron')
-let space_number = 0, space_id, knytes = {}
+let space_number = 0, space_id, knytes = {}, contents = {}
 const arg1 = `--window-caption-number=`
 const arg2 = `--space_knyte-id=`
 for (let i = 0; i < process.argv.length; ++i) {
@@ -43,7 +43,7 @@ function create_shape_circle(desc) {
 	shape.setAttribute('fill', fill_color)
 	return shape
 }
-function render_knoxel_body(knoxel, create_shape, centering) {
+function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	const {knoxel_id, knyte_id, x, y} = knoxel
 	const body = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
@@ -56,7 +56,7 @@ function render_knoxel_body(knoxel, create_shape, centering) {
 		stroke_color = '#9DA2A6', fill_color = '#1C2333'
 	const center = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
-	);
+	)
 	center.setAttribute('transform', centering
 		? `translate(${-0.5*default_size}, ${-0.5*default_size})`
 		: `translate(0, 0)`
@@ -64,25 +64,42 @@ function render_knoxel_body(knoxel, create_shape, centering) {
 	const shape = create_shape({
 		default_size, stroke_width, stroke_color, fill_color
 	})
+	const foreign_object = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'foreignObject'
+	)
+	const content_div = document.createElement(
+		'div'
+	)
+	content_div.style.color = '#F5F9FC'
+	if (content_text) {
+		// TODO: use autosize and viewers
+		foreign_object.style.width = '64px'
+		foreign_object.style.height = '64px'
+		content_div.textContent = content_text
+	}
+	foreign_object.append(content_div)
 	center.append(shape)
+	center.append(foreign_object)
 	body.append(center)
 	return body
 }
-function render_knoxel_body_solid(knoxel) {
-	return render_knoxel_body(knoxel, create_shape_rect, true)
+function render_knoxel_body_solid(knoxel, content_text) {
+	return render_knoxel_body(knoxel, create_shape_rect, true, content_text)
 }
 function render_knoxel_body_broken(knoxel) {
 	return render_knoxel_body(knoxel, create_shape_circle, false)
 }
-function render_space(root_space_id, knytes, space_desc) {
+function render_space(root_space_id, knytes, contents, space_desc) {
 	const svg = document.getElementById('svg-space')
 	svg.dataset.knyte_id = root_space_id
 	const knoxel_bodies = svg.getElementsByClassName('knoxel-bodies')[0]
 	knoxel_bodies.innerHTML = ''
 	for (let i = 0; i < space_desc.length; ++i) {
 		const knoxel = space_desc[i]
-		const body = knoxel.knyte_id in knytes
-			? render_knoxel_body_solid(knoxel)
+		const knyte = knytes[knoxel.knyte_id]
+		const content_text = knyte && knyte.content ? contents[knyte.content] : null
+		const body = knyte
+			? render_knoxel_body_solid(knoxel, content_text)
 			: render_knoxel_body_broken(knoxel)
 		knoxel_bodies.append(body)
 	}
@@ -104,6 +121,7 @@ function show_space() {
 				if (!desc.history_focus.is_present)
 					document.title = `${document.title} [read-only]`
 				knytes = desc.knytes
+				contents = desc.contents
 				if (desc.space_id in knytes) {
 					const space_knyte = knytes[desc.space_id]
 					const {content} = space_knyte
@@ -144,7 +162,7 @@ function show_space() {
 									document.body.style.margin = 0
 									error_report.style.display = 'none'
 									render_result.style.display = ''
-									render_space(space_id, knytes, space_desc)
+									render_space(space_id, knytes, contents, space_desc)
 								}
 							})
 					}
