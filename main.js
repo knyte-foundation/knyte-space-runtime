@@ -385,6 +385,18 @@ function add_operation(desc) {
 		// patch knytes
 		apply_operation_to_knytes(operation)
 		knytes_focus.operation_id = id
+
+		// update contents
+		contents = {}
+		const complete_contents = db_get_contents_map() // TODO: optimize it.
+			// implement contents caching to don't read all contents
+			// on every add_operation call
+		for (let knyte_id in knytes) {
+			const { content } = knytes[knyte_id]
+			if (!content || !complete_contents[content])
+				continue
+			contents[content] = complete_contents[content]
+		}
 	}
 	return result
 }
