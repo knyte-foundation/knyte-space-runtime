@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', () => {
 					if (reply.content) {
 						result.value = reply.content
 					} else {
-						result.style.color = 'red'
+						result.style.color = 'orangered'
 						result.value = reply.not_found ? 'not found'
 							: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
 					}
@@ -150,7 +150,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				)
 				.then((reply) => {
 					if (reply.content === undefined) {
-						result.style.color = 'red'
+						result.style.color = 'orangered'
 						result.value = `ERROR: ${
 							reply.error ? reply.error.message : 'unknown'
 						}`

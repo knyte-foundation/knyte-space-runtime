@@ -48,7 +48,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			const root_hixel = root_operation === uuid_nil
 				? undefined
 				: document.getElementById(root_operation)
-			const node_stroke_color = root_hixel !== null ? '#9DA2A6' : 'red'
+			const node_stroke_color = root_hixel !== null ? '#9DA2A6' : '#E47D80'
 			// in 2 lines of code above
 				// root_hixel = null means it's not found, but required, use warning (red) color
 				// and root_hixel = undefined means it's not required, use normal color

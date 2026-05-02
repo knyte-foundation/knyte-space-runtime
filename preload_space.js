@@ -54,7 +54,7 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	body.setAttribute('transform', `translate(${x}, ${y})`)
 	const is_invalid_content = content_text === null
 	const default_size = 32, stroke_width = 4,
-		stroke_color = is_invalid_content ? '#ff0000' : '#9DA2A6',
+		stroke_color = is_invalid_content ? '#E47D80' : '#9DA2A6',
 		fill_color = '#1C2333'
 	const center = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
@@ -79,7 +79,7 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 		foreign_object.style.height = '64px'
 		content_div.textContent = content_text
 	} else if (is_invalid_content) {
-		content_div.style.color = '#ff0000'
+		content_div.style.color = '#E47D80'
 		foreign_object.style.width = '96px'
 		foreign_object.style.height = '32px'
 		content_div.textContent = 'invalid content'
@@ -140,7 +140,7 @@ function show_space() {
 					const space_knyte = knytes[desc.space_id]
 					const {content} = space_knyte
 					if (!content) {
-						error_report.style.color = 'red'
+						error_report.style.color = '#E47D80'
 						error_report.textContent = 'content not defined'
 					} else {
 						ipcRenderer
@@ -155,19 +155,19 @@ function show_space() {
 											need_render = true
 										}
 										else {
-											error_report.style.color = 'red'
+											error_report.style.color = '#E47D80'
 											error_report.textContent = `content is not array\n\n${
 												reply.content
 											}`
 										}
 									} catch (error) {
-										error_report.style.color = 'red'
+										error_report.style.color = '#E47D80'
 										error_report.textContent = `content is not valid JSON\n\n${
 											reply.content
 										}`
 									}
 								} else {
-									error_report.style.color = 'red'
+									error_report.style.color = '#E47D80'
 									error_report.textContent = reply.not_found
 										? 'content text not found'
 										: `ERROR: ${reply.error ? reply.error.message : 'unknown'}`
@@ -181,11 +181,11 @@ function show_space() {
 							})
 					}
 				} else {
-					error_report.style.color = 'red'
+					error_report.style.color = '#E47D80'
 					error_report.textContent = `space ${desc.space_id} not found in knytes`
 				}
 			} else if (error) {
-				error_report.style.color = 'red'
+				error_report.style.color = '#E47D80'
 				error_report.textContent = JSON.stringify(error, null, '\t')
 			}
 		})
