@@ -19,25 +19,25 @@ function convert_client_to_local(currentTarget, clientX, clientY) {
 	}
 }
 function create_shape_rect(desc) {
-	const {default_size, stroke_width, stroke_color, fill_color} = desc
+	const {width, height, stroke_width, stroke_color, fill_color} = desc
 	const shape = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'rect'
 	);
-	shape.setAttribute('width', default_size)
-	shape.setAttribute('height', default_size)
+	shape.setAttribute('width', width)
+	shape.setAttribute('height', height)
 	shape.setAttribute('stroke-width', stroke_width)
 	shape.setAttribute('stroke', stroke_color)
 	shape.setAttribute('fill', fill_color)
 	return shape
 }
 function create_shape_circle(desc) {
-	const {default_size, stroke_width, stroke_color, fill_color} = desc
+	const {width, height, stroke_width, stroke_color, fill_color} = desc
 	const shape = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'circle'
 	);
 	shape.setAttribute('cx', 0)
 	shape.setAttribute('cy', 0)
-	shape.setAttribute('r', 0.5*default_size)
+	shape.setAttribute('r', 0.5*width)
 	shape.setAttribute('stroke-width', stroke_width)
 	shape.setAttribute('stroke', stroke_color)
 	shape.setAttribute('fill', fill_color)
@@ -47,7 +47,7 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	const {knoxel_id, knyte_id, x, y} = knoxel
 	const body = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
-	);
+	)
 	body.id = knoxel_id
 	body.dataset.knyte_id = knyte_id
 	body.classList.add('space_knoxel')
@@ -56,6 +56,15 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	const default_size = 32, stroke_width = 4,
 		stroke_color = is_invalid_content ? '#E47D80' : '#9DA2A6',
 		fill_color = '#1C2333'
+	const default_margin = 6
+	let width = default_size, height = default_size
+	// TODO: use autosize and viewers
+	if (is_invalid_content) {
+		width = 70 + 2*default_margin
+		height = 40 + 2*default_margin
+	} else if (content_text) {
+		// TODO: compute autosize
+	}
 	const center = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
 	)
@@ -64,7 +73,7 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 		: `translate(0, 0)`
 	)
 	const shape = create_shape({
-		default_size, stroke_width, stroke_color, fill_color
+		width, height, stroke_width, stroke_color, fill_color
 	})
 	const foreign_object = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'foreignObject'
@@ -73,16 +82,18 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 		'div'
 	)
 	content_div.style.color = '#F5F9FC'
-	if (content_text) {
-		// TODO: use autosize and viewers
-		foreign_object.style.width = '64px'
-		foreign_object.style.height = '64px'
-		content_div.textContent = content_text
-	} else if (is_invalid_content) {
+	foreign_object.style.width = `${width}px`
+	foreign_object.style.height = `${height}px`
+	if (is_invalid_content) {
 		content_div.style.color = '#E47D80'
-		foreign_object.style.width = '96px'
-		foreign_object.style.height = '32px'
+		content_div.style.margin = `${default_margin}px`
 		content_div.textContent = 'invalid content'
+	} else if (content_text) {
+		content_div.style.whiteSpace = 'pre'
+		content_div.style.tabSize = 4
+		content_div.style.textAlign = 'left'
+		content_div.style.margin = `${default_margin}px`
+		content_div.textContent = content_text
 	}
 	foreign_object.append(content_div)
 	center.append(shape)
