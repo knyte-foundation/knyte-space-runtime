@@ -127,6 +127,7 @@ function connect_db() {
 			console.error(`Error creating table "${table_name}"`, error)
 		}
 	}
+	contents = db_get_contents_map()
 }
 function is_row_exist(name, id) {
 	try {
@@ -308,18 +309,8 @@ function get_actual_knytes(top_branch, top_operation) {
 		return { error: history_line.error }
 	const { line } = history_line
 	knytes = {}
-	contents = {}
-	const complete_contents = db_get_contents_map() // TODO: optimize it.
-		// implement contents caching to don't read all contents
-		// on every get_actual_knytes call
 	for (let i = 0; i < line.length; ++i) {
 		apply_operation_to_knytes(line[i])
-	}
-	for (let knyte_id in knytes) {
-		const { content } = knytes[knyte_id]
-		if (!content || !complete_contents[content])
-			continue
-		contents[content] = complete_contents[content]
 	}
 	knytes_focus.branch_id = top_branch
 	knytes_focus.operation_id = top_operation
@@ -385,18 +376,6 @@ function add_operation(desc) {
 		// patch knytes
 		apply_operation_to_knytes(operation)
 		knytes_focus.operation_id = id
-
-		// update contents
-		contents = {}
-		const complete_contents = db_get_contents_map() // TODO: optimize it.
-			// implement contents caching to don't read all contents
-			// on every add_operation call
-		for (let knyte_id in knytes) {
-			const { content } = knytes[knyte_id]
-			if (!content || !complete_contents[content])
-				continue
-			contents[content] = complete_contents[content]
-		}
 	}
 	return result
 }
@@ -485,10 +464,15 @@ function db_append_content(content) {
 		}
 	}
 	const id = uuidv7()
-	return append_row(
+	const result = append_row(
 		'INSERT INTO contents (id, content) VALUES (?, ?)',
 		id, content
 	)
+	if (!result.error) {
+		// patch contents
+		contents[id] = content
+	}
+	return result
 }
 function convert_history_patch_to_knytes_patch(history_patch) {
 	const knytes_patch = {}
