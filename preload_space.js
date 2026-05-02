@@ -52,8 +52,10 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	body.dataset.knyte_id = knyte_id
 	body.classList.add('space_knoxel')
 	body.setAttribute('transform', `translate(${x}, ${y})`)
+	const is_invalid_content = content_text === null
 	const default_size = 32, stroke_width = 4,
-		stroke_color = '#9DA2A6', fill_color = '#1C2333'
+		stroke_color = is_invalid_content ? '#ff0000' : '#9DA2A6',
+		fill_color = '#1C2333'
 	const center = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
 	)
@@ -76,6 +78,11 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 		foreign_object.style.width = '64px'
 		foreign_object.style.height = '64px'
 		content_div.textContent = content_text
+	} else if (is_invalid_content) {
+		content_div.style.color = '#ff0000'
+		foreign_object.style.width = '96px'
+		foreign_object.style.height = '32px'
+		content_div.textContent = 'invalid content'
 	}
 	foreign_object.append(content_div)
 	center.append(shape)
@@ -97,7 +104,14 @@ function render_space(root_space_id, knytes, contents, space_desc) {
 	for (let i = 0; i < space_desc.length; ++i) {
 		const knoxel = space_desc[i]
 		const knyte = knytes[knoxel.knyte_id]
-		const content_text = knyte && knyte.content ? contents[knyte.content] : null
+		let content_text = null
+		if (knyte) {
+			if (!knyte.content) {
+				content_text = ''
+			} else if (contents[knyte.content]) {
+				content_text = contents[knyte.content]
+			}
+		}
 		const body = knyte
 			? render_knoxel_body_solid(knoxel, content_text)
 			: render_knoxel_body_broken(knoxel)
