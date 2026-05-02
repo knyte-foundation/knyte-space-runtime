@@ -18,6 +18,17 @@ function convert_client_to_local(currentTarget, clientX, clientY) {
 		localY: clientY - rect.top,
 	}
 }
+let autosizer = null
+function init_autosizer() {
+	const autosizers = document.getElementsByClassName('autosizer')
+	autosizer = autosizers[autosizers.length - 1]
+}
+function get_html_block_size(html) {
+	autosizer.innerHTML = html
+	const { width, height } = autosizer.getBoundingClientRect()
+	autosizer.innerHTML = ''
+	return { width, height }
+}
 function create_shape_rect(desc) {
 	const {width, height, stroke_width, stroke_color, fill_color} = desc
 	const shape = document.createElementNS(
@@ -58,18 +69,32 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 		fill_color = '#1C2333'
 	const default_margin = 6
 	let width = default_size, height = default_size
-	// TODO: use autosize and viewers
+	// TODO: implement viewers
+	const content_div = document.createElement(
+		'div'
+	)
 	if (is_invalid_content) {
+		content_div.style.color = '#E47D80'
+		content_div.style.margin = `${default_margin}px`
+		content_div.textContent = 'invalid content'
 		width = 70 + 2*default_margin
 		height = 40 + 2*default_margin
 	} else if (content_text) {
-		// TODO: compute autosize
+		content_div.style.color = '#F5F9FC'
+		content_div.style.whiteSpace = 'pre'
+		content_div.style.tabSize = 4
+		content_div.style.textAlign = 'left'
+		content_div.style.margin = `${default_margin}px`
+		content_div.textContent = content_text
+		const size = get_html_block_size(content_div.outerHTML)
+		width = size.width
+		height = size.height
 	}
 	const center = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
 	)
 	center.setAttribute('transform', centering
-		? `translate(${-0.5*default_size}, ${-0.5*default_size})`
+		? `translate(${-0.5*width}, ${-0.5*height})`
 		: `translate(0, 0)`
 	)
 	const shape = create_shape({
@@ -78,23 +103,8 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	const foreign_object = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'foreignObject'
 	)
-	const content_div = document.createElement(
-		'div'
-	)
-	content_div.style.color = '#F5F9FC'
 	foreign_object.style.width = `${width}px`
 	foreign_object.style.height = `${height}px`
-	if (is_invalid_content) {
-		content_div.style.color = '#E47D80'
-		content_div.style.margin = `${default_margin}px`
-		content_div.textContent = 'invalid content'
-	} else if (content_text) {
-		content_div.style.whiteSpace = 'pre'
-		content_div.style.tabSize = 4
-		content_div.style.textAlign = 'left'
-		content_div.style.margin = `${default_margin}px`
-		content_div.textContent = content_text
-	}
 	foreign_object.append(content_div)
 	center.append(shape)
 	center.append(foreign_object)
@@ -212,6 +222,7 @@ contextBridge.exposeInMainWorld('core_api', {
 	}
 })
 window.addEventListener('DOMContentLoaded', () => {
+	init_autosizer()
 	show_space()
 	ipcRenderer.on('asynchronous-reply', (event, arg, arg2) => {
 		if (

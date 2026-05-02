@@ -6,7 +6,7 @@
 	<!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
 	<meta
 		http-equiv="Content-Security-Policy"
-		content="default-src 'self'; script-src 'self'"
+		content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"
 	>
 	<link rel="stylesheet" href="node_modules/meslo/meslo.css">
 	<link rel="stylesheet" href="style.css">
@@ -49,6 +49,7 @@
 			</g>
 		</svg>
 	</div>
+	<div class="autosizer"></div>
 
 	<!-- You can also require other files to run in this process -->
 	<script src="./render_space.js"></script>

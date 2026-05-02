@@ -40,3 +40,9 @@ textarea {
 .paragraph {
 	margin: 16px 0 16px 0;
 }
+.autosizer {
+	position: absolute;
+	visibility: hidden;
+	width: auto;
+	height: auto;
+}
