@@ -55,7 +55,7 @@ function create_shape_circle(desc) {
 	return shape
 }
 function render_knoxel_body(knoxel, create_shape, centering, content_text) {
-	const {knoxel_id, knyte_id, x, y} = knoxel
+	const {knoxel_id, knyte_id, x, y, viewer} = knoxel
 	const body = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
 	)
@@ -64,32 +64,51 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	body.classList.add('space_knoxel')
 	body.setAttribute('transform', `translate(${x}, ${y})`)
 	const is_invalid_content = content_text === null
-	const default_size = 32, stroke_width = 4,
-		stroke_color = is_invalid_content ? '#E47D80' : '#9DA2A6',
-		fill_color = '#1C2333'
+	const default_size = 32, stroke_width = 4
 	const default_margin = 6
 	let width = default_size, height = default_size
-	// TODO: implement viewers
 	const content_div = document.createElement(
 		'div'
 	)
-	if (is_invalid_content) {
+	let is_invalid_viewer = false
+	if (content_text) {
+		const viewer_name = viewer || 'plain text'
+		if (viewer_name === 'plain text') {
+			content_div.style.color = '#F5F9FC'
+			content_div.style.whiteSpace = 'pre'
+			content_div.style.tabSize = 4
+			content_div.style.textAlign = 'left'
+			content_div.style.margin = `${default_margin}px`
+			content_div.textContent = content_text
+		} else if (viewer_name === '2048px text') {
+			content_div.style.color = '#F5F9FC'
+			content_div.style.whiteSpace = 'pre-wrap'
+			content_div.style.tabSize = 4
+			content_div.style.maxWidth = '2048px'
+			content_div.style.wordWrap = 'break-word'
+			content_div.style.textAlign = 'left'
+			content_div.style.margin = `${default_margin}px`
+			content_div.textContent = content_text
+		} else {
+			is_invalid_viewer = true
+		}
+		if (!is_invalid_viewer) {
+			const size = get_html_block_size(content_div.outerHTML)
+			width = size.width
+			height = size.height
+		}
+	}
+	if (is_invalid_content || is_invalid_viewer) {
 		content_div.style.color = '#E47D80'
 		content_div.style.margin = `${default_margin}px`
-		content_div.textContent = 'invalid content'
+		content_div.textContent = `invalid ${
+			is_invalid_content ? 'content' : 'viewer'
+		}`
 		width = 70 + 2*default_margin
 		height = 40 + 2*default_margin
-	} else if (content_text) {
-		content_div.style.color = '#F5F9FC'
-		content_div.style.whiteSpace = 'pre'
-		content_div.style.tabSize = 4
-		content_div.style.textAlign = 'left'
-		content_div.style.margin = `${default_margin}px`
-		content_div.textContent = content_text
-		const size = get_html_block_size(content_div.outerHTML)
-		width = size.width
-		height = size.height
 	}
+	const stroke_color = is_invalid_content || is_invalid_viewer ? '#E47D80' : '#9DA2A6',
+		fill_color = '#1C2333'
 	const center = document.createElementNS(
 		'http://www.w3.org/2000/svg', 'g'
 	)
