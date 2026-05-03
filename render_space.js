@@ -308,10 +308,37 @@ document.addEventListener('keydown', (event) => {
 			graph_editor.state === 'frame add' ||
 			graph_editor.state === 'frame remove'
 		) {
+			function is_contains(rect1, rect2) {
+				return rect1.left < rect2.left && rect1.top < rect2.top &&
+					rect1.right > rect2.right && rect1.bottom > rect2.bottom;
+			}
+
+			if (graph_editor.state === 'frame define') {
+				const selected = root.getElementsByClassName('knoxel-bodies')[0].
+					getElementsByClassName('selected-knoxel')
+				const to_remove = []
+				for (let i = 0; i < selected.length; ++i)
+					to_remove.push(selected[i])
+				for (let i = 0; i < to_remove.length; ++i)
+					to_remove[i].classList.remove('selected-knoxel')
+			}
+			const frame_element = root.getElementsByClassName('frame')[0].firstElementChild
+			const frame_rect = frame_element.getBoundingClientRect();
+			const knoxels = root.getElementsByClassName('knoxel-bodies')[0].children;
+			for (let i = 0; i < knoxels.length; ++i) {
+				const knoxel = knoxels[i];
+				const rect = knoxel.getBoundingClientRect();
+				if (!is_contains(frame_rect, rect))
+					continue;
+				if (graph_editor.state === 'frame remove')
+					knoxel.classList.remove('selected-knoxel');
+				else
+					knoxel.classList.add('selected-knoxel');
+			}			
+			
 			event.preventDefault()
 			graph_editor.state = 'view'
 			remove_frame()
-			// TODO: update selection
 		}
 	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		if (
