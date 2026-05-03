@@ -311,6 +311,17 @@ document.addEventListener('keydown', (event) => {
 			event.preventDefault()
 			graph_editor.state = 'view'
 			remove_frame()
+			// TODO: update selection
+		}
+	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
+		if (
+			graph_editor.state === 'frame define' ||
+			graph_editor.state === 'frame add' ||
+			graph_editor.state === 'frame remove'
+		) {
+			event.preventDefault()
+			graph_editor.state = 'view'
+			remove_frame()
 		}
 	}
 })
