@@ -1,3 +1,8 @@
+const graph_editor = {
+	state: 'view',
+	ghosts: [],
+	central_knoxel_id: undefined,
+}
 const steering_gear = {
 	init: (target_element, x, y, zoom) => {
 		const steering_element =
@@ -123,36 +128,84 @@ function get_data_thru_parents(element, data_name) {
 		return get_data_thru_parents(element.parentElement, data_name)
 	return { data, element }
 }
-
+function create_frame(desc) {
+	const { x, y, stroke_color } = desc
+	const frame = root.getElementsByClassName('frame')[0]
+	const fill_color = stroke_color + '40'
+	const stroke_width = 4
+	const rect = document.createElementNS(
+		'http://www.w3.org/2000/svg', 'rect'
+	)
+	rect.setAttribute('x', x)
+	rect.setAttribute('y', y)
+	rect.setAttribute('width', stroke_width)
+	rect.setAttribute('height', stroke_width)
+	rect.setAttribute('fill', fill_color)
+	rect.setAttribute('stroke', stroke_color)
+	rect.setAttribute('stroke-width', stroke_width)
+	rect.style.pointerEvents = 'none'
+	rect.dataset.start_x = x
+	rect.dataset.start_y = y
+	frame.appendChild(rect)
+}
+function update_frame(desc) {
+	const { x, y } = desc
+	const frame_element = root.getElementsByClassName('frame')[0].firstElementChild
+	const current_position = steering_gear.screen_to_space_position(
+		root, { x, y }
+	)
+	const p1 = {x: parseFloat(frame_element.dataset.start_x), y: parseFloat(frame_element.dataset.start_y)}
+	const p2 = current_position
+	const xx = Math.min(p1.x, p2.x)
+	const width = Math.abs(p1.x - p2.x)
+	const yy = Math.min(p1.y, p2.y)
+	const height = Math.abs(p1.y - p2.y)
+	frame_element.setAttribute('x', xx)
+	frame_element.setAttribute('y', yy)
+	frame_element.setAttribute('width', width)
+	frame_element.setAttribute('height', height)
+}
+function remove_frame() {
+	const frame = root.getElementsByClassName('frame')[0]
+	frame.innerHTML = ''
+}
+const root = document.getElementById('svg-space')
 function space_on_wheel(event) {
 	// ctrlKey + wheel means touch pad scale gesture
 	// mouse wheel means deltaY, shift + mouse wheel means deltaX
 	const { currentTarget, deltaX, deltaY, deltaMode, altKey, ctrlKey, metaKey } =
-		event;
-	const speeds = {};
-	speeds[WheelEvent.DOM_DELTA_PIXEL] = 0.8; // main mode
-	speeds[WheelEvent.DOM_DELTA_LINE] = 0.0; // can't reproduce this mode, thus disable it
-	speeds[WheelEvent.DOM_DELTA_PAGE] = 0.0; // can't reproduce this mode, thus disable it
-	const speed = speeds[deltaMode];
-	//const zoom_wheel_normalization = -1.0 / 360.0;
-	const zoom_pinch_normalization = -1.0 / 72.0;
-	const mousemove_position = { x: previous.localX, y: previous.localY };
+		event
+	const speeds = {}
+	speeds[WheelEvent.DOM_DELTA_PIXEL] = 0.8 // main mode
+	speeds[WheelEvent.DOM_DELTA_LINE] = 0.0 // can't reproduce this mode, thus disable it
+	speeds[WheelEvent.DOM_DELTA_PAGE] = 0.0 // can't reproduce this mode, thus disable it
+	const speed = speeds[deltaMode]
+	//const zoom_wheel_normalization = -1.0 / 360.0
+	const zoom_pinch_normalization = -1.0 / 72.0
+	const mousemove_position = { x: previous.localX, y: previous.localY }
 	if (!altKey && ctrlKey && !metaKey) {
-		const text_scale = window.outerWidth / window.innerWidth;
-		const pitch_scale = window.visualViewport.scale;
-		const total_scale = text_scale * pitch_scale;
+		const text_scale = window.outerWidth / window.innerWidth
+		const pitch_scale = window.visualViewport.scale
+		const total_scale = text_scale * pitch_scale
 		steering_gear.zoom(
 			currentTarget,
 			mousemove_position,
 			zoom_pinch_normalization * total_scale * deltaY,
-		);
+		)
 	} else if (!altKey && !ctrlKey && !metaKey)
 		steering_gear.pan(currentTarget, {
 			x: -speed * deltaX,
 			y: -speed * deltaY,
-		});
-	event.stopPropagation();
-	event.preventDefault();
+		})
+	if (
+		graph_editor.state === 'frame define' ||
+		graph_editor.state === 'frame add' ||
+		graph_editor.state === 'frame remove'
+	) {
+		update_frame({ x: previous.localX, y: previous.localY })
+	}
+	event.stopPropagation()
+	event.preventDefault()
 }
 let previous = {};
 function space_on_mousemove(event) {
@@ -173,6 +226,13 @@ function space_on_mousemove(event) {
 			event.preventDefault();
 		}
 	}
+	if (
+		graph_editor.state === 'frame define' ||
+		graph_editor.state === 'frame add' ||
+		graph_editor.state === 'frame remove'
+	) {
+		update_frame({ x: clientX, y: clientY })
+	}
 	previous.currentTarget = currentTarget;
 	previous.localX = localX;
 	previous.localY = localY;
@@ -180,7 +240,6 @@ function space_on_mousemove(event) {
 	previous.clientY = clientY;
 }
 
-const root = document.getElementById('svg-space')
 root.addEventListener("wheel", space_on_wheel, { passive: false });
 root.addEventListener("mousemove", space_on_mousemove, { passive: false });
 const document_mousemove_cache = {};
@@ -221,6 +280,38 @@ document.addEventListener('keydown', (event) => {
 	} else if (code === 'Digit1' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		const mousemove_position = { x: previous.localX, y: previous.localY };
 		steering_gear.reset_zoom(root, mousemove_position);
+	} else if (code === 'KeyF' && !ctrlKey && !metaKey) {
+		if (graph_editor.state === 'view') {
+			let stroke_color = null
+			if (!altKey && !shiftKey) {
+				event.preventDefault()
+				graph_editor.state = 'frame define'
+				stroke_color = '#0000FF'
+			} else if (!altKey && shiftKey) {
+				event.preventDefault()
+				graph_editor.state = 'frame add'
+				stroke_color = '#00FF00'
+			} else if (altKey && !shiftKey) {
+				event.preventDefault()
+				graph_editor.state = 'frame remove'
+				stroke_color = '#FF0000'
+			}
+			if (stroke_color) {
+				const { x, y } = steering_gear.screen_to_space_position(root, {
+					x: clientX,
+					y: clientY,
+				})
+				create_frame({x, y, stroke_color})
+			}
+		} else if (
+			graph_editor.state === 'frame define' ||
+			graph_editor.state === 'frame add' ||
+			graph_editor.state === 'frame remove'
+		) {
+			event.preventDefault()
+			graph_editor.state = 'view'
+			remove_frame()
+		}
 	}
 })
 function handle_click_space(event) {
