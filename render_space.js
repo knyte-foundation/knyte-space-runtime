@@ -194,10 +194,6 @@ function create_ghost_knoxel(desc) {
 	ghost_body.id = undefined
 	ghost_body.dataset.knyte_id = undefined
 	ghost_body.style.pointerEvents = 'none'
-
-	// TODO: try to use opacity in ghosts instead
-	ghost_body.setAttribute('opacity', '0.5')
-	
 	set_knoxel_position(ghost_body, x, y)
 	return ghost_body
 }

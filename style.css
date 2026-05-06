@@ -49,3 +49,6 @@ textarea {
 .selected-knoxel {
 	filter: brightness(2) drop-shadow(0px 0px 32px orange);
 }
+.ghosts {
+	opacity: 0.5;
+}
