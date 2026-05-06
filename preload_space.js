@@ -61,7 +61,7 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 	)
 	body.id = knoxel_id
 	body.dataset.knyte_id = knyte_id
-	body.classList.add('space_knoxel')
+	body.classList.add('space-knoxel')
 	body.setAttribute('transform', `translate(${x}, ${y})`)
 	const is_invalid_content = content_text === null
 	const default_size = 32, stroke_width = 4
