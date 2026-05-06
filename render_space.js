@@ -186,7 +186,7 @@ function get_knoxel_position(knoxel) {
 	return { x: parseFloat(coordinates[0]), y: parseFloat(coordinates[1]) }
 }
 function set_knoxel_position(knoxel, x, y) {
-	knoxel.setAttribute("transform", `translate(${x}, ${y})`)
+	knoxel.setAttribute('transform', `translate(${x}, ${y})`)
 }
 function create_ghost_knoxel(desc) {
 	const { x, y, original } = desc
@@ -299,8 +299,8 @@ function space_on_mousemove(event) {
 	previous.clientY = clientY
 }
 
-root.addEventListener("wheel", space_on_wheel, { passive: false })
-root.addEventListener("mousemove", space_on_mousemove, { passive: false })
+root.addEventListener('wheel', space_on_wheel, { passive: false })
+root.addEventListener('mousemove', space_on_mousemove, { passive: false })
 const document_mousemove_cache = {};
 document.addEventListener('mousemove', (event) => {
 	const { clientX, clientY } = event
@@ -325,7 +325,7 @@ document.addEventListener('keydown', (event) => {
 	if (code === 'KeyI' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		event.preventDefault()
 		if (focused_element) {
-			const { data: id } = get_data_thru_parents(focused_element, "knyte_id")
+			const { data: id } = get_data_thru_parents(focused_element, 'knyte_id')
 			if (id) {
 				const result = document.getElementById('result-knyte-id-text')
 				result.value = id
