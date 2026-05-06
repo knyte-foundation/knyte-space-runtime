@@ -154,7 +154,10 @@ function update_frame(desc) {
 	const current_position = steering_gear.screen_to_space_position(
 		root, { x, y }
 	)
-	const p1 = {x: parseFloat(frame_element.dataset.start_x), y: parseFloat(frame_element.dataset.start_y)}
+	const p1 = {
+		x: parseFloat(frame_element.dataset.start_x),
+		y: parseFloat(frame_element.dataset.start_y),
+	}
 	const p2 = current_position
 	const xx = Math.min(p1.x, p2.x)
 	const width = Math.abs(p1.x - p2.x)
@@ -169,6 +172,53 @@ function remove_frame() {
 	const frame = root.getElementsByClassName('frame')[0]
 	frame.innerHTML = ''
 }
+function move_positioning(desc) {
+	const { x, y } = desc
+	root.getElementsByClassName('positioning')[0].setAttribute(
+		'transform', `translate(${x} ${y})`
+	)
+}
+function get_knoxel_position(knoxel) {
+	const transform = knoxel.getAttribute('transform')
+	if (!transform)
+		return { x: 0, y: 0 }
+	const coordinates = transform.split('translate(')[1].split(' ')
+	return { x: parseFloat(coordinates[0]), y: parseFloat(coordinates[1]) }
+}
+function set_knoxel_position(knoxel, x, y) {
+	knoxel.setAttribute("transform", `translate(${x}, ${y})`)
+}
+function create_ghost_knoxel(desc) {
+	const { x, y, original } = desc
+	const ghost_body = original.cloneNode(true)
+	ghost_body.id = undefined
+	ghost_body.dataset.knyte_id = undefined
+	ghost_body.style.pointerEvents = 'none'
+
+	// TODO: try to use opacity in ghosts instead
+	ghost_body.setAttribute('opacity', '0.5')
+	
+	set_knoxel_position(ghost_body, x, y)
+	return ghost_body
+}
+function create_ghosts_in_position(pointer_on_screen, knoxels) {
+	const ghosts = root.getElementsByClassName('ghosts')[0]
+	move_positioning(pointer_on_screen)
+	const {x: x_pointer, y: y_pointer} = steering_gear.screen_to_space_position(
+		root, pointer_on_screen
+	)
+	graph_editor.ghosts = []
+	for (let i = 0; i < knoxels.length; ++i) {
+		const element = knoxels[i]
+		const { x: x_knoxel, y: y_knoxel } = get_knoxel_position(element)
+		const x = x_knoxel - x_pointer
+		const y = y_knoxel - y_pointer
+		const knyte_id = element.dataset.knyte_id
+		graph_editor.ghosts.push({knyte_id, knoxel_id: element.id, offset: {x, y}})
+		const ghost = create_ghost_knoxel({ x, y, original: element })
+		ghosts.appendChild(ghost)
+	}
+}
 const root = document.getElementById('svg-space')
 function space_on_wheel(event) {
 	// ctrlKey + wheel means touch pad scale gesture
@@ -176,9 +226,12 @@ function space_on_wheel(event) {
 	const { currentTarget, deltaX, deltaY, deltaMode, altKey, ctrlKey, metaKey } =
 		event
 	const speeds = {}
-	speeds[WheelEvent.DOM_DELTA_PIXEL] = 0.8 // main mode
-	speeds[WheelEvent.DOM_DELTA_LINE] = 0.0 // can't reproduce this mode, thus disable it
-	speeds[WheelEvent.DOM_DELTA_PAGE] = 0.0 // can't reproduce this mode, thus disable it
+	// main mode
+	speeds[WheelEvent.DOM_DELTA_PIXEL] = 0.8
+	// can't reproduce this mode, thus disable it
+	speeds[WheelEvent.DOM_DELTA_LINE] = 0.0
+	// can't reproduce this mode, thus disable it
+	speeds[WheelEvent.DOM_DELTA_PAGE] = 0.0
 	const speed = speeds[deltaMode]
 	//const zoom_wheel_normalization = -1.0 / 360.0
 	const zoom_pinch_normalization = -1.0 / 72.0
@@ -207,23 +260,23 @@ function space_on_wheel(event) {
 	event.stopPropagation()
 	event.preventDefault()
 }
-let previous = {};
+let previous = {}
 function space_on_mousemove(event) {
-	const { currentTarget, buttons, clientX, clientY } = event;
+	const { currentTarget, buttons, clientX, clientY } = event
 	const { localX, localY } = convert_client_to_local(
 		currentTarget,
 		clientX,
 		clientY,
-	);
+	)
 	if (previous.currentTarget === currentTarget) {
 		if (buttons === 4) {
 			// middle mouse button/wheel pressed
 			steering_gear.pan(currentTarget, {
 				x: localX - previous.localX,
 				y: localY - previous.localY,
-			});
-			event.stopPropagation();
-			event.preventDefault();
+			})
+			event.stopPropagation()
+			event.preventDefault()
 		}
 	}
 	if (
@@ -233,15 +286,21 @@ function space_on_mousemove(event) {
 	) {
 		update_frame({ x: clientX, y: clientY })
 	}
-	previous.currentTarget = currentTarget;
-	previous.localX = localX;
-	previous.localY = localY;
-	previous.clientX = clientX;
-	previous.clientY = clientY;
+	if (
+		graph_editor.state === 'move' ||
+		graph_editor.state === 'clone'
+	) {
+		move_positioning({ x: clientX, y: clientY })
+	}
+	previous.currentTarget = currentTarget
+	previous.localX = localX
+	previous.localY = localY
+	previous.clientX = clientX
+	previous.clientY = clientY
 }
 
-root.addEventListener("wheel", space_on_wheel, { passive: false });
-root.addEventListener("mousemove", space_on_mousemove, { passive: false });
+root.addEventListener("wheel", space_on_wheel, { passive: false })
+root.addEventListener("mousemove", space_on_mousemove, { passive: false })
 const document_mousemove_cache = {};
 document.addEventListener('mousemove', (event) => {
 	const { clientX, clientY } = event
@@ -278,8 +337,8 @@ document.addEventListener('keydown', (event) => {
 	} else if (code === 'KeyO' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		steering_gear.init(root, 0, 0, 1)
 	} else if (code === 'Digit1' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
-		const mousemove_position = { x: previous.localX, y: previous.localY };
-		steering_gear.reset_zoom(root, mousemove_position);
+		const mousemove_position = { x: previous.localX, y: previous.localY }
+		steering_gear.reset_zoom(root, mousemove_position)
 	} else if (code === 'KeyF' && !ctrlKey && !metaKey) {
 		if (graph_editor.state === 'view') {
 			let stroke_color = null
@@ -310,7 +369,7 @@ document.addEventListener('keydown', (event) => {
 		) {
 			function is_contains(rect1, rect2) {
 				return rect1.left < rect2.left && rect1.top < rect2.top &&
-					rect1.right > rect2.right && rect1.bottom > rect2.bottom;
+					rect1.right > rect2.right && rect1.bottom > rect2.bottom
 			}
 
 			if (graph_editor.state === 'frame define') {
@@ -322,18 +381,19 @@ document.addEventListener('keydown', (event) => {
 				for (let i = 0; i < to_remove.length; ++i)
 					to_remove[i].classList.remove('selected-knoxel')
 			}
-			const frame_element = root.getElementsByClassName('frame')[0].firstElementChild
-			const frame_rect = frame_element.getBoundingClientRect();
-			const knoxels = root.getElementsByClassName('knoxel-bodies')[0].children;
+			const frame_element = root.getElementsByClassName('frame')[0].
+				firstElementChild
+			const frame_rect = frame_element.getBoundingClientRect()
+			const knoxels = root.getElementsByClassName('knoxel-bodies')[0].children
 			for (let i = 0; i < knoxels.length; ++i) {
-				const knoxel = knoxels[i];
-				const rect = knoxel.getBoundingClientRect();
+				const knoxel = knoxels[i]
+				const rect = knoxel.getBoundingClientRect()
 				if (!is_contains(frame_rect, rect))
-					continue;
+					continue
 				if (graph_editor.state === 'frame remove')
-					knoxel.classList.remove('selected-knoxel');
+					knoxel.classList.remove('selected-knoxel')
 				else
-					knoxel.classList.add('selected-knoxel');
+					knoxel.classList.add('selected-knoxel')
 			}			
 			
 			event.preventDefault()
@@ -343,19 +403,28 @@ document.addEventListener('keydown', (event) => {
 	} else if (code === 'Space' && !altKey && !ctrlKey && !metaKey) {
 		event.preventDefault()
 		if (focused_element) {
-			const { element } = get_data_thru_parents(focused_element, "knyte_id")
-			const knoxel_ids = []
-			if (element && !element.classList.contains('space-root')) {
+			const { element } = get_data_thru_parents(focused_element, 'knyte_id')
+			const knoxels = []
+			if (
+				graph_editor.state === 'view' && element &&
+				!element.classList.contains('space-root')
+			) {
+				graph_editor.state = shiftKey ? 'clone' : 'move'
 				if (element.classList.contains('selected-knoxel')) {
 					const selection = root.getElementsByClassName('selected-knoxel')
 					for (let i = 0; i < selection.length; ++i) {
-						knoxel_ids.push(selection[i].id)
+						knoxels.push(selection[i])
 					}
 				} else {
-					knoxel_ids.push(element.id)
+					knoxels.push(element)
+				}
+				create_ghosts_in_position({ x: clientX, y: clientY }, knoxels)
+				if (graph_editor.state === 'move') {
+					for (let i = 0; i < knoxels.length; ++i) {
+						knoxels[i].style.filter = 'brightness(0.6)'
+					}
 				}
 			}
-			console.log(`${shiftKey ? 'clone' : 'move'} knoxels`, knoxel_ids)
 		}
 	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		if (
