@@ -193,6 +193,7 @@ function create_ghost_knoxel(desc) {
 	const ghost_body = original.cloneNode(true)
 	ghost_body.id = undefined
 	ghost_body.dataset.knyte_id = undefined
+	ghost_body.classList.remove('selected-knoxel')
 	ghost_body.style.pointerEvents = 'none'
 	set_knoxel_position(ghost_body, x, y)
 	return ghost_body
@@ -215,6 +216,23 @@ function create_ghosts_in_position(pointer_on_screen, knoxels) {
 		ghosts.appendChild(ghost)
 	}
 }
+function remove_ghosts() {
+	const ghosts = root.getElementsByClassName('ghosts')[0]
+	ghosts.innerHTML = '';
+}
+function set_filter_for_ghost_original_knoxels(filter) {
+	for (let i = 0; i < graph_editor.ghosts.length; ++i) {
+		const knoxel = document.getElementById(graph_editor.ghosts[i].knoxel_id)
+		knoxel.style.filter = filter
+	}
+}
+function mark_moving_knoxels() {
+	set_filter_for_ghost_original_knoxels('brightness(0.6)')
+}
+function unmark_moving_knoxels() {
+	set_filter_for_ghost_original_knoxels('')	
+}
+
 const root = document.getElementById('svg-space')
 function space_on_wheel(event) {
 	// ctrlKey + wheel means touch pad scale gesture
@@ -416,9 +434,7 @@ document.addEventListener('keydown', (event) => {
 				}
 				create_ghosts_in_position({ x: clientX, y: clientY }, knoxels)
 				if (graph_editor.state === 'move') {
-					for (let i = 0; i < knoxels.length; ++i) {
-						knoxels[i].style.filter = 'brightness(0.6)'
-					}
+					mark_moving_knoxels()
 				}
 			}
 		}
@@ -426,11 +442,17 @@ document.addEventListener('keydown', (event) => {
 		if (
 			graph_editor.state === 'frame define' ||
 			graph_editor.state === 'frame add' ||
-			graph_editor.state === 'frame remove'
+			graph_editor.state === 'frame remove' ||
+			graph_editor.state === 'move' ||
+			graph_editor.state === 'clone'
 		) {
 			event.preventDefault()
-			graph_editor.state = 'view'
+			if (graph_editor.state === 'move') {
+				unmark_moving_knoxels()
+			}
+			remove_ghosts()
 			remove_frame()
+			graph_editor.state = 'view'
 		}
 	}
 })
