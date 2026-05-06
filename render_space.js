@@ -340,7 +340,7 @@ document.addEventListener('keydown', (event) => {
 			graph_editor.state = 'view'
 			remove_frame()
 		}
-	} else if (code === 'Space' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
+	} else if (code === 'Space' && !altKey && !ctrlKey && !metaKey) {
 		event.preventDefault()
 		if (focused_element) {
 			const { element } = get_data_thru_parents(focused_element, "knyte_id")
@@ -355,7 +355,7 @@ document.addEventListener('keydown', (event) => {
 					knoxel_ids.push(element.id)
 				}
 			}
-			console.log('move', knoxel_ids)
+			console.log(`${shiftKey ? 'clone' : 'move'} knoxels`, knoxel_ids)
 		}
 	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		if (
