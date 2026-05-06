@@ -340,6 +340,23 @@ document.addEventListener('keydown', (event) => {
 			graph_editor.state = 'view'
 			remove_frame()
 		}
+	} else if (code === 'Space' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
+		event.preventDefault()
+		if (focused_element) {
+			const { element } = get_data_thru_parents(focused_element, "knyte_id")
+			const knoxel_ids = []
+			if (element && !element.classList.contains('space-root')) {
+				if (element.classList.contains('selected-knoxel')) {
+					const selection = root.getElementsByClassName('selected-knoxel')
+					for (let i = 0; i < selection.length; ++i) {
+						knoxel_ids.push(selection[i].id)
+					}
+				} else {
+					knoxel_ids.push(element.id)
+				}
+			}
+			console.log('move', knoxel_ids)
+		}
 	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		if (
 			graph_editor.state === 'frame define' ||
