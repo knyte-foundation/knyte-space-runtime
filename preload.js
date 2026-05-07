@@ -21,7 +21,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	ipcRenderer
 		.invoke('invoke-handle-message', 'event-system-info')
 		.then((reply) => {
-			const { app_instance_id, app_root_path, db_path } = reply			
+			const { app_instance_id, app_root_path, db_path } = reply
 			document.getElementById('app-instance-id').textContent = app_instance_id
 			document.getElementById('root-path').textContent = app_root_path
 			document.getElementById('db-path').textContent = db_path
@@ -87,7 +87,7 @@ window.addEventListener('DOMContentLoaded', () => {
 				tbody.appendChild(tr)
 			}
 		}
-	})	
+	})
 	ipcRenderer.send(
 		'asynchronous-message', 'event-register-ipc-render', 'system'
 	)

@@ -230,7 +230,7 @@ function mark_moving_knoxels() {
 	set_filter_for_ghost_original_knoxels('brightness(0.6)')
 }
 function unmark_moving_knoxels() {
-	set_filter_for_ghost_original_knoxels('')	
+	set_filter_for_ghost_original_knoxels('')
 }
 
 const root = document.getElementById('svg-space')
@@ -409,7 +409,7 @@ document.addEventListener('keydown', (event) => {
 				else
 					knoxel.classList.add('selected-knoxel')
 			}
-			
+
 			event.preventDefault()
 			graph_editor.state = 'view'
 			remove_frame()
@@ -483,7 +483,7 @@ document.addEventListener('keydown', (event) => {
 					remove_ghosts()
 					graph_editor.state = 'view'
 				}
-			})			
+			})
 		}
 	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		if (

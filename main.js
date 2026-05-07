@@ -1195,7 +1195,7 @@ app.whenReady().then(() => {
 				return result
 			patch_desc.new_operation = result
 			const history_patch = [patch_desc]
-			const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)			
+			const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)
 			// update graph knytes
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
@@ -1278,7 +1278,7 @@ app.whenReady().then(() => {
 				return result
 			patch_desc.new_operation = result
 			const history_patch = [patch_desc]
-			const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)			
+			const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)
 			// update graph knytes
 			const ipc_graph = registered_ipc_renders['graph']
 			ipc_graph && ipc_graph.send(
