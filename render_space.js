@@ -504,19 +504,19 @@ document.addEventListener('keydown', (event) => {
 	}
 })
 function handle_click_space(event) {
-    const {
-        currentTarget,
-        clientX,
-        clientY,
-        altKey,
-        ctrlKey,
-        shiftKey,
-        metaKey,
-    } = event
+	const {
+		currentTarget,
+		clientX,
+		clientY,
+		altKey,
+		ctrlKey,
+		shiftKey,
+		metaKey,
+	} = event
 
-    if (!altKey && (shiftKey ^ (metaKey || ctrlKey))) {
-	    event.stopPropagation()
-    	event.preventDefault()
+	if (!altKey && (shiftKey ^ (metaKey || ctrlKey))) {
+		event.stopPropagation()
+		event.preventDefault()
 		const { localX, localY } = convert_client_to_local(
 			currentTarget,
 			clientX,
@@ -526,7 +526,7 @@ function handle_click_space(event) {
 			x: localX,
 			y: localY,
 		})
-	    if (shiftKey) {
+		if (shiftKey) {
 			const dialog = document.getElementById('prompt-knyte-id-dialog')
 			const input = document.getElementById('prompt-knyte-id-input')
 			const button_ok = document.getElementById('prompt-knyte-id-ok')
@@ -535,7 +535,7 @@ function handle_click_space(event) {
 			input.focus()
 			dialog.onclose = () => {
 				input.value = ''
-    			if (!dialog.returnValue)
+				if (!dialog.returnValue)
 					return
 				window['core_api'].create_knoxel_for_knyte({
 					knyte_id: dialog.returnValue, x, y
