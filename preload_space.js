@@ -89,6 +89,8 @@ function render_knoxel_body(knoxel, create_shape, centering, content_text) {
 			content_div.style.textAlign = 'left'
 			content_div.style.margin = `${default_margin}px`
 			content_div.textContent = content_text
+		} else if (viewer_name === 'html render') {
+			content_div.innerHTML = content_text
 		} else {
 			is_invalid_viewer = true
 		}
