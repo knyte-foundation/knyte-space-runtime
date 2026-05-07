@@ -18,11 +18,11 @@ let present_operations_in_branches = {} // history_branch_id -> operation_id
 let history_render_sequence = [] // [{root_branch, root_operation, branch, branch_id}]
 const history_focus = {branch_id: null, operation_id: null, is_present: false, is_frozen: false}
 let knytes = {} // knyte_id -> {id, initial, terminal, content}
-let contents = {} // content_id -> content_text for all knyte_id from knytes
+let contents = {} // content_id -> content_text for table contents
 let discovery_map = {} // app_instance_id -> {history_focus, rinfo}
 const knytes_focus = {branch_id: null, operation_id: null}
 
-function export_files(desc) { // desc = { filename: { content, base64 } }
+function export_files_raw(desc) { // desc = { filename: { content, base64 } }
 	try {
 		for (let relative_file_name in desc) {
 			const { content, base64 } = desc[relative_file_name]
@@ -41,6 +41,34 @@ function export_files(desc) { // desc = { filename: { content, base64 } }
 		return { error }
 	}
 	return { success: true }
+}
+function export_files_knytes(desc) {
+	// desc = { filename_knyte_id: {content_knyte_id, base64_bool} }
+	const desc_raw = {}
+	for (let file_name_knyte_id in desc) {
+		const { content: content_knyte_id, base64 } = desc[file_name_knyte_id]
+		if (!(file_name_knyte_id in knytes)) {
+			return { error: `file name knyte ${file_name_knyte_id} not found` }
+		}
+		if (!(content_knyte_id in knytes)) {
+			return { error: `content knyte ${content_knyte_id} not found` }
+		}
+		const file_name_content_id = knytes[file_name_knyte_id].content
+		const content_content_id = knytes[content_knyte_id].content
+		if (!file_name_content_id || !contents[file_name_content_id]) {
+			return { error: `file name text ${file_name_content_id} not found` }
+		}
+		if (!content_content_id || !contents[content_content_id]) {
+			return { error: `content text ${content_content_id} not found` }
+		}
+		const filename = contents[file_name_content_id]
+		if (filename in desc_raw) {
+			return { error: `duplicated file name: ${filename}` }
+		}
+		const content = contents[content_content_id]
+		desc_raw[filename] = { content, base64 }
+	}
+	return export_files_raw(desc_raw)
 }
 function create_space_window(space_id) {
 	const space_number = ++space_window_number
@@ -749,7 +777,7 @@ app.whenReady().then(() => {
 		if (arg === 'event-system-info') {
 			return { app_instance_id, app_root_path, db_path }
 		} else if (arg === 'event-export-files') {
-			return export_files(arg2)
+			return export_files_knytes(arg2)
 		} else if (arg === 'event-system-memtest') {
 			const max_engine_size = await check_max_memory(false)
 			const max_buffer_size = await check_max_memory(true)
