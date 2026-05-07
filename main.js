@@ -405,6 +405,45 @@ function add_knoxel_to_space(desc) {
 		target: root_space_id, parameter: new_space_content_id
 	})
 }
+function move_knoxels_in_space_desc(space_content_id, knoxels) {
+	const space_desc_text = db_get_content_text_by_id(space_content_id).content
+	const space_desc = JSON.parse(space_desc_text)
+	const move_map = {}
+	for (let i = 0; i < knoxels.length; ++i) {
+		const { knoxel_id, x, y } = knoxels[i]
+		move_map[knoxel_id] = { x, y }
+	}
+	for (let i = 0; i < space_desc.length; ++i) {
+		const { knoxel_id } = space_desc[i]
+		if (knoxel_id in move_map) {
+			const { x, y } = move_map[knoxel_id]
+			space_desc[i].x = x
+			space_desc[i].y = y
+		}
+	}
+	const new_space_desc_text = JSON.stringify(space_desc, null, '\t')
+	let content = db_get_content_id_by_text(new_space_desc_text)
+	if (!content)
+		content = db_append_content(new_space_desc_text)
+	return content.id
+}
+function move_knoxels_in_space(desc) {
+	const { root_space_id, root_space_content_id, knoxels } = desc
+	let new_space_content_id
+	try {
+		new_space_content_id = move_knoxels_in_space_desc(
+			root_space_content_id, knoxels
+		)
+	} catch (error) {
+		return { error }
+	}
+	// TODO: handle situation when new_space_content_id === root_space_content_id
+		// in other words no changes were made, no action required
+	return add_operation({
+		command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
+		target: root_space_id, parameter: new_space_content_id
+	})
+}
 function create_history_branch(
 	history_branch_id, root_branch_id, root_operation_id
 ) {
@@ -1024,7 +1063,85 @@ app.whenReady().then(() => {
 			return {success: true}
 		} else if (arg === 'event-move-knoxels-in-space') {
 			const { root_space_id, knoxels } = arg2
-			console.log('event-move-knoxels-in-space', root_space_id, knoxels)
+			if (!uuid_validate(root_space_id))
+				return { error: {
+					code: `root_space_id "${
+						root_space_id
+					}" is not valid uuid v7`,
+					message: `can't create knoxel because root_space_id "${
+						root_space_id
+					}" is not valid uuid v7`,
+					stack: 'not available'
+				} }
+			const { knytes, error } = get_actual_knytes(
+				history_focus.branch_id, history_focus.operation_id
+			)
+			if (!knytes)
+				return { error }
+			if (!(root_space_id in knytes))
+				return { error: {
+					code: `root_space_id "${
+						root_space_id
+					}" not found in knytes`,
+					message: `can't create knoxel because root_space_id "${
+						root_space_id
+					}" not found in knytes`,
+					stack: 'not available'
+				} }
+			const root_space_content_id = knytes[root_space_id].content
+			if (!uuid_validate(root_space_content_id))
+				return { error: {
+					code: `root_space_content_id "${
+						root_space_content_id
+					}" is not valid uuid v7`,
+					message: `can't create knoxel because root_space_content_id "${
+						root_space_content_id
+					}" is not valid uuid v7`,
+					stack: 'not available'
+				} }
+			for (let i = 0; i < knoxels.length; ++i) {
+				const { knoxel_id } = knoxels[i]
+				if (!uuid_validate(knoxel_id))
+					return { error: {
+						code: `knoxel_id "${
+							knoxel_id
+						}" is not valid uuid v7`,
+						message: `can't move knoxels because knoxel_id "${
+							knoxel_id
+						}" is not valid uuid v7`,
+						stack: 'not available'
+					} }
+			}
+			const patch_desc = {
+				parent_branch_id: history_focus.branch_id,
+				parent_operation_id: history_focus.operation_id
+			}
+			const result = move_knoxels_in_space({
+				root_space_id, root_space_content_id, knoxels
+			})
+			if (result.error)
+				return result
+			patch_desc.new_operation = result
+			const history_patch = [patch_desc]
+			const knytes_patch = convert_history_patch_to_knytes_patch(history_patch)			
+			// update graph knytes
+			const ipc_graph = registered_ipc_renders['graph']
+			ipc_graph && ipc_graph.send(
+				'asynchronous-reply', 'event-add-operation',
+				knytes_patch, history_focus
+			)
+			// patch history view
+			const ipc_history = registered_ipc_renders['history']
+			ipc_history && ipc_history.send(
+				'asynchronous-reply', 'event-add-operation',
+				history_patch, history_focus
+			)
+			// redraw all spaces
+			for (let space_window_id in registered_ipc_spaces) {
+				registered_ipc_spaces[space_window_id].send(
+					'asynchronous-reply', 'event-add-operation'
+				)
+			}
 			return {success: true}
 		}
 		return { uknown_command: true }
