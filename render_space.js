@@ -438,6 +438,7 @@ document.addEventListener('keydown', (event) => {
 				}
 			}
 		} else if (graph_editor.state === 'move') {
+			// code duplication 1 [
 			const { x: x_pointer, y: y_pointer } = steering_gear.screen_to_space_position(root, {
 				x: clientX,
 				y: clientY,
@@ -450,6 +451,7 @@ document.addEventListener('keydown', (event) => {
 				const y = y_pointer + y_offset
 				knoxels.push({ x, y, knoxel_id })
 			}
+			// ]
 			window.core_api.move_knoxels_in_space({ knoxels }).then((reply) => {
 				if (reply.error) {
 					alert(reply.error.message)
@@ -460,8 +462,28 @@ document.addEventListener('keydown', (event) => {
 				}
 			})
 		} else if (graph_editor.state === 'clone') {
-			console.warn('not implemented yet')
-			alert('not implemented yet')
+			// code duplication 1 [
+			const { x: x_pointer, y: y_pointer } = steering_gear.screen_to_space_position(root, {
+				x: clientX,
+				y: clientY,
+			})
+			const knoxels = []
+			for (let i = 0; i < graph_editor.ghosts.length; ++i) {
+				const { knoxel_id, offset } = graph_editor.ghosts[i]
+				const { x: x_offset, y: y_offset } = offset
+				const x = x_pointer + x_offset
+				const y = y_pointer + y_offset
+				knoxels.push({ x, y, knoxel_id })
+			}
+			// ]
+			window.core_api.clone_knoxels_in_space({ knoxels }).then((reply) => {
+				if (reply.error) {
+					alert(reply.error.message)
+				} else {
+					remove_ghosts()
+					graph_editor.state = 'view'
+				}
+			})			
 		}
 	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		if (

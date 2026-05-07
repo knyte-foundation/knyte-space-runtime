@@ -243,6 +243,10 @@ contextBridge.exposeInMainWorld('core_api', {
 		desc.root_space_id = space_id
 		return ipcRenderer.invoke('invoke-handle-message', 'event-move-knoxels-in-space', desc)
 	},
+	clone_knoxels_in_space: (desc) => {
+		desc.root_space_id = space_id
+		return ipcRenderer.invoke('invoke-handle-message', 'event-clone-knoxels-in-space', desc)
+	},
 })
 window.addEventListener('DOMContentLoaded', () => {
 	init_autosizer()
