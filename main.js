@@ -38,7 +38,8 @@ function export_files_raw(desc) { // desc = { filename: { content, base64 } }
 			}
 		}
 	} catch (error) {
-		return { error }
+		const { code, message, stack } = error
+		return {  error: { code, message, stack } }
 	}
 	return { success: true }
 }
