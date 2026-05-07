@@ -238,7 +238,11 @@ contextBridge.exposeInMainWorld('core_api', {
 	create_knyte_and_knoxel: (desc) => {
 		desc.root_space_id = space_id
 		return ipcRenderer.invoke('invoke-handle-message', 'event-create-knyte-and-knoxel', desc)
-	}
+	},
+	move_knoxels_in_space: (desc) => {
+		desc.root_space_id = space_id
+		return ipcRenderer.invoke('invoke-handle-message', 'event-move-knoxels-in-space', desc)
+	},
 })
 window.addEventListener('DOMContentLoaded', () => {
 	init_autosizer()

@@ -1022,6 +1022,10 @@ app.whenReady().then(() => {
 				)
 			}
 			return {success: true}
+		} else if (arg === 'event-move-knoxels-in-space') {
+			const { root_space_id, knoxels } = arg2
+			console.log('event-move-knoxels-in-space', root_space_id, knoxels)
+			return {success: true}
 		}
 		return { uknown_command: true }
 	})

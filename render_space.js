@@ -408,7 +408,7 @@ document.addEventListener('keydown', (event) => {
 					knoxel.classList.remove('selected-knoxel')
 				else
 					knoxel.classList.add('selected-knoxel')
-			}			
+			}
 			
 			event.preventDefault()
 			graph_editor.state = 'view'
@@ -416,27 +416,52 @@ document.addEventListener('keydown', (event) => {
 		}
 	} else if (code === 'Space' && !altKey && !ctrlKey && !metaKey) {
 		event.preventDefault()
-		if (focused_element) {
-			const { element } = get_data_thru_parents(focused_element, 'knyte_id')
-			const knoxels = []
-			if (
-				graph_editor.state === 'view' && element &&
-				!element.classList.contains('space-root')
-			) {
-				graph_editor.state = shiftKey ? 'clone' : 'move'
-				if (element.classList.contains('selected-knoxel')) {
-					const selection = root.getElementsByClassName('selected-knoxel')
-					for (let i = 0; i < selection.length; ++i) {
-						knoxels.push(selection[i])
+		if (graph_editor.state === 'view') {
+			if (focused_element) {
+				const { element } = get_data_thru_parents(focused_element, 'knyte_id')
+				const knoxels = []
+				if (element && !element.classList.contains('space-root')
+				) {
+					graph_editor.state = shiftKey ? 'clone' : 'move'
+					if (element.classList.contains('selected-knoxel')) {
+						const selection = root.getElementsByClassName('selected-knoxel')
+						for (let i = 0; i < selection.length; ++i) {
+							knoxels.push(selection[i])
+						}
+					} else {
+						knoxels.push(element)
 					}
-				} else {
-					knoxels.push(element)
-				}
-				create_ghosts_in_position({ x: clientX, y: clientY }, knoxels)
-				if (graph_editor.state === 'move') {
-					mark_moving_knoxels()
+					create_ghosts_in_position({ x: clientX, y: clientY }, knoxels)
+					if (graph_editor.state === 'move') {
+						mark_moving_knoxels()
+					}
 				}
 			}
+		} else if (graph_editor.state === 'move') {
+			const { x: x_pointer, y: y_pointer } = steering_gear.screen_to_space_position(root, {
+				x: clientX,
+				y: clientY,
+			})
+			const knoxels = []
+			for (let i = 0; i < graph_editor.ghosts.length; ++i) {
+				const { knoxel_id, offset } = graph_editor.ghosts[i]
+				const { x: x_offset, y: y_offset } = offset
+				const x = x_pointer + x_offset
+				const y = y_pointer + y_offset
+				knoxels.push({ x, y, knoxel_id })
+			}
+			window.core_api.move_knoxels_in_space({ knoxels }).then((reply) => {
+				if (reply.error) {
+					alert(reply.error.message)
+				} else {
+					unmark_moving_knoxels()
+					remove_ghosts()
+					graph_editor.state = 'view'
+				}
+			})
+		} else if (graph_editor.state === 'clone') {
+			console.warn('not implemented yet')
+			alert('not implemented yet')
 		}
 	} else if (code === 'Escape' && !altKey && !ctrlKey && !shiftKey && !metaKey) {
 		if (
