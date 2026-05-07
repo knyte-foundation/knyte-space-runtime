@@ -23,20 +23,24 @@ let discovery_map = {} // app_instance_id -> {history_focus, rinfo}
 const knytes_focus = {branch_id: null, operation_id: null}
 
 function export_files(desc) { // desc = { filename: { content, base64 } }
-	for (let relative_file_name in desc) {
-		const { content, base64 } = desc[relative_file_name]
-		const absolute_file_name = path.join(export_files_path, relative_file_name)
-		const dirname = path.dirname(absolute_file_name)
-		fs.mkdirSync(dirname, { recursive: true })
-		if (base64) {
-			const buffer = Buffer.from(content, 'base64')
-			fs.writeFileSync(absolute_file_name, buffer)
+	try {
+		for (let relative_file_name in desc) {
+			const { content, base64 } = desc[relative_file_name]
+			const absolute_file_name = path.join(export_files_path, relative_file_name)
+			const dirname = path.dirname(absolute_file_name)
+			fs.mkdirSync(dirname, { recursive: true })
+			if (base64) {
+				const buffer = Buffer.from(content, 'base64')
+				fs.writeFileSync(absolute_file_name, buffer)
+			}
+			else {
+				fs.writeFileSync(absolute_file_name, content, 'utf8')
+			}
 		}
-		else {
-			fs.writeFileSync(absolute_file_name, content, 'utf8')
-		}
+	} catch (error) {
+		return { error }
 	}
-	// TODO: implement errors handling and reporting
+	return { success: true }
 }
 function create_space_window(space_id) {
 	const space_number = ++space_window_number
@@ -745,8 +749,7 @@ app.whenReady().then(() => {
 		if (arg === 'event-system-info') {
 			return { app_instance_id, app_root_path, db_path }
 		} else if (arg === 'event-export-files') {
-			export_files(arg2)
-			return { success: true }
+			return export_files(arg2)
 		} else if (arg === 'event-system-memtest') {
 			const max_engine_size = await check_max_memory(false)
 			const max_buffer_size = await check_max_memory(true)
