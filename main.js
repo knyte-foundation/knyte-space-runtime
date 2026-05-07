@@ -437,8 +437,8 @@ function move_knoxels_in_space(desc) {
 	} catch (error) {
 		return { error }
 	}
-	// TODO: handle situation when new_space_content_id === root_space_content_id
-		// in other words no changes were made, no action required
+	if (new_space_content_id === root_space_content_id)
+		return null // no additional operation needed
 	return add_operation({
 		command: '0188dd27-12f5-732d-b53d-6e9519f5ac29', // set knyte content
 		target: root_space_id, parameter: new_space_content_id
@@ -1119,6 +1119,8 @@ app.whenReady().then(() => {
 			const result = move_knoxels_in_space({
 				root_space_id, root_space_content_id, knoxels
 			})
+			if (result === null) // no changes was made
+				return {success: true}
 			if (result.error)
 				return result
 			patch_desc.new_operation = result
