@@ -380,6 +380,7 @@ function add_operation(desc) {
 	return result
 }
 function append_knoxel_to_space_desc(space_content_id, knoxel_desc) {
+	// code duplication 4
 	const space_desc_text = db_get_content_text_by_id(space_content_id).content
 	const space_desc = JSON.parse(space_desc_text)
 	space_desc.push(knoxel_desc)
@@ -390,6 +391,7 @@ function append_knoxel_to_space_desc(space_content_id, knoxel_desc) {
 	return content.id
 }
 function add_knoxel_to_space(desc) {
+	// code duplication 3
 	const {root_space_id, root_space_content_id, knyte_id, x, y} = desc
 	const knoxel_id = uuidv7()
 	let new_space_content_id
@@ -406,6 +408,7 @@ function add_knoxel_to_space(desc) {
 	})
 }
 function move_knoxels_in_space_desc(space_content_id, knoxels) {
+	// code duplication 4
 	const space_desc_text = db_get_content_text_by_id(space_content_id).content
 	const space_desc = JSON.parse(space_desc_text)
 	const move_map = {}
@@ -428,6 +431,7 @@ function move_knoxels_in_space_desc(space_content_id, knoxels) {
 	return content.id
 }
 function move_knoxels_in_space(desc) {
+	// code duplication 3
 	const { root_space_id, root_space_content_id, knoxels } = desc
 	let new_space_content_id
 	try {
@@ -445,6 +449,7 @@ function move_knoxels_in_space(desc) {
 	})
 }
 function clone_knoxels_in_space_desc(space_content_id, knoxels) {
+	// code duplication 4
 	const space_desc_text = db_get_content_text_by_id(space_content_id).content
 	const space_desc = JSON.parse(space_desc_text) // appendable sequence
 	const space_desc2 = JSON.parse(space_desc_text) // mutable elements
@@ -470,6 +475,7 @@ function clone_knoxels_in_space_desc(space_content_id, knoxels) {
 	return content.id
 }
 function clone_knoxels_in_space(desc) {
+	// code duplication 3
 	const { root_space_id, root_space_content_id, knoxels } = desc
 	let new_space_content_id
 	try {
@@ -932,6 +938,7 @@ app.whenReady().then(() => {
 			}
 			return {}
 		} else if (arg === 'event-create-knyte-and-knoxel') {
+			// code duplication 2
 			const {root_space_id, x, y} = arg2
 			if (!uuid_validate(root_space_id))
 				return { error: {
@@ -1013,6 +1020,7 @@ app.whenReady().then(() => {
 			}
 			return {success: true}
 		} else if (arg === 'event-create-knoxel-for-knyte') {
+			// code duplication 2
 			const {root_space_id, knyte_id, x, y} = arg2
 			if (!uuid_validate(root_space_id))
 				return { error: {
@@ -1102,6 +1110,7 @@ app.whenReady().then(() => {
 			}
 			return {success: true}
 		} else if (arg === 'event-move-knoxels-in-space') {
+			// code duplication 2
 			const { root_space_id, knoxels } = arg2
 			if (!uuid_validate(root_space_id))
 				return { error: {
@@ -1186,6 +1195,7 @@ app.whenReady().then(() => {
 			}
 			return {success: true}
 		} else if (arg === 'event-clone-knoxels-in-space') {
+			// code duplication 2
 			const { root_space_id, knoxels } = arg2
 			if (!uuid_validate(root_space_id))
 				return { error: {
