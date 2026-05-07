@@ -452,7 +452,7 @@ document.addEventListener('keydown', (event) => {
 				knoxels.push({ x, y, knoxel_id })
 			}
 			// ]
-			window.core_api.move_knoxels_in_space({ knoxels }).then((reply) => {
+			window['core_api'].move_knoxels_in_space({ knoxels }).then((reply) => {
 				if (reply.error) {
 					alert(reply.error.message)
 				} else {
@@ -476,7 +476,7 @@ document.addEventListener('keydown', (event) => {
 				knoxels.push({ x, y, knoxel_id })
 			}
 			// ]
-			window.core_api.clone_knoxels_in_space({ knoxels }).then((reply) => {
+			window['core_api'].clone_knoxels_in_space({ knoxels }).then((reply) => {
 				if (reply.error) {
 					alert(reply.error.message)
 				} else {
@@ -537,7 +537,7 @@ function handle_click_space(event) {
 				input.value = ''
     			if (!dialog.returnValue)
 					return
-				window.core_api.create_knoxel_for_knyte({
+				window['core_api'].create_knoxel_for_knyte({
 					knyte_id: dialog.returnValue, x, y
 				}).then((reply) => reply.error && alert(reply.error.message))
 			}
@@ -557,7 +557,7 @@ function handle_click_space(event) {
 				}
 			}
 		} else {
-			window.core_api.create_knyte_and_knoxel({
+			window['core_api'].create_knyte_and_knoxel({
 				x, y
 			}).then((reply) => reply.error && alert(reply.error.message))
 		}
