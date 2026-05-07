@@ -9,7 +9,7 @@ const path = require('node:path')
 const fs = require('node:fs')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
-const export_files_path = path.join(app.getPath('userData'), 'export')
+const export_files_path = path.join(app.getPath('userData'), 'Export From Semantics')
 const dgram = require('node:dgram')
 const udp_socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 let db, space_window_number = 0, registered_ipc_renders = {}, registered_ipc_spaces = {}
