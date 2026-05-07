@@ -6,8 +6,10 @@ const {
 const app_instance_id = uuidv7()
 const first_history_branch_id = uuid_nil
 const path = require('node:path')
+const fs = require('node:fs')
 const app_root_path = __dirname
 const db_path = path.join(app.getPath('userData'), 'db.sqlite')
+const export_files_path = path.join(app.getPath('userData'), 'export')
 const dgram = require('node:dgram')
 const udp_socket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
 let db, space_window_number = 0, registered_ipc_renders = {}, registered_ipc_spaces = {}
@@ -20,6 +22,22 @@ let contents = {} // content_id -> content_text for all knyte_id from knytes
 let discovery_map = {} // app_instance_id -> {history_focus, rinfo}
 const knytes_focus = {branch_id: null, operation_id: null}
 
+function export_files(desc) { // desc = { filename: { content, base64 } }
+	for (let relative_file_name in desc) {
+		const { content, base64 } = desc[relative_file_name]
+		const absolute_file_name = path.join(export_files_path, relative_file_name)
+		const dirname = path.dirname(absolute_file_name)
+		fs.mkdirSync(dirname, { recursive: true })
+		if (base64) {
+			const buffer = Buffer.from(content, 'base64')
+			fs.writeFileSync(absolute_file_name, buffer)
+		}
+		else {
+			fs.writeFileSync(absolute_file_name, content, 'utf8')
+		}
+	}
+	// TODO: implement errors handling and reporting
+}
 function create_space_window(space_id) {
 	const space_number = ++space_window_number
 	const y_offset = space_number * 30
@@ -726,6 +744,9 @@ app.whenReady().then(() => {
 		}
 		if (arg === 'event-system-info') {
 			return { app_instance_id, app_root_path, db_path }
+		} else if (arg === 'event-export-files') {
+			export_files(arg2)
+			return { success: true }
 		} else if (arg === 'event-system-memtest') {
 			const max_engine_size = await check_max_memory(false)
 			const max_buffer_size = await check_max_memory(true)

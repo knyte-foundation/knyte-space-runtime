@@ -247,6 +247,9 @@ contextBridge.exposeInMainWorld('core_api', {
 		desc.root_space_id = space_id
 		return ipcRenderer.invoke('invoke-handle-message', 'event-clone-knoxels-in-space', desc)
 	},
+	export_files: (desc) => {
+		return ipcRenderer.invoke('invoke-handle-message', 'event-export-files', desc)
+	},
 })
 window.addEventListener('DOMContentLoaded', () => {
 	init_autosizer()
