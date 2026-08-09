@@ -59,6 +59,10 @@ window.addEventListener('DOMContentLoaded', () => {
 				})
 		}, 100)
 	})
+	document.getElementById('button-hide-contents').addEventListener('click', () => {
+		const result = document.getElementById('result-show-contents')
+		result.textContent = ''
+	})
 	document.getElementById('button-add-operation').addEventListener('click', () => {
 		const result = document.getElementById('result-add-operation')
 		result.textContent = 'loading...'
