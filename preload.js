@@ -25,7 +25,7 @@ window.addEventListener('DOMContentLoaded', () => {
 			document.getElementById('app-instance-id').textContent = app_instance_id
 			document.getElementById('root-path').textContent = app_root_path
 			document.getElementById('db-path').textContent = db_path
-			console.log(app_version)
+			console.log('app_version', app_version)
 		})
 	document.getElementById('button-memtest-node').addEventListener('click', () => {
 		ipcRenderer
