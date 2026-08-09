@@ -127,6 +127,53 @@ window.addEventListener('DOMContentLoaded', () => {
 				})
 		}, 100)
 	}
+	document.getElementById('button-scan-spaces').addEventListener('click', () => {
+		const result = document.getElementById('result-scan-spaces')
+		const focused_branch_id = document.getElementById('input-focused-branch-id').value
+		const last_operation_id = document.getElementById('input-last-operation-id').value
+		result.textContent = 'loading...'
+		setTimeout(() => {
+			ipcRenderer
+				.invoke(
+					'invoke-handle-message', 'event-get-knytes',
+					focused_branch_id, last_operation_id
+				)
+				.then(async (reply) => {
+					if (!reply.knytes) {
+						result.textContent = `ERROR: ${
+							reply.error ? reply.error.message : 'unknown'
+						}`
+						return
+					}
+					result_text = ''
+					for (knyte_id in reply.knytes) {
+						knyte = reply.knytes[knyte_id]
+						if (knyte && knyte.content) {
+							const reply = await ipcRenderer
+								.invoke('invoke-handle-message', 'event-db-find-content-by-id', knyte.content)
+							if (reply.content) {
+								let is_space = false
+								try {
+									json = JSON.parse(reply.content)
+									if (Array.isArray(json))
+										if (json.length === 0)
+											is_space = true
+										else if (json[0].knoxel_id && json[0].knyte_id)
+											is_space = true
+								} catch (e) {}
+								if (is_space)
+									result_text += `${knyte_id}\n`
+							}
+						}
+					}
+					result.textContent = result_text			
+				})
+		}, 100)
+	})
+	document.getElementById('button-hide-spaces').addEventListener('click', () => {
+		const result = document.getElementById('result-scan-spaces')
+		result.textContent = ''
+	})
 	document.getElementById('button-show-knytes').addEventListener('click',
 		handle_click_show_knytes
 	)
