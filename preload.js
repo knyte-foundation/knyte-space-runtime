@@ -25,7 +25,11 @@ window.addEventListener('DOMContentLoaded', () => {
 			document.getElementById('app-instance-id').textContent = app_instance_id
 			document.getElementById('root-path').textContent = app_root_path
 			document.getElementById('db-path').textContent = db_path
-			console.log('app_version', app_version)
+			document.getElementById('app-version').innerHTML = `<ul>
+				<li>app "${app_version.app}"</li>
+				<li>branch ${app_version.branch}</li>
+				<li>operation ${app_version.operation}</li>
+			</ul>`
 		})
 	document.getElementById('button-memtest-node').addEventListener('click', () => {
 		ipcRenderer
