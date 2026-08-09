@@ -21,10 +21,11 @@ window.addEventListener('DOMContentLoaded', () => {
 	ipcRenderer
 		.invoke('invoke-handle-message', 'event-system-info')
 		.then((reply) => {
-			const { app_instance_id, app_root_path, db_path } = reply
+			const { app_instance_id, app_root_path, db_path, app_version } = reply
 			document.getElementById('app-instance-id').textContent = app_instance_id
 			document.getElementById('root-path').textContent = app_root_path
 			document.getElementById('db-path').textContent = db_path
+			console.log(app_version)
 		})
 	document.getElementById('button-memtest-node').addEventListener('click', () => {
 		ipcRenderer

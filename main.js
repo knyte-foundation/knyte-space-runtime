@@ -22,6 +22,9 @@ let contents = {} // content_id -> content_text for table contents
 let discovery_map = {} // app_instance_id -> {history_focus, rinfo}
 const knytes_focus = {branch_id: null, operation_id: null}
 
+const app_version = require('./version.json')
+console.log('app_version', app_version)
+
 function export_files_raw(desc) { // desc = { filename: { content, base64 } }
 	try {
 		for (let relative_file_name in desc) {
@@ -776,7 +779,7 @@ app.whenReady().then(() => {
 			return
 		}
 		if (arg === 'event-system-info') {
-			return { app_instance_id, app_root_path, db_path }
+			return { app_instance_id, app_root_path, db_path, app_version }
 		} else if (arg === 'event-export-files') {
 			return export_files_knytes(arg2)
 		} else if (arg === 'event-system-memtest') {
